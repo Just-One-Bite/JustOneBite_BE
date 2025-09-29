@@ -1,0 +1,29 @@
+name: "bug_issues_template"
+title: "fix:"
+description: "버그 이슈를 작성하는 템플릿입니다."
+labels: []
+assignees: []
+
+body:
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: "버그 내용"
+      description: "발생한 버그에 대한 설명을 작성해주세요."
+      placeholder: "예: 특정 페이지에서 버튼 클릭 시 오류 발생"
+    validations:
+      required: true
+
+  - type: input
+    id: related_issue
+    attributes:
+      label: "연관 이슈 번호"
+      description: "관련된 이슈 번호를 입력해주세요."
+      placeholder: "#123"
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "해결 방법"
+      description: "버그를 해결하기 위한 방법을 제안해주세요."
+      placeholder: "예: API 요청 시 파라미터를 변경하면 정상 작동함"
