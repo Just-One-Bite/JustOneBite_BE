@@ -1,0 +1,29 @@
+name: "refactor_issues_template"
+title: "refactor:"
+description: "리팩토링 이슈를 작성하는 템플릿입니다."
+labels: []
+assignees: []
+
+body:
+  - type: textarea
+    id: refector_description
+    attributes:
+      label: "리팩토링 내용"
+      description: "리팩토링 할 부분에 대한 설명을 작성해주세요."
+      placeholder: "예: 특정 조회 기능 성능 개선"
+    validations:
+      required: true
+
+  - type: input
+    id: related_issue
+    attributes:
+      label: "연관 이슈 번호"
+      description: "관련된 이슈 번호를 입력해주세요."
+      placeholder: "#123"
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "리팩토링 상세"
+      description: "리팩토링 계획을 제안해주세요."
+      placeholder: "예: API 요청 시 성능 개선"
