@@ -1,7 +1,7 @@
-package com.delivery.justonebite.exception.handler;
+package com.delivery.justonebite.global.exception.handler;
 
-import com.delivery.justonebite.exception.custom.CustomException;
-import com.delivery.justonebite.exception.response.ErrorResponse;
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import static com.delivery.justonebite.exception.response.ErrorCode.*;
+import static com.delivery.justonebite.global.exception.response.ErrorCode.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestControllerAdvice

@@ -1,4 +1,4 @@
-package com.delivery.justonebite.exception.response;
+package com.delivery.justonebite.global.exception.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
