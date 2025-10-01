@@ -1,6 +1,6 @@
-package com.delivery.justonebite.exception.custom;
+package com.delivery.justonebite.global.exception.custom;
 
-import com.delivery.justonebite.exception.response.ErrorCode;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
