@@ -7,6 +7,7 @@ import java.util.UUID;
 public record CreateReviewResponse(
         UUID reviewId,
         UUID orderId,
+        UUID shopId,
         String content,
         int rating,
         LocalDateTime createdAt,
@@ -16,10 +17,12 @@ public record CreateReviewResponse(
         return new CreateReviewResponse(
                 r.getReviewId(),
                 r.getOrder().getId(),
+                r.getShopId(),
                 r.getContent(),
                 r.getRating(),
                 r.getCreatedAt(),
                 r.getCreatedBy()
         );
     }
+
 }
