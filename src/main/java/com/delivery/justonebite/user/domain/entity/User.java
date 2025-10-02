@@ -1,6 +1,7 @@
 package com.delivery.justonebite.user.domain.entity;
 
 import com.delivery.justonebite.common.entity.BaseEntity;
+import com.delivery.justonebite.user.presentation.dto.request.SignupRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,6 +24,9 @@ public class User extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
+    private String phoneNumber;
+
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -32,11 +36,28 @@ public class User extends BaseEntity {
     public User(
             String email,
             String name,
-            String password,
-            UserRole userRole) {
+            String phoneNumber,
+            String password
+    ) {
         this.email = email;
         this.name = name;
+        this.phoneNumber = phoneNumber;
         this.password = password;
-        this.userRole = userRole;
+    }
+
+    public static User toEntity(SignupRequestDto requestDto, String password) {
+        return new User(
+                requestDto.email(),
+                requestDto.name(),
+                requestDto.phoneNumber(),
+                password
+        );
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.userRole == null) {
+            this.userRole = UserRole.CUSTOMER;
+        }
     }
 }
