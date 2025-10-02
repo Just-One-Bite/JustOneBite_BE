@@ -3,10 +3,10 @@ package com.delivery.justonebite.order.application.service;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
-import jakarta.transaction.Transactional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
