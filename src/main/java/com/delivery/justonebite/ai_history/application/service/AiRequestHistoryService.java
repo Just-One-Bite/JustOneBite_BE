@@ -21,11 +21,11 @@ public class AiRequestHistoryService {
     public AiRequestHistoryResponse getHistory(UUID id) {
         AiRequestHistory history = aiRequestHistoryRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
-        return history.toDto();
+        return AiRequestHistoryResponse.from(history);
     }
 
     public Page<AiRequestHistoryResponse> getHistories(Long userId, Pageable pageable) {
         Page<AiRequestHistory> histories = aiRequestHistoryRepository.findAllByUserId(userId, pageable);
-        return histories.map(AiRequestHistory::toDto);
+        return histories.map(AiRequestHistoryResponse::from);
     }
 }

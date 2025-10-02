@@ -22,20 +22,18 @@ public class AiRequestHistoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AiRequestHistoryResponse> getHistory(
-//        @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable UUID id
-    ) { // fix
+    ) {
         return ResponseEntity.status(HttpStatus.OK).body(aiRequestHistoryService.getHistory(id));
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<Page<AiRequestHistoryResponse>> getHistories(
-        Long userId,
-//        @AuthenticationPrincipal UserDetails userDetails,
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy
     ) {
+        Long userId = 1L; // 더미
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         return ResponseEntity.ok(aiRequestHistoryService.getHistories(userId, pageable));
     }

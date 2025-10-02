@@ -1,6 +1,5 @@
 package com.delivery.justonebite.ai_history.domain.entity;
 
-import com.delivery.justonebite.ai_history.presentation.dto.AiRequestHistoryResponse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,14 +37,4 @@ public class AiRequestHistory {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    public AiRequestHistoryResponse toDto() {
-        return new AiRequestHistoryResponse(
-            this.getId(),
-            this.getModel(),
-            this.getRequest(),
-            this.getResponse(),
-            this.getCreatedAt()
-        );
-    }
 }
