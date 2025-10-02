@@ -1,4 +1,4 @@
-package com.delivery.justonebite.common.entity;
+package com.delivery.justonebite.global.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
