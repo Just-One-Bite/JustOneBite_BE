@@ -1,0 +1,38 @@
+package com.delivery.justonebite.item.presentation.dto;
+
+import com.delivery.justonebite.item.domain.entity.Item;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
+import lombok.val;
+
+import java.util.UUID;
+
+@Builder
+public record ItemRequest(
+    @JsonProperty("shop_id")
+    String shopId,
+    @NotBlank(message = "상품 명은 공백일 수 없습니다.")
+    String name,
+    @Min(value = 10, message = "상품 금액은 10원 이상이어야 합니다.")
+    int price,
+    String image,
+    String description,
+    @JsonProperty("ai_generated")
+    boolean aiGenerated
+) {
+    public Item toItem() {
+        return Item.builder()
+            .shopId(UUID.fromString(shopId))
+            .name(name)
+            .price(price)
+            .image(image)
+            .description(description)
+            .aiGenerated(aiGenerated)
+            .isHidden(false)
+            .createdBy(1L)
+            .updatedBy(1L)
+            .build();
+    }
+}
