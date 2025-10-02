@@ -52,6 +52,7 @@ public class ItemService {
     @Transactional
     public void updateItem(UUID itemId, ItemUpdateRequest request) {
         Item item = itemRepository.findByItemId(itemId).orElseThrow(IllegalArgumentException::new);
+        item.updateItem(request);
 
         if (request.aiGenerated()) {
             String prompt = request.description();
