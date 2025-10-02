@@ -39,8 +39,7 @@ public class JwtUtil {
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(userId)
-                        .claim("email", email)
+                        .setSubject(email)
                         .claim("role", role)
                         .setExpiration(new Date(date.getTime() + TOKEN_EXPIRATION))
                         .setIssuedAt(date)

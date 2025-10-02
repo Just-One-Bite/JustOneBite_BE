@@ -53,14 +53,31 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
             try {
                 setAuthentication(info.getSubject());
+                log.info("Subject : {}", info.getSubject());
             } catch (UsernameNotFoundException e) {
                 log.error("Authentication Setup Failed - User Not Found: 사용자 인증 정보를 찾을 수 없습니다.}");
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "사용자 인증 정보를 찾을 수 없습니다.");
                 return;
             } catch (Exception e) {
+                log.error("Error: {}", e.getMessage());
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
+//            if (!jwtUtil.validateToken(token)) {
+//                log.error("Token Error");
+//                return;
+//            }
+//
+//            Claims info = jwtUtil.extractClaims(token);
+//            log.info("JWT Claims : {}", info);
+//
+//            try {
+//                setAuthentication(info.getSubject());
+//                log.info("Subject: {}", info.getSubject());
+//            } catch (Exception e) {
+//                log.error("Error: {}", e.getMessage());
+//                return;
+//            }
         }
 
         chain.doFilter(request, response);

@@ -42,6 +42,9 @@ public class WebSecurityConfig {
                 .rememberMe(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("v1/auth/**").permitAll()
+                        .anyRequest().authenticated()
+//                        .requestMatchers("v1/**").permitAll()
+//                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)

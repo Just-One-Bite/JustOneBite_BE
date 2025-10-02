@@ -2,7 +2,7 @@ package com.delivery.justonebite.common.jwt;
 
 import com.delivery.justonebite.common.security.UserDetailsImpl;
 import com.delivery.justonebite.user.domain.entity.User;
-import com.delivery.justonebite.user.presentation.dto.request.LoginRequestDto;
+import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         log.info("로그인 시도");
         try {
-            LoginRequestDto requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDto.class);
+            LoginRequest requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
 
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
