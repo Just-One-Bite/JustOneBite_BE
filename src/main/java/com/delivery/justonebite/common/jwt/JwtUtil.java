@@ -32,7 +32,6 @@ public class JwtUtil {
     }
 
     public String createToken(User user) {
-        String userId = user.getId().toString();
         String email = user.getEmail();
         String role = user.getUserRole().toString();
         Date date = new Date();
