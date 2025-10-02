@@ -1,8 +1,8 @@
 package com.delivery.justonebite.user.presentation.controller;
 
 import com.delivery.justonebite.user.application.service.AuthService;
-import com.delivery.justonebite.user.presentation.dto.request.SignupRequestDto;
-import com.delivery.justonebite.user.presentation.dto.response.SignupResponseDto;
+import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
+import com.delivery.justonebite.user.presentation.dto.response.SignupResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,8 +20,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
-        SignupResponseDto token = authService.signup(requestDto);
+    public ResponseEntity<SignupResponse> signup(@RequestBody @Valid SignupRequest request) {
+        SignupResponse token = authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(token);
     }
 }

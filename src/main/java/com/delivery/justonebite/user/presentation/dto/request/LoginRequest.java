@@ -1,6 +1,6 @@
 package com.delivery.justonebite.user.presentation.dto.request;
 
-public record LoginRequestDto(
+public record LoginRequest(
         String email,
         String password
 ) {
