@@ -12,6 +12,7 @@ public record CreateReviewRequest(
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         @NotNull(message = "주문 ID는 필수입니다.")
         UUID orderId,
+        UUID shopId,
         @NotBlank(message = "내용은 필수입니다.")
         String content,
         @Min(value = 1, message = "평점은 1 이상이어야 합니다.")
