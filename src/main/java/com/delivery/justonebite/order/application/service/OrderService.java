@@ -3,8 +3,14 @@ package com.delivery.justonebite.order.application.service;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
+import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,5 +44,18 @@ public class OrderService {
             );
 
         orderRepository.save(order);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CustomerOrderResponse> getCustomerOrders(int page, int size, String sortBy) {
+        // TODO: USE ROLE이 CUSTOMER일 경우에만 조회 가능하도록 처리 필요
+//        UserRoleEnum role = user.getRole();
+
+        Sort.Direction dir = Sort.Direction.ASC;
+        Sort sort = Sort.by(dir, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return orderRepository.findAll(pageable)
+            .map(CustomerOrderResponse::from);
     }
 }

@@ -1,14 +1,22 @@
 package com.delivery.justonebite.order.presentation.controller;
 
 import com.delivery.justonebite.order.application.service.OrderService;
+import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
+import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,5 +32,20 @@ public class OrderController {
     public ResponseEntity<Void> createOrder(@Valid  @RequestBody CreateOrderRequest request) {
         orderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<CustomerOrderResponse>> getCustomerOrders(
+//        @AuthenticationPrincipal User user,
+        @RequestParam(name = "page", defaultValue = "1") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size,
+        @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy
+    ) {
+        Page<CustomerOrderResponse> response = orderService.getCustomerOrders(
+            page - 1,
+            size,
+            sortBy
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
