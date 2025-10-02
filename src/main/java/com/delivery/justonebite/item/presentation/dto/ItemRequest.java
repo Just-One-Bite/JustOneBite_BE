@@ -1,29 +1,29 @@
 package com.delivery.justonebite.item.presentation.dto;
 
-import com.delivery.justonebite.item.domain.entity.ItemEntity;
+import com.delivery.justonebite.item.domain.entity.Item;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.val;
 
 import java.util.UUID;
 
-@Getter
-@Setter
 @Builder
-public class ItemRequestDto {
+public record ItemRequest(
     @JsonProperty("shop_id")
-    private String shopId;
-    private String name;
-    private int price;
-    private String image;
-    private String description;
+    String shopId,
+    @NotBlank(message = "상품 명은 공백일 수 없습니다.")
+    String name,
+    @Min(value = 10, message = "상품 금액은 10원 이상이어야 합니다.")
+    int price,
+    String image,
+    String description,
     @JsonProperty("ai_generated")
-    private boolean aiGenerated;
-
-    // required fix : 당장은 created_by와 같은 컬럼이 참조가 되지 않아 1L로 주입
-    public ItemEntity toEntity() {
-        return ItemEntity.builder()
+    boolean aiGenerated
+) {
+    public Item toItem() {
+        return Item.builder()
             .shopId(UUID.fromString(shopId))
             .name(name)
             .price(price)
