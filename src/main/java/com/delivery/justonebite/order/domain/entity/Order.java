@@ -14,10 +14,12 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "h_order")
 @Getter
+@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {
 
@@ -38,7 +40,7 @@ public class Order extends BaseEntity {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "user_phonenumber", nullable = false)
+    @Column(name = "user_phonenumber", nullable = false, length = 15)
     private String userPhoneNumber;
 
     // 주문 요약 ex) 토스 티셔츠 외 2건
@@ -50,11 +52,11 @@ public class Order extends BaseEntity {
     private Integer totalPrice;
 
     // 주문 요청사항
-    @Column(name = "order_request")
+    @Column(name = "order_request", length = 100)
     private String orderRequest;
 
     // 배달 요청사항
-    @Column(name = "delivery_request")
+    @Column(name = "delivery_request", length = 100)
     private String deliveryRequest;
 
     private Order(String address, String userPhoneNumber,
