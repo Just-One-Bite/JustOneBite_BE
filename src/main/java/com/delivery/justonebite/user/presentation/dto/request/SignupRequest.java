@@ -1,10 +1,13 @@
 package com.delivery.justonebite.user.presentation.dto.request;
 
+import com.delivery.justonebite.user.domain.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record SignupRequest(
         @NotBlank(message = "이메일을 입력해주세요.")
         @Email
@@ -22,4 +25,12 @@ public record SignupRequest(
         )
         String password
 ) {
+        public User toUser(String encodedPassword) {
+                return User.builder()
+                        .email(email)
+                        .name(name)
+                        .phoneNumber(phoneNumber)
+                        .password(encodedPassword)
+                        .build();
+        }
 }

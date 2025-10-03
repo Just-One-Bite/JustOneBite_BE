@@ -1,13 +1,14 @@
 package com.delivery.justonebite.user.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
-import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
+@SuperBuilder
 @Entity
 @Table(name = "h_user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,27 +33,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
-
-    public User(
-            String email,
-            String name,
-            String phoneNumber,
-            String password
-    ) {
-        this.email = email;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.password = password;
-    }
-
-    public static User toEntity(SignupRequest requestDto, String password) {
-        return new User(
-                requestDto.email(),
-                requestDto.name(),
-                requestDto.phoneNumber(),
-                password
-        );
-    }
 
     @PrePersist
     public void prePersist() {

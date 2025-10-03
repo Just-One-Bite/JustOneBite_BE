@@ -56,7 +56,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 log.info("Subject : {}", info.getSubject());
             } catch (UsernameNotFoundException e) {
                 log.error("Authentication Setup Failed - User Not Found: 사용자 인증 정보를 찾을 수 없습니다.}");
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "사용자 인증 정보를 찾을 수 없습니다.");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "사용자 인증 정보를 찾을 수 없습니다.");
                 return;
             } catch (Exception e) {
                 log.error("Error: {}", e.getMessage());

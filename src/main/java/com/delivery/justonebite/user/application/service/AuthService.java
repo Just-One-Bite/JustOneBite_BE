@@ -22,7 +22,7 @@ public class AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new RuntimeException("Email already exists");
         }
-        User user = User.toEntity(request, passwordEncoder.encode(request.password()));
+        User user = request.toUser(passwordEncoder.encode(request.password()));
         userRepository.save(user);
         String bearerToken = jwtUtil.createToken(user);
         String token = jwtUtil.removePrefix(bearerToken);
