@@ -1,9 +1,15 @@
 package com.delivery.justonebite.order.application.service;
 
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.domain.entity.Order;
+import com.delivery.justonebite.order.domain.entity.OrderHistory;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
+import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderHistoryRepository orderHistoryRepository;
 
     // TODO: User, Shop 정보 받아와야 함 (추후 더미 데이터 수정 필요)
     @Transactional
@@ -44,6 +51,7 @@ public class OrderService {
             );
 
         orderRepository.save(order);
+        orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.PENDING));
     }
 
     @Transactional(readOnly = true)
@@ -56,6 +64,12 @@ public class OrderService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return orderRepository.findAll(pageable)
-            .map(CustomerOrderResponse::from);
+            .map(order -> CustomerOrderResponse.from(order, getOrderStatus(order)));
+    }
+
+    private OrderStatus getOrderStatus(Order order) {
+        return orderHistoryRepository.findByOrderId(order.getId())
+            .map(OrderHistory::getStatus)
+            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }
