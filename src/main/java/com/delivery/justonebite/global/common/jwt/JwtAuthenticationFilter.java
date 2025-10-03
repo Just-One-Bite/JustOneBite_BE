@@ -1,6 +1,6 @@
-package com.delivery.justonebite.common.jwt;
+package com.delivery.justonebite.global.common.jwt;
 
-import com.delivery.justonebite.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,8 +1,8 @@
-package com.delivery.justonebite.common.security;
+package com.delivery.justonebite.global.common.security;
 
-import com.delivery.justonebite.common.jwt.JwtAuthenticationFilter;
-import com.delivery.justonebite.common.jwt.JwtAuthorizationFilter;
-import com.delivery.justonebite.common.jwt.JwtUtil;
+import com.delivery.justonebite.global.common.jwt.JwtAuthenticationFilter;
+import com.delivery.justonebite.global.common.jwt.JwtAuthorizationFilter;
+import com.delivery.justonebite.global.common.jwt.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

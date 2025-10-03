@@ -1,6 +1,6 @@
-package com.delivery.justonebite.common.jwt;
+package com.delivery.justonebite.global.common.jwt;
 
-import com.delivery.justonebite.common.security.UserDetailsServiceImpl;
+import com.delivery.justonebite.global.common.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

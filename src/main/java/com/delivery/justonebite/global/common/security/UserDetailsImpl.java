@@ -1,4 +1,4 @@
-package com.delivery.justonebite.common.security;
+package com.delivery.justonebite.global.common.security;
 
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;

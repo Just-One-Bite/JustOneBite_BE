@@ -1,4 +1,4 @@
-package com.delivery.justonebite.common.jwt;
+package com.delivery.justonebite.global.common.jwt;
 
 import com.delivery.justonebite.user.domain.entity.User;
 import io.jsonwebtoken.*;

@@ -1,6 +1,6 @@
 package com.delivery.justonebite.user.application.service;
 
-import com.delivery.justonebite.common.jwt.JwtUtil;
+import com.delivery.justonebite.global.common.jwt.JwtUtil;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
