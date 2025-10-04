@@ -2,6 +2,7 @@ package com.delivery.justonebite.order.presentation.dto.response;
 
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -12,17 +13,17 @@ public record CustomerOrderResponse(
 //    String shopName,
     String shopImage,
     String orderStatus,
-    String orderedDate,
+    LocalDateTime orderedDate,
     Integer totalFee,
     String itemName
 ) {
 
-    public static CustomerOrderResponse from(Order order, OrderStatus status) {
+    public static CustomerOrderResponse toDto(Order order, OrderStatus status) {
         return CustomerOrderResponse.builder()
             .orderId(order.getId())
 //            .shopName(order.getShop().getShopName())
             .orderStatus(status.name())
-            .orderedDate(order.getCreatedAt().toString())
+            .orderedDate(order.getCreatedAt())
             .totalFee(order.getTotalPrice())
             .itemName(order.getOrderName())
             .build();
