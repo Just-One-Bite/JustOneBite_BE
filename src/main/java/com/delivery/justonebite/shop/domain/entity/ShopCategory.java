@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
 import java.util.UUID;
 @Entity
 @Table(name = "h_shop_category")
@@ -37,6 +38,21 @@ public class ShopCategory {
                 .shop(shop)
                 .category(category)
                 .build();
+    }
+
+    // category  중복 방지 기준
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(!(o instanceof ShopCategory)) return false;
+        ShopCategory shopCategory = (ShopCategory) o;
+        return Objects.equals(shop.getId(),shopCategory.shop.getId())&&
+                Objects.equals(category.getId(), shopCategory.category.getId());
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(shop.getId(), category.getId());
     }
 }
 

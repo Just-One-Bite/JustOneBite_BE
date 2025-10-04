@@ -1,7 +1,8 @@
 package com.delivery.justonebite.shop.domain.entity;
 
-import com.delivery.justonebite.common.entity.BaseEntity;
+import com.delivery.justonebite.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class Shop extends BaseEntity {
     @Column(nullable = false)
     private Long owner;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String name;
 
     @Column(name = "registration_number", nullable = false)
@@ -37,7 +38,7 @@ public class Shop extends BaseEntity {
     @Column(nullable = false)
     private String province;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     private String city;
 
     @Column(nullable = false)
@@ -47,16 +48,18 @@ public class Shop extends BaseEntity {
     private String address;
 
     @Column(name = "phone_number", nullable = false)
+    @Pattern(regexp = "^[0-9\\-]+$", message = "전화번호는 숫자와 하이픈만 허용합니다.")
     private String phoneNumber;
 
-    @Column(name = "operating_hour")
+    @Column(name = "operating_hour",nullable = false)
     private String operatingHour;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
-    @Column(name = "average_rating", precision = 2, scale = 1)
-    private BigDecimal averageRating;
+    @Builder.Default
+    @Column(name = "average_rating", precision = 2, scale = 1, nullable = false)
+    private BigDecimal averageRating = BigDecimal.ZERO;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -82,6 +85,7 @@ public class Shop extends BaseEntity {
 
     public void addCategory(Category category) {
         ShopCategory shopCategory = ShopCategory.create(this, category);
+        if(!this.categories.contains(shopCategory)) this.categories.add(shopCategory);
         this.categories.add(shopCategory);
     }
 }
