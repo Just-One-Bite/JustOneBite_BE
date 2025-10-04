@@ -25,8 +25,13 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED("지원하지 않는 HTTP 메서드입니다.", HttpStatus.METHOD_NOT_ALLOWED),
 
 
+    // 주문
+    INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
+
 
     ;
+
+
 
     private final String description;
     private final HttpStatus status;
