@@ -25,6 +25,16 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED("지원하지 않는 HTTP 메서드입니다.", HttpStatus.METHOD_NOT_ALLOWED),
 
 
+    //리뷰
+    INVALID_RATING_RANGE("평점은 1~5 범위여야 합니다.", HttpStatus.BAD_REQUEST),
+    REVIEW_NOT_FOUND("리뷰를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    REVIEW_ALREADY_EXISTS("해당 주문에는 이미 리뷰가 존재합니다.", HttpStatus.CONFLICT),
+    ORDER_NOT_COMPLETED("주문이 아직 완료상태가 아닙니다.", HttpStatus.FORBIDDEN),
+
+
+    //주문
+    ORDER_NOT_FOUND("주문을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ORDER_STATUS_NOT_FOUND("주문상태를 확인할수 없습니다", HttpStatus.NOT_FOUND),
 
     ;
 
