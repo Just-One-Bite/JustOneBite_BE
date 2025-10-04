@@ -37,4 +37,11 @@ public class AiRequestHistory {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public AiRequestHistory(Long userId, String model, String request, String response) {
+        this.userId = userId;
+        this.model = model;
+        this.request = request;
+        this.response = response;
+    }
 }
