@@ -13,7 +13,6 @@ import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequ
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import com.delivery.justonebite.review.repository.ReviewRepository;
-import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +28,6 @@ public class ReviewService {
 
 
     private final ReviewRepository reviewRepository;
-    private final ShopRepository shopRepository;
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
 
@@ -76,6 +74,25 @@ public class ReviewService {
 
         applyUpdates(review, req);
         return ReviewResponse.from(review);
+    }
+
+    @Transactional
+    public void softDelete(UUID reviewId, Long currentUserId, UserRole currentUserRole) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        assertDeletable(review, currentUserId, currentUserRole);
+        review.softDelete(currentUserId);
+    }
+
+    @Transactional
+    public void restore(UUID reviewId, Long currentUserId, UserRole currentUserRole) {
+        assertAdmin(currentUserRole);
+
+        Review review = reviewRepository.findByIdIncludingDeleted(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        review.restore();
     }
 
     private void validateCanWrite(UserRole role) {
@@ -135,6 +152,19 @@ public class ReviewService {
     private void applyUpdates(Review review, UpdateReviewRequest req) {
         if (req.content() != null) review.updateContent(req.content());
         if (req.rating() != null)  review.updateRating(req.rating());
+    }
+
+    private void assertDeletable(Review review, Long userId, UserRole role) {
+        boolean isAuthor = review.getUserId().equals(userId);
+        boolean isAdmin = (role == UserRole.MANAGER || role == UserRole.MASTER);
+        if (!isAuthor && !isAdmin) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    private void assertAdmin(UserRole role) {
+        boolean isAdmin = (role == UserRole.MANAGER || role == UserRole.MASTER);
+        if (!isAdmin) throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
     }
 
 }

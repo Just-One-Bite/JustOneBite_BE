@@ -89,4 +89,12 @@ public class Review extends BaseEntity {
         }
     }
 
+    public void softDelete(Long deleterId) {
+        super.markDeleted(deleterId);
+    }
+
+    public void restore() {
+        super.restoreDeletion();
+    }
+
 }
