@@ -27,7 +27,8 @@ public enum ErrorCode {
 
     // 주문
     INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
-
+    INVALID_USER_ROLE("유효하지 않은 회원 유형입니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_ORDER_STATUS("유효하지 않은 주문 상태입니다.", HttpStatus.UNAUTHORIZED),
 
     ;
 

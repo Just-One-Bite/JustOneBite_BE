@@ -13,8 +13,11 @@ import com.delivery.justonebite.order.domain.repository.OrderItemRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.order.presentation.dto.OrderItemDto;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
+import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
+import com.delivery.justonebite.user.domain.entity.User;
+import com.delivery.justonebite.user.domain.entity.UserRole;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -127,5 +130,31 @@ public class OrderService {
         String firstItem = itemMap.get(request.orderItems().getFirst().itemId()).getName();
         int count = request.orderItems().size() - 1;
         return count > 0 ? firstItem + " 외 " + count + "건" : firstItem;
+    }
+
+    @Transactional
+    public void updateOrderStatus(UUID orderId, UpdateOrderStatusRequest request, User user) {
+        // 유저 Role 권한 검증 : 가게 주인(OWNER)만 가능
+        if (!(user.getUserRole().equals(UserRole.OWNER))) {
+            throw new CustomException(ErrorCode.INVALID_USER_ROLE);
+        }
+
+        // TODO: 추후에 develop 머지 된걸로 수정 예정
+        OrderHistory orderHistory = orderHistoryRepository.findByOrderId(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        OrderStatus currentStatus = OrderStatus.of(orderHistory.getStatus().name());
+        OrderStatus nextStatus = OrderStatus.of(request.newStatus());
+
+        // 주문 상태 전이 유효성 검증
+        if (!currentStatus.isValidNextStatus(nextStatus)) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        // OrderHistory 엔티티에는 새로운 상태와 함께 생성 시간이 기록되어야 함 (점이력)
+        orderHistoryRepository.save(OrderHistory.create(order, nextStatus));
     }
 }
