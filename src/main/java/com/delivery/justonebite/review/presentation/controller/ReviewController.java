@@ -24,14 +24,14 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-//    @PostMapping
-//    public ResponseEntity<CreateReviewResponse> createReview(
-//            @AuthenticationPrincipal UserDetailsImpl principal,
-//            @Valid @RequestBody CreateReviewRequest request
-//    ) {
-//        CreateReviewResponse body =
-//                reviewService.createReview(principal.getUserId(), principal.getUserRole(), request);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(body);
-//    }
+    @PostMapping
+    public ResponseEntity<CreateReviewResponse> createReview(
+            @AuthenticationPrincipal UserDetailsImpl principal,
+            @Valid @RequestBody CreateReviewRequest request
+    ) {
+        CreateReviewResponse body =
+                reviewService.createReview(principal.getUserId(), principal.getUserRole(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
 
 }

@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderHistoryRepository extends JpaRepository<OrderHistory, UUID> {
     Optional<OrderHistory> findByOrderId(UUID orderId);
+    Optional<OrderHistory> findTopByOrder_IdOrderByCreatedAtDesc(UUID orderId);
 }

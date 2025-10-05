@@ -35,6 +35,7 @@ public enum ErrorCode {
     //주문
     ORDER_NOT_FOUND("주문을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ORDER_STATUS_NOT_FOUND("주문상태를 확인할수 없습니다", HttpStatus.NOT_FOUND),
+    INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
 
     ;
 
