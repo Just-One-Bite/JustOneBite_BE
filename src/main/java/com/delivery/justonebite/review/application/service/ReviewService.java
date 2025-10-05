@@ -9,20 +9,17 @@ import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.review.entity.Review;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
+import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import com.delivery.justonebite.review.repository.ReviewRepository;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
-import jakarta.persistence.PreUpdate;
 import lombok.RequiredArgsConstructor;
-//import lombok.var;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 import java.util.UUID;
 import static com.delivery.justonebite.review.entity.Review.create;
 
@@ -66,6 +63,21 @@ public class ReviewService {
                 .map(ReviewResponse::from);
     }
 
+    @Transactional
+    public ReviewResponse update(UUID reviewId,
+                                 Long currentUserId,
+                                 UserRole currentUserRole,
+                                 UpdateReviewRequest req) {
+
+        Review review = loadReviewOrThrow(reviewId);
+        assertCanEdit(review, currentUserId, currentUserRole);
+
+        if (isNoop(req)) return ReviewResponse.from(review);
+
+        applyUpdates(review, req);
+        return ReviewResponse.from(review);
+    }
+
     private void validateCanWrite(UserRole role) {
         boolean canWrite = role == UserRole.CUSTOMER || role == UserRole.MANAGER || role == UserRole.MASTER;
         if (!canWrite) throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
@@ -102,6 +114,27 @@ public class ReviewService {
     private Review buildReview(Order order, Long currentUserId, CreateReviewRequest req) {
         UUID shopId = order.getShop().getId();
         return create(order, currentUserId, shopId, req.content(), req.rating());
+    }
+
+    private Review loadReviewOrThrow(UUID reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+    }
+
+    private void assertCanEdit(Review review, Long userId, UserRole role) {
+        boolean isAuthor = review.getUserId().equals(userId);
+        if (!isAuthor) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    private boolean isNoop(UpdateReviewRequest req) {
+        return req.content() == null && req.rating() == null;
+    }
+
+    private void applyUpdates(Review review, UpdateReviewRequest req) {
+        if (req.content() != null) review.updateContent(req.content());
+        if (req.rating() != null)  review.updateRating(req.rating());
     }
 
 }

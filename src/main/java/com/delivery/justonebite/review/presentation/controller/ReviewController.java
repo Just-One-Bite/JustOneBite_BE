@@ -3,24 +3,21 @@ package com.delivery.justonebite.review.presentation.controller;
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.review.application.service.ReviewService;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
+import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -54,6 +51,19 @@ public class ReviewController {
             Pageable pageable) {
 
         Page<ReviewResponse> body = reviewService.getByShop(shopId, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ReviewResponse> update(@PathVariable("id") UUID id,
+                                                 @AuthenticationPrincipal UserDetailsImpl principal,
+                                                 @Valid @RequestBody UpdateReviewRequest request) {
+        ReviewResponse body = reviewService.update(
+                id,
+                principal.getUserId(),
+                principal.getUserRole(),
+                request
+        );
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
