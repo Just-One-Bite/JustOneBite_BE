@@ -24,6 +24,8 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR("서버 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     METHOD_NOT_ALLOWED("지원하지 않는 HTTP 메서드입니다.", HttpStatus.METHOD_NOT_ALLOWED),
 
+    // 상품 AI 응답 생성 에러
+    INVALID_AI_RESPONSE("AI API 서버의 에러가 존재합니다. 다시 시도하거나 상품에 대한 프롬프트를 입력해주세요.", HttpStatus.INTERNAL_SERVER_ERROR)
 
 
     ;
