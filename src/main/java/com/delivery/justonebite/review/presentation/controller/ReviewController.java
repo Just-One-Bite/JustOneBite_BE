@@ -40,7 +40,6 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<ReviewResponse> getOne(@PathVariable UUID id) {
         ReviewResponse body = reviewService.getById(id);
