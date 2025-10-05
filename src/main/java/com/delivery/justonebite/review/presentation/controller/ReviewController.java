@@ -40,6 +40,7 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<ReviewResponse> getOne(@PathVariable UUID id) {
         ReviewResponse body = reviewService.getById(id);
@@ -72,14 +73,14 @@ public class ReviewController {
     @DeleteMapping("/{id}")
     public ResponseEntity<DeleteReviewResponse> softDelete(@PathVariable("id") UUID id,
                                                            @AuthenticationPrincipal UserDetailsImpl principal) {
-        reviewService.softDelete(id, principal.getUser().getId(), principal.getUser().getUserRole());
+        reviewService.softDelete(id, principal.getUserId(), principal.getUser().getUserRole());
         return ResponseEntity.status(HttpStatus.OK).body(DeleteReviewResponse.ok(id));
     }
 
     @PostMapping("/{id}/restore")
     public ResponseEntity<RestoreReviewResponse> restore(@PathVariable("id") UUID id,
                                                          @AuthenticationPrincipal UserDetailsImpl principal) {
-        reviewService.restore(id, principal.getUser().getId(), principal.getUser().getUserRole());
+        reviewService.restore(id, principal.getUserId(), principal.getUser().getUserRole());
         return ResponseEntity.status(HttpStatus.OK).body(RestoreReviewResponse.ok(id));
     }
 
