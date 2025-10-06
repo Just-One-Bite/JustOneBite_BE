@@ -25,12 +25,14 @@ public class ItemService {
     private final ShopRepository shopRepository;
 
     @Transactional
-    public void createItem(ItemRequest request) {
+    public ItemReponse createItem(ItemRequest request) {
         Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(IllegalArgumentException::new);
         Item item = request.toItem();
         item.setShop(shop);
 
         itemRepository.save(item);
+
+        return ItemReponse.from(item);
     }
 
     public ItemDetailResponse getItem(UUID itemId) {
