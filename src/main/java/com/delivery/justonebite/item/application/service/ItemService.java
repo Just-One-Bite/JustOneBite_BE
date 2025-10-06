@@ -24,6 +24,7 @@ public class ItemService {
 
     private final ShopRepository shopRepository;
 
+    @Transactional
     public void createItem(ItemRequest request) {
         Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(IllegalArgumentException::new);
         Item item = request.toItem();
