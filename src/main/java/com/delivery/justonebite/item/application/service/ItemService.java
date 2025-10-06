@@ -6,6 +6,8 @@ import com.delivery.justonebite.item.presentation.dto.ItemDetailResponse;
 import com.delivery.justonebite.item.presentation.dto.ItemReponse;
 import com.delivery.justonebite.item.presentation.dto.ItemRequest;
 import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
+import com.delivery.justonebite.shop.domain.entity.Shop;
+import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,8 +22,14 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
 
+    private final ShopRepository shopRepository;
+
     public void createItem(ItemRequest request) {
-        itemRepository.save(request.toItem());
+        Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(IllegalArgumentException::new);
+        Item item = request.toItem();
+        item.setShop(shop);
+
+        itemRepository.save(item);
     }
 
     public ItemDetailResponse getItem(UUID itemId) {

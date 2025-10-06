@@ -24,15 +24,12 @@ public record ItemRequest(
 ) {
     public Item toItem() {
         return Item.builder()
-            .shopId(UUID.fromString(shopId))
             .name(name)
             .price(price)
             .image(image)
             .description(description)
             .aiGenerated(aiGenerated)
             .isHidden(false)
-            .createdBy(1L)
-            .updatedBy(1L)
             .build();
     }
 }
