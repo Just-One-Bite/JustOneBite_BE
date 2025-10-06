@@ -28,6 +28,8 @@ public enum ErrorCode {
     // 주문
     INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
 
+    // 가게
+    INVALID_SHOP("존재하지 않는 가게입니다.", HttpStatus.NOT_FOUND),
 
     ;
 

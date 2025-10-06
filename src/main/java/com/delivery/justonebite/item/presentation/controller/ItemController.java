@@ -45,9 +45,8 @@ public class ItemController {
     }
 
     @PutMapping("/{item-id}")
-    public ResponseEntity<Void> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
-        itemService.updateItem(itemId, request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<ItemReponse> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.updateItem(itemId, request));
     }
 
     @DeleteMapping("/{item-id}")
