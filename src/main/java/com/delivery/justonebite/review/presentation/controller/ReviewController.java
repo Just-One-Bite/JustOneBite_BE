@@ -5,7 +5,6 @@ import com.delivery.justonebite.review.application.service.ReviewService;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
-import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,8 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -66,5 +65,5 @@ public class ReviewController {
         );
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
-
+  
 }

@@ -11,11 +11,10 @@ import com.delivery.justonebite.review.entity.Review;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
-import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import com.delivery.justonebite.review.repository.ReviewRepository;
-import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class ReviewService {
 
 
     private final ReviewRepository reviewRepository;
-    private final ShopRepository shopRepository;
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
 
