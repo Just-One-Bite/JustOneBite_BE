@@ -11,15 +11,11 @@ import com.delivery.justonebite.review.entity.Review;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
 import com.delivery.justonebite.review.repository.ReviewRepository;
-import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
-import jakarta.persistence.PreUpdate;
 import lombok.RequiredArgsConstructor;
-//import lombok.var;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 import static com.delivery.justonebite.review.entity.Review.create;
 
@@ -29,7 +25,6 @@ public class ReviewService {
 
 
     private final ReviewRepository reviewRepository;
-    private final ShopRepository shopRepository;
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
 

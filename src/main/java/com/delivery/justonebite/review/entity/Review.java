@@ -62,7 +62,7 @@ public class Review extends BaseEntity {
         return Review.builder()
                 .order(order)
                 .userId(userId)
-//                .shopId(order.getShop()) TODO: shop도메인 구현하면 주석 해제
+                .shopId(order.getShop().getId())
                 .content(content)
                 .rating(rating)
                 .build();
