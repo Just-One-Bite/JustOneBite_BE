@@ -37,29 +37,29 @@ public class ItemController {
     }
 
     @GetMapping("/shop/{shop-id}")
-    public ResponseEntity<Page<ItemReponse>> getItemsByShop(@PathVariable("shop-id") UUID shopId,
+    public ResponseEntity<Page<ItemReponse>> getItemsByShop(@PathVariable("shop-id") String shopId,
                                                             @RequestParam(name = "page", defaultValue = "0") int page,
                                                             @RequestParam(name = "size", defaultValue = "10") int size,
                                                             @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShop(shopId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShop(UUID.fromString(shopId), pageable));
     }
 
     @PutMapping("/{item-id}")
-    public ResponseEntity<Void> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
-        itemService.updateItem(itemId, request);
+    public ResponseEntity<Void> updateItem(@PathVariable("item-id") String itemId, @RequestBody @Valid ItemUpdateRequest request) {
+        itemService.updateItem(UUID.fromString(itemId), request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("/{item-id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable("item-id") UUID itemId) {
-        itemService.deleteItem(itemId);
+    public ResponseEntity<Void> deleteItem(@PathVariable("item-id") String itemId) {
+        itemService.deleteItem(UUID.fromString(itemId));
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/{item-id}/hide")
-    public ResponseEntity<Void> toggleHidden(@PathVariable("item-id") UUID itemId) {
-        itemService.toggleHidden(itemId);
+    public ResponseEntity<Void> toggleHidden(@PathVariable("item-id") String itemId) {
+        itemService.toggleHidden(UUID.fromString(itemId));
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
