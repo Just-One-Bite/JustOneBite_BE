@@ -48,6 +48,10 @@ public class Item extends BaseEntity {
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
 
+    public void updateDescription(String aiResponse) {
+        this.description = aiResponse;
+    }
+
     public void updateItem(ItemUpdateRequest request) {
         this.name = request.name();
         this.price = request.price();

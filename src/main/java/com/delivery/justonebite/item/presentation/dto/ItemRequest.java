@@ -4,6 +4,7 @@ import com.delivery.justonebite.item.domain.entity.Item;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.val;
 
@@ -18,6 +19,7 @@ public record ItemRequest(
     @Min(value = 10, message = "상품 금액은 10원 이상이어야 합니다.")
     int price,
     String image,
+    @Size(max = 100)
     String description,
     @JsonProperty("ai_generated")
     boolean aiGenerated
