@@ -39,13 +39,11 @@ public class ItemService {
         Item item = request.toItem();
         item.setShop(shop);
       
-        if (item.isAiGenerated()) { // 상품 소개 AI API를 통해 작성
-            String prompt = request.description();
-            String response = generateAiResponse(item, prompt);
-            item.updateDescription(response);
-            itemRepository.save(item);
+        if (request.aiGenerated()) { // 상품 소개 AI API를 통해 작성
+            String response = generateAiResponse(item, request.description());
+
             // AI 사용 기록 저장
-            saveAiRequestHistory(1L, prompt, response);
+            saveAiRequestHistory(1L, request.description(), response);
         } else { // 상품 소개 직접 작성
             itemRepository.save(item);
         }
@@ -67,15 +65,14 @@ public class ItemService {
         item.updateItem(request);
 
         if (request.aiGenerated()) {
-            String prompt = request.description();
-            String response = generateAiResponse(item, prompt);
-            item.updateDescription(response);
-            itemRepository.save(item);
+            String response = generateAiResponse(item, request.description());
+
             // AI 사용 기록 저장
-            saveAiRequestHistory(1L, prompt, response);
+            saveAiRequestHistory(1L, request.description(), response);
         } else {
             itemRepository.save(item);
         }
+
         return ItemReponse.from(item);
     }
 
