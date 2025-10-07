@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Where;
 import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
@@ -25,6 +26,7 @@ import java.util.UUID;
                 @Index(name = "IDX_h_review_shop_id", columnList = "shop_id")
         }
 )
+@Where(clause = "deleted_at IS NULL")
 @Check(constraints = "rating BETWEEN 1 AND 5")
 @Getter
 @SuperBuilder
@@ -40,6 +42,10 @@ public class Review extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
+
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(name = "order_id", insertable = false, updatable = false)
+    private UUID orderIdRef;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
