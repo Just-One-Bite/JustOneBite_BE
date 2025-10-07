@@ -32,6 +32,7 @@ public class ItemService {
     private final GeminiClient geminiClient;
 
     private final AiRequestHistoryRepository aiRequestHistoryRepository;
+
     @Transactional
     public ItemReponse createItem(ItemRequest request) {
         Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(() -> new CustomException(ErrorCode.INVALID_SHOP));
@@ -41,12 +42,15 @@ public class ItemService {
         if (item.isAiGenerated()) { // 상품 소개 AI API를 통해 작성
             String prompt = request.description();
             String response = generateAiResponse(item, prompt);
-
+            item.updateDescription(response);
+            itemRepository.save(item);
             // AI 사용 기록 저장
             saveAiRequestHistory(1L, prompt, response);
         } else { // 상품 소개 직접 작성
             itemRepository.save(item);
         }
+
+        return ItemReponse.from(item);
     }
 
     public ItemDetailResponse getItem(UUID itemId) {
@@ -65,12 +69,14 @@ public class ItemService {
         if (request.aiGenerated()) {
             String prompt = request.description();
             String response = generateAiResponse(item, prompt);
-
+            item.updateDescription(response);
+            itemRepository.save(item);
             // AI 사용 기록 저장
             saveAiRequestHistory(1L, prompt, response);
         } else {
             itemRepository.save(item);
         }
+        return ItemReponse.from(item);
     }
 
     @Transactional
