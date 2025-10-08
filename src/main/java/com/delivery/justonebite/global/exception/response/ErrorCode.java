@@ -24,7 +24,12 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR("서버 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     METHOD_NOT_ALLOWED("지원하지 않는 HTTP 메서드입니다.", HttpStatus.METHOD_NOT_ALLOWED),
 
+    // 상품 AI 응답 생성 에러
+    INVALID_AI_RESPONSE("AI API 서버의 에러가 존재합니다. 다시 시도하거나 상품에 대한 프롬프트를 입력해주세요.", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // 가게
+    INVALID_SHOP("존재하지 않는 가게입니다.", HttpStatus.NOT_FOUND),
+  
     //리뷰
     INVALID_RATING_RANGE("평점은 1~5 범위여야 합니다.", HttpStatus.BAD_REQUEST),
     REVIEW_NOT_FOUND("리뷰를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
@@ -36,6 +41,10 @@ public enum ErrorCode {
     ORDER_NOT_FOUND("주문을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ORDER_STATUS_NOT_FOUND("주문상태를 확인할수 없습니다", HttpStatus.NOT_FOUND),
     INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
+    INVALID_USER_ROLE("유효하지 않은 회원 유형입니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_ORDER_STATUS("유효하지 않은 주문 상태입니다.", HttpStatus.UNAUTHORIZED),
+    ORDER_NOT_FOUND("주문 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
 
     ;
 
