@@ -141,10 +141,10 @@ public class OrderService {
 
         // TODO: 추후에 develop 머지 된걸로 수정 예정
         OrderHistory orderHistory = orderHistoryRepository.findByOrderId(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         OrderStatus currentStatus = OrderStatus.of(orderHistory.getStatus().name());
         OrderStatus nextStatus = OrderStatus.of(request.newStatus());
