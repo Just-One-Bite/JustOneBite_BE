@@ -1,6 +1,7 @@
 package com.delivery.justonebite.user.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
+import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,5 +40,11 @@ public class User extends BaseEntity {
         if (this.userRole == null) {
             this.userRole = UserRole.CUSTOMER;
         }
+    }
+
+    public void updateProfile(UpdateProfileRequest request) {
+        this.name = request.name() != null ? request.name() : this.name;
+        this.phoneNumber = request.phoneNumber() != null ? request.phoneNumber() : this.phoneNumber;
+
     }
 }
