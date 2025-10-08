@@ -35,13 +35,22 @@ public class ItemController {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem(itemId));
     }
 
-    @GetMapping("/shop/{shop-id}")
+    @GetMapping("/shop/owner/{shop-id}") // fix : 추후 권한에 따라서 다른 service를 쓰도록 할 것 같음
     public ResponseEntity<Page<ItemReponse>> getItemsByShop(@PathVariable("shop-id") String shopId,
                                                             @RequestParam(name = "page", defaultValue = "0") int page,
                                                             @RequestParam(name = "size", defaultValue = "10") int size,
                                                             @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShop(UUID.fromString(shopId), pageable));
+    }
+
+    @GetMapping("/shop/{shop-id}")
+    public ResponseEntity<Page<ItemReponse>> getItemsByShopWithoutHidden(@PathVariable("shop-id") String shopId,
+                                                            @RequestParam(name = "page", defaultValue = "0") int page,
+                                                            @RequestParam(name = "size", defaultValue = "10") int size,
+                                                            @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShopWithoutHidden(UUID.fromString(shopId), pageable));
     }
 
     @PutMapping("/{item-id}")

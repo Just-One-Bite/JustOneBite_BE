@@ -55,8 +55,12 @@ public class ItemService {
         return ItemDetailResponse.from(itemRepository.findByItemId(itemId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_ITEM)));
     }
 
-    public Page<ItemReponse> getItemsByShop(UUID shopId, Pageable pageable) {
+    public Page<ItemReponse> getItemsByShop(UUID shopId, Pageable pageable) { // owner 입장에서의 상품 조회
         return itemRepository.findAllByShopId(shopId, pageable).map(ItemReponse::from);
+    }
+
+    public Page<ItemReponse> getItemsByShopWithoutHidden(UUID shopId, Pageable pageable) { // customer 입장에서의 상품 조회
+        return itemRepository.findAllByShopIdWithoutHidden(shopId, pageable).map(ItemReponse::from);
     }
 
     @Transactional
