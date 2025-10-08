@@ -18,7 +18,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public GetProfileResponse findMyProfile(UserDetailsImpl userDetails) {
-        User myProfile = userRepository.findById(userDetails.getUserId())
+        User myProfile = userRepository.findById(userDetails.getUser().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         return GetProfileResponse.toDto(myProfile);
     }
