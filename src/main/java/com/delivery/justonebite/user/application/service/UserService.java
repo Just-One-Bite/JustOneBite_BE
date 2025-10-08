@@ -3,12 +3,11 @@ package com.delivery.justonebite.user.application.service;
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
+import com.delivery.justonebite.user.presentation.dto.request.UpdatePasswordRequest;
 import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileRequest;
 import com.delivery.justonebite.user.presentation.dto.response.GetProfileResponse;
 import com.delivery.justonebite.user.presentation.dto.response.UpdateProfileResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,8 +21,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public GetProfileResponse findMyProfile(UserDetailsImpl userDetails) {
-        User myProfile = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User myProfile = findProfile(userDetails.getUsername());
         return GetProfileResponse.toDto(myProfile);
     }
 
@@ -33,20 +31,31 @@ public class UserService {
             UpdateProfileRequest request
     ) {
         User foundUser = findProfile(userDetails.getUsername());
-        if (!passwordEncoder.matches(request.password(), foundUser.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
-        }
+        varifyPassword(request.password(), foundUser);
         foundUser.updateProfile(request);
         userRepository.save(foundUser);
         return UpdateProfileResponse.toDto(foundUser);
     }
 
-    // Todo: 비밀번호 변경
+    @Transactional
+    public void updatePassword(UserDetailsImpl userDetails, UpdatePasswordRequest request) {
+        User foundUser = findProfile(userDetails.getUsername());
+        varifyPassword(request.oldPassword(), foundUser);
+        String encodedPassword = passwordEncoder.encode(request.newPassword());
+        foundUser.updatePassword(encodedPassword);
+        userRepository.save(foundUser);
+    }
 
     // Todo: 회원 탈퇴
 
     private User findProfile(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+    }
+
+    private void varifyPassword(String password, User user) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
     }
 }

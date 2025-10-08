@@ -45,6 +45,9 @@ public class User extends BaseEntity {
     public void updateProfile(UpdateProfileRequest request) {
         this.name = request.name() != null ? request.name() : this.name;
         this.phoneNumber = request.phoneNumber() != null ? request.phoneNumber() : this.phoneNumber;
+    }
 
+    public void updatePassword(String password) {
+        this.password = password;
     }
 }

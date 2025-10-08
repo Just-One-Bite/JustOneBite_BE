@@ -2,6 +2,7 @@ package com.delivery.justonebite.user.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.user.application.service.UserService;
+import com.delivery.justonebite.user.presentation.dto.request.UpdatePasswordRequest;
 import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileRequest;
 import com.delivery.justonebite.user.presentation.dto.response.GetProfileResponse;
 import com.delivery.justonebite.user.presentation.dto.response.UpdateProfileResponse;
@@ -34,7 +35,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(myProfile);
     }
 
-    // Todo: 비밀번호 변경
+    @PatchMapping("/me/password")
+    public ResponseEntity<Void> updatePassword(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody @Valid UpdatePasswordRequest request
+    ) {
+        userService.updatePassword(userDetails, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
     // Todo: 회원 탈퇴
 }
