@@ -18,6 +18,10 @@ import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderRes
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import com.delivery.justonebite.shop.domain.entity.Shop;
+import com.delivery.justonebite.shop.domain.repository.ShopRepository;
+import com.delivery.justonebite.user.domain.entity.User;
+import com.delivery.justonebite.user.domain.entity.UserRole;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,13 +40,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final ShopRepository shopRepository;
     private final OrderHistoryRepository orderHistoryRepository;
     private final ItemRepository itemRepository;
     private final OrderItemRepository orderItemRepository;
 
-    // TODO: User, Shop 정보 받아와야 함 (추후 더미 데이터 수정 필요)
     @Transactional
-    public void createOrder(CreateOrderRequest request) {
+    public void createOrder(CreateOrderRequest request, User user) {
+        // 유저 Role 권한 검증
+        authorizeCustomer(user);
 
         // TODO: Address 테이블에서 Id로 주소값 가져와야 함 (없으면 예외처리)
         String address = "서울시 종로구 사직로 155-2";
@@ -68,8 +74,14 @@ public class OrderService {
             .mapToInt(dto -> itemMap.get(dto.itemId()).getPrice() * dto.count())
             .sum();
 
+        Shop shop = shopRepository.findById(request.shopId())
+            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+
         // 추후에 created_by에 userId 추가
-        Order order = Order.create(address,
+        Order order = Order.create(
+                user,
+                shop,
+                address,
                 request.userPhoneNumber(),
                 convertToOrderName(request, itemMap),
                 totalPrice,
@@ -130,6 +142,12 @@ public class OrderService {
         String firstItem = itemMap.get(request.orderItems().getFirst().itemId()).getName();
         int count = request.orderItems().size() - 1;
         return count > 0 ? firstItem + " 외 " + count + "건" : firstItem;
+    }
+
+    private void authorizeCustomer(User user) {
+        if (!(user.getUserRole().equals(UserRole.CUSTOMER))) {
+            throw new CustomException(ErrorCode.INVALID_MEMBER);
+        }
     }
 
     @Transactional
