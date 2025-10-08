@@ -5,6 +5,7 @@ import com.delivery.justonebite.review.application.service.ReviewService;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
+import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
