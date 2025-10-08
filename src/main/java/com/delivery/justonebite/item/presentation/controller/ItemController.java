@@ -2,7 +2,7 @@ package com.delivery.justonebite.item.presentation.controller;
 
 import com.delivery.justonebite.item.application.service.ItemService;
 import com.delivery.justonebite.item.presentation.dto.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemReponse;
+import com.delivery.justonebite.item.presentation.dto.ItemResponse;
 import com.delivery.justonebite.item.presentation.dto.ItemRequest;
 import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
 import jakarta.validation.Valid;
@@ -26,7 +26,7 @@ public class ItemController {
 
     // require fix : 추후 role과 같은 이슈 해결 필요 -> @AuthenticationPrincipal UserDetails userDetails
     @PostMapping
-    public ResponseEntity<ItemReponse> createItem(@RequestBody @Valid ItemRequest request) {
+    public ResponseEntity<ItemResponse> createItem(@RequestBody @Valid ItemRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.createItem(request));
     }
 
@@ -35,17 +35,26 @@ public class ItemController {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem(itemId));
     }
 
-    @GetMapping("/shop/{shop-id}")
-    public ResponseEntity<Page<ItemReponse>> getItemsByShop(@PathVariable("shop-id") String shopId,
-                                                            @RequestParam(name = "page", defaultValue = "0") int page,
-                                                            @RequestParam(name = "size", defaultValue = "10") int size,
-                                                            @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
+    @GetMapping("/shop/owner/{shop-id}") // fix : 추후 권한에 따라서 다른 service를 쓰도록 할 것 같음
+    public ResponseEntity<Page<ItemResponse>> getItemsByShop(@PathVariable("shop-id") String shopId,
+                                                             @RequestParam(name = "page", defaultValue = "0") int page,
+                                                             @RequestParam(name = "size", defaultValue = "10") int size,
+                                                             @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShop(UUID.fromString(shopId), pageable));
     }
 
+    @GetMapping("/shop/{shop-id}")
+    public ResponseEntity<Page<ItemResponse>> getItemsByShopWithoutHidden(@PathVariable("shop-id") String shopId,
+                                                                          @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                          @RequestParam(name = "size", defaultValue = "10") int size,
+                                                                          @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShopWithoutHidden(UUID.fromString(shopId), pageable));
+    }
+
     @PutMapping("/{item-id}")
-    public ResponseEntity<ItemReponse> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
+    public ResponseEntity<ItemResponse> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.updateItem(itemId, request));
     }
 

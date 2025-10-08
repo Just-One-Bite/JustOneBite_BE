@@ -8,7 +8,7 @@ import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.item.infrastructure.api.gemini.client.GeminiClient;
 import com.delivery.justonebite.item.presentation.dto.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemReponse;
+import com.delivery.justonebite.item.presentation.dto.ItemResponse;
 import com.delivery.justonebite.item.presentation.dto.ItemRequest;
 import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
 import com.delivery.justonebite.shop.domain.entity.Shop;
@@ -34,7 +34,7 @@ public class ItemService {
     private final AiRequestHistoryRepository aiRequestHistoryRepository;
 
     @Transactional
-    public ItemReponse createItem(ItemRequest request) {
+    public ItemResponse createItem(ItemRequest request) {
         Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(() -> new CustomException(ErrorCode.INVALID_SHOP));
         Item item = request.toItem();
         item.setShop(shop);
@@ -48,19 +48,23 @@ public class ItemService {
             itemRepository.save(item);
         }
 
-        return ItemReponse.from(item);
+        return ItemResponse.from(item);
     }
 
     public ItemDetailResponse getItem(UUID itemId) {
         return ItemDetailResponse.from(itemRepository.findByItemId(itemId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_ITEM)));
     }
 
-    public Page<ItemReponse> getItemsByShop(UUID shopId, Pageable pageable) {
-        return itemRepository.findAllByShopId(shopId, pageable).map(ItemReponse::from);
+    public Page<ItemResponse> getItemsByShop(UUID shopId, Pageable pageable) { // owner 입장에서의 상품 조회
+        return itemRepository.findAllByShopId(shopId, pageable).map(ItemResponse::from);
+    }
+
+    public Page<ItemResponse> getItemsByShopWithoutHidden(UUID shopId, Pageable pageable) { // customer 입장에서의 상품 조회
+        return itemRepository.findAllByShopIdWithoutHidden(shopId, pageable).map(ItemResponse::from);
     }
 
     @Transactional
-    public ItemReponse updateItem(UUID itemId, ItemUpdateRequest request) {
+    public ItemResponse updateItem(UUID itemId, ItemUpdateRequest request) {
         Item item = itemRepository.findByItemId(itemId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_ITEM));
         item.updateItem(request);
 
@@ -73,7 +77,7 @@ public class ItemService {
             itemRepository.save(item);
         }
 
-        return ItemReponse.from(item);
+        return ItemResponse.from(item);
     }
 
     @Transactional
