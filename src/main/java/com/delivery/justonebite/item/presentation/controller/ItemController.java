@@ -26,9 +26,8 @@ public class ItemController {
 
     // require fix : 추후 role과 같은 이슈 해결 필요 -> @AuthenticationPrincipal UserDetails userDetails
     @PostMapping
-    public ResponseEntity<Void> createItem(@RequestBody @Valid ItemRequest request) {
-        itemService.createItem(request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<ItemReponse> createItem(@RequestBody @Valid ItemRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.createItem(request));
     }
 
     @GetMapping("/{item-id}")
@@ -37,29 +36,28 @@ public class ItemController {
     }
 
     @GetMapping("/shop/{shop-id}")
-    public ResponseEntity<Page<ItemReponse>> getItemsByShop(@PathVariable("shop-id") UUID shopId,
+    public ResponseEntity<Page<ItemReponse>> getItemsByShop(@PathVariable("shop-id") String shopId,
                                                             @RequestParam(name = "page", defaultValue = "0") int page,
                                                             @RequestParam(name = "size", defaultValue = "10") int size,
                                                             @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShop(shopId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShop(UUID.fromString(shopId), pageable));
     }
 
     @PutMapping("/{item-id}")
-    public ResponseEntity<Void> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
-        itemService.updateItem(itemId, request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<ItemReponse> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.updateItem(itemId, request));
     }
 
     @DeleteMapping("/{item-id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable("item-id") UUID itemId) {
-        itemService.deleteItem(itemId);
+    public ResponseEntity<Void> deleteItem(@PathVariable("item-id") String itemId) {
+        itemService.deleteItem(UUID.fromString(itemId));
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/{item-id}/hide")
-    public ResponseEntity<Void> toggleHidden(@PathVariable("item-id") UUID itemId) {
-        itemService.toggleHidden(itemId);
+    public ResponseEntity<Void> toggleHidden(@PathVariable("item-id") String itemId) {
+        itemService.toggleHidden(UUID.fromString(itemId));
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

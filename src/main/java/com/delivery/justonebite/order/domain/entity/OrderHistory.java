@@ -53,4 +53,5 @@ public class OrderHistory {
     public static OrderHistory create(Order order, OrderStatus status) {
         return new OrderHistory(order, status);
     }
+
 }
