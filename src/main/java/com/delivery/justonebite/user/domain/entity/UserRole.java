@@ -1,5 +1,7 @@
 package com.delivery.justonebite.user.domain.entity;
 
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +23,7 @@ public enum UserRole {
         return Arrays.stream(UserRole.values())
                 .filter(a -> a.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new CustomException(ErrorCode.ROLE_NOT_FOUND));
     }
 
     private static class Role {

@@ -2,9 +2,11 @@ package com.delivery.justonebite.item.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
 import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
+import com.delivery.justonebite.shop.domain.entity.Shop;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
@@ -18,12 +20,15 @@ import java.util.UUID;
 public class Item extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "item_id")
     private UUID itemId;
 
-    @Column(name = "shop_id", nullable = false)
-    private UUID shopId;
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    private Shop shop;
 
     @Column(nullable = false)
     private String name;
@@ -42,6 +47,10 @@ public class Item extends BaseEntity {
 
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
+
+    public void updateDescription(String aiResponse) {
+        this.description = aiResponse;
+    }
 
     public void updateItem(ItemUpdateRequest request) {
         this.name = request.name();

@@ -1,6 +1,8 @@
 package com.delivery.justonebite.user.application.service;
 
 import com.delivery.justonebite.global.common.jwt.JwtUtil;
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
@@ -19,7 +21,7 @@ public class AuthService {
 
     public SignupResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email already exists");
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         User user = request.toUser(passwordEncoder.encode(request.password()));
         userRepository.save(user);
