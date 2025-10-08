@@ -5,6 +5,9 @@ import com.delivery.justonebite.review.application.service.ReviewService;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
+import com.delivery.justonebite.review.presentation.dto.response.DeleteReviewResponse;
+import com.delivery.justonebite.review.presentation.dto.response.RestoreReviewResponse;
+
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -66,5 +69,19 @@ public class ReviewController {
         );
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
-  
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DeleteReviewResponse> softDelete(@PathVariable("id") UUID id,
+                                                           @AuthenticationPrincipal UserDetailsImpl principal) {
+        reviewService.softDelete(id, principal.getUserId(), principal.getUser().getUserRole());
+        return ResponseEntity.status(HttpStatus.OK).body(DeleteReviewResponse.ok(id));
+    }
+
+    @PostMapping("/{id}/restore")
+    public ResponseEntity<RestoreReviewResponse> restore(@PathVariable("id") UUID id,
+                                                         @AuthenticationPrincipal UserDetailsImpl principal) {
+        reviewService.restore(id, principal.getUserId(), principal.getUser().getUserRole());
+        return ResponseEntity.status(HttpStatus.OK).body(RestoreReviewResponse.ok(id));
+    }
+
 }
