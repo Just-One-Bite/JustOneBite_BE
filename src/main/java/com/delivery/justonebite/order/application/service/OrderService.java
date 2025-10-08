@@ -106,9 +106,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CustomerOrderResponse> getCustomerOrders(int page, int size, String sortBy) {
-        // TODO: USE ROLE이 CUSTOMER일 경우에만 조회 가능하도록 처리 필요
-//        UserRoleEnum role = user.getRole();
+    public Page<CustomerOrderResponse> getCustomerOrders(int page, int size, String sortBy, User user) {
+        authorizeCustomer(user);
 
         // 주문 목록은 기본적으로 내림차순으로 표시됨
         Sort.Direction dir = Direction.DESC;

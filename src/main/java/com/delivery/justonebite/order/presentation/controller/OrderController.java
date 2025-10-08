@@ -42,7 +42,7 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<Page<CustomerOrderResponse>> getCustomerOrders(
-//        @AuthenticationPrincipal User user,
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
         @RequestParam(name = "page", defaultValue = "1") int page,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy
@@ -50,7 +50,8 @@ public class OrderController {
         Page<CustomerOrderResponse> response = orderService.getCustomerOrders(
             page - 1,
             size,
-            sortBy
+            sortBy,
+            userDetails.getUser()
         );
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
