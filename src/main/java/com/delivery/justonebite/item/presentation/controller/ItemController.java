@@ -26,9 +26,8 @@ public class ItemController {
 
     // require fix : 추후 role과 같은 이슈 해결 필요 -> @AuthenticationPrincipal UserDetails userDetails
     @PostMapping
-    public ResponseEntity<Void> createItem(@RequestBody @Valid ItemRequest request) {
-        itemService.createItem(request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<ItemReponse> createItem(@RequestBody @Valid ItemRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.createItem(request));
     }
 
     @GetMapping("/{item-id}")
@@ -46,9 +45,8 @@ public class ItemController {
     }
 
     @PutMapping("/{item-id}")
-    public ResponseEntity<Void> updateItem(@PathVariable("item-id") String itemId, @RequestBody @Valid ItemUpdateRequest request) {
-        itemService.updateItem(UUID.fromString(itemId), request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<ItemReponse> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.updateItem(itemId, request));
     }
 
     @DeleteMapping("/{item-id}")
