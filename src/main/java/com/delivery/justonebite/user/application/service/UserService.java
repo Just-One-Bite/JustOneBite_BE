@@ -5,8 +5,12 @@ import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
+import com.delivery.justonebite.user.presentation.dto.request.UpdatePasswordRequest;
+import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileRequest;
 import com.delivery.justonebite.user.presentation.dto.response.GetProfileResponse;
+import com.delivery.justonebite.user.presentation.dto.response.UpdateProfileResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public GetProfileResponse findMyProfile(UserDetailsImpl userDetails) {
@@ -48,12 +53,12 @@ public class UserService {
 
     private User findProfile(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 
     private void varifyPassword(String password, User user) {
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
     }
 }
