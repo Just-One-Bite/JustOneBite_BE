@@ -35,7 +35,9 @@ public class ItemService {
 
     @Transactional
     public ItemResponse createItem(ItemRequest request) {
-        Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(() -> new CustomException(ErrorCode.INVALID_SHOP));
+        Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(
+            () -> new CustomException(ErrorCode.INVALID_SHOP)
+        );
         Item item = request.toItem();
         item.setShop(shop);
       
@@ -51,12 +53,20 @@ public class ItemService {
         return ItemResponse.from(item);
     }
 
-    public ItemDetailResponse getItem(UUID itemId) {
-        return ItemDetailResponse.from(itemRepository.findByItemId(itemId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_ITEM)));
+    public ItemDetailResponse getItemFromOwner(UUID itemId) {
+        return ItemDetailResponse.from(itemRepository.findByItemIdWithNativeQuery(itemId).orElseThrow(
+            () -> new CustomException(ErrorCode.INVALID_ITEM)
+        ));
+    }
+
+    public ItemDetailResponse getItemFromCustomer(UUID itemId) {
+        return ItemDetailResponse.from(itemRepository.findByItemId(itemId).orElseThrow(
+            () -> new CustomException(ErrorCode.INVALID_ITEM)
+        ));
     }
 
     public Page<ItemResponse> getItemsByShop(UUID shopId, Pageable pageable) { // owner 입장에서의 상품 조회
-        return itemRepository.findAllByShopId(shopId, pageable).map(ItemResponse::from);
+        return itemRepository.findAllByShopIdWithNativeQuery(shopId, pageable).map(ItemResponse::from);
     }
 
     public Page<ItemResponse> getItemsByShopWithoutHidden(UUID shopId, Pageable pageable) { // customer 입장에서의 상품 조회
@@ -65,7 +75,10 @@ public class ItemService {
 
     @Transactional
     public ItemResponse updateItem(UUID itemId, ItemUpdateRequest request) {
-        Item item = itemRepository.findByItemId(itemId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_ITEM));
+        Item item = itemRepository.findByItemId(itemId).orElseThrow(
+            () -> new CustomException(ErrorCode.INVALID_ITEM)
+        );
+
         item.updateItem(request);
 
         if (request.aiGenerated()) {
@@ -81,14 +94,26 @@ public class ItemService {
     }
 
     @Transactional
-    public void deleteItem(UUID itemId) {
+    public void softDelete(Long deleterId, UUID itemId) {
         Item item = itemRepository.findByItemId(itemId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_ITEM));
-        itemRepository.delete(item);
+        item.softDelete(deleterId);
+        itemRepository.save(item);
+    }
+
+    @Transactional
+    public void restoreItem(UUID itemId) {
+        Item item = itemRepository.findByItemIdWithNativeQuery(itemId).orElseThrow(
+            () -> new CustomException(ErrorCode.INVALID_ITEM)
+        );
+        item.restore();
+        itemRepository.save(item);
     }
 
     @Transactional
     public void toggleHidden(UUID itemId) {
-        Item item = itemRepository.findByItemId(itemId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_ITEM));
+        Item item = itemRepository.findByItemId(itemId).orElseThrow(
+            () -> new CustomException(ErrorCode.INVALID_ITEM)
+        );
         item.toggleIsHidden();
         itemRepository.save(item);
     }

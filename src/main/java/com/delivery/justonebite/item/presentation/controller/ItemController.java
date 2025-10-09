@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,22 +32,27 @@ public class ItemController {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.createItem(request));
     }
 
-    @GetMapping("/{item-id}")
-    public ResponseEntity<ItemDetailResponse> getItem(@PathVariable("item-id") UUID itemId) {
-        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem(itemId));
+    @GetMapping("/owner/{item-id}")
+    public ResponseEntity<ItemDetailResponse> getItemFromOwner(@PathVariable("item-id") UUID itemId) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemFromOwner(itemId));
     }
 
-    @GetMapping("/shop/owner/{shop-id}") // fix : 추후 권한에 따라서 다른 service를 쓰도록 할 것 같음
-    public ResponseEntity<Page<ItemResponse>> getItemsByShop(@PathVariable("shop-id") String shopId,
+    @GetMapping("/{item-id}")
+    public ResponseEntity<ItemDetailResponse> getItemFromCustomer(@PathVariable("item-id") UUID itemId) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemFromCustomer(itemId));
+    }
+
+    @GetMapping("/shop/owner/{shop-id}") // owner 용, fix : 추후 권한에 따라서 다른 service를 쓰도록 할 것 같음
+    public ResponseEntity<Page<ItemResponse>> getItemsByShopFromOwner(@PathVariable("shop-id") String shopId,
                                                              @RequestParam(name = "page", defaultValue = "0") int page,
                                                              @RequestParam(name = "size", defaultValue = "10") int size,
                                                              @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(changeSnakeCase(sortBy)));
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getItemsByShop(UUID.fromString(shopId), pageable));
     }
 
-    @GetMapping("/shop/{shop-id}")
-    public ResponseEntity<Page<ItemResponse>> getItemsByShopWithoutHidden(@PathVariable("shop-id") String shopId,
+    @GetMapping("/shop/{shop-id}") // customer 용
+    public ResponseEntity<Page<ItemResponse>> getItemsByShopFromCustomer(@PathVariable("shop-id") String shopId,
                                                                           @RequestParam(name = "page", defaultValue = "0") int page,
                                                                           @RequestParam(name = "size", defaultValue = "10") int size,
                                                                           @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy) {
@@ -59,8 +66,14 @@ public class ItemController {
     }
 
     @DeleteMapping("/{item-id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable("item-id") String itemId) {
-        itemService.deleteItem(UUID.fromString(itemId));
+    public ResponseEntity<Void> softDelete(@PathVariable("item-id") String itemId) {
+        itemService.softDelete(1L, UUID.fromString(itemId));
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/{item-id}/restore")
+    public ResponseEntity<Void> restoreItem(@PathVariable("item-id") String itemId) {
+        itemService.restoreItem(UUID.fromString(itemId));
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -68,5 +81,14 @@ public class ItemController {
     public ResponseEntity<Void> toggleHidden(@PathVariable("item-id") String itemId) {
         itemService.toggleHidden(UUID.fromString(itemId));
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    private String changeSnakeCase(String sortBy) {
+        Pattern pattern = Pattern.compile("([a-z])([A-Z])");
+        Matcher matcher = pattern.matcher(sortBy);
+
+        return matcher.replaceAll(matchResult ->
+            String.format("%s_%s", matchResult.group(1), matchResult.group(2))
+        );
     }
 }
