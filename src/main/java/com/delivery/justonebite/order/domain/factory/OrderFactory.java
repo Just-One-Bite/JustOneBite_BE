@@ -30,7 +30,7 @@ public class OrderFactory {
         String orderName = convertToOrderName(request.orderItems(), itemMap);
 
         // Order 엔티티 생성
-        Order order = Order.create(
+        return Order.create(
             user,
             shop,
             address,
@@ -40,8 +40,6 @@ public class OrderFactory {
             request.orderRequest(),
             request.deliveryRequest()
         );
-
-        return order;
     }
 
     // OrderItem 리스트 생성 및 여러 주문 아이템 한번에 저장하기 위해 (트랜잭션 최적화)

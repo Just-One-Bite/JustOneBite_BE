@@ -43,7 +43,7 @@ public enum ErrorCode {
     INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
     INVALID_USER_ROLE("유효하지 않은 회원 유형입니다.", HttpStatus.UNAUTHORIZED),
     INVALID_ORDER_STATUS("유효하지 않은 주문 상태입니다.", HttpStatus.UNAUTHORIZED),
-
+    TOTAL_PRICE_NOT_MATCH("전체 주문금액이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     ;
 
