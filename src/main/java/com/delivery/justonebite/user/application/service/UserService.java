@@ -23,9 +23,8 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public GetProfileResponse findMyProfile(UserDetailsImpl userDetails) {
-        User myProfile = userRepository.findById(userDetails.getUser().getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-        return GetProfileResponse.toDto(myProfile);
+        User foundUser = findUser(userDetails.getUserId());
+        return GetProfileResponse.toDto(foundUser);
     }
 
     @Transactional
@@ -33,7 +32,7 @@ public class UserService {
             UserDetailsImpl userDetails,
             UpdateProfileRequest request
     ) {
-        User foundUser = findProfile(userDetails.getUsername());
+        User foundUser = findUser(userDetails.getUserId());
         varifyPassword(request.password(), foundUser);
         foundUser.updateProfile(request);
         userRepository.save(foundUser);
@@ -42,7 +41,7 @@ public class UserService {
 
     @Transactional
     public void updatePassword(UserDetailsImpl userDetails, UpdatePasswordRequest request) {
-        User foundUser = findProfile(userDetails.getUsername());
+        User foundUser = findUser(userDetails.getUserId());
         varifyPassword(request.oldPassword(), foundUser);
         String encodedPassword = passwordEncoder.encode(request.newPassword());
         foundUser.updatePassword(encodedPassword);
@@ -51,8 +50,8 @@ public class UserService {
 
     // Todo: 회원 탈퇴
 
-    private User findProfile(String email) {
-        return userRepository.findByEmail(email)
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 
