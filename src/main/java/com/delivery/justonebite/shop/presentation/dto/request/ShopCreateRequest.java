@@ -5,16 +5,12 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import java.util.List;
-import java.util.UUID;
 
 @Builder
 public record ShopCreateRequest(
 
-        @NotNull(message = "가게 주인 ID는 필수입니다.")
-        Long owner,
-
         @NotBlank(message = "가게 이름은 필수 입력값입니다.")
-        @Size(max = 100, message = "가게 이름은 100자를 초과할 수 없습니다.")
+        @Size(max = 50, message = "가게 이름은 50자를 초과할 수 없습니다.")
         String name,
 
         @NotBlank(message = "사업자 등록번호는 필수 입력값입니다.")
@@ -41,7 +37,6 @@ public record ShopCreateRequest(
         @Size(max = 100, message = "영업시간은 최대 100자까지 입력 가능합니다.")
         String operatingHour,
 
-        @NotBlank(message = "가게 설명은 필수입니다.")
         @Size(max = 1000, message = "가게 설명은 1000자를 초과할 수 없습니다.")
         String description,
 
@@ -50,7 +45,7 @@ public record ShopCreateRequest(
 ) {
         public Shop toEntity(Long userId) {
                 return Shop.builder()
-                        .owner(this.owner)
+                        .ownerId(userId)
                         .name(this.name)
                         .registrationNumber(this.registrationNumber)
                         .province(this.province)
@@ -62,7 +57,6 @@ public record ShopCreateRequest(
                         .description(this.description)
                         .createdBy(userId)
                         .updatedBy(userId)
-                        // averageRating, createAcceptStatus, deleteAcceptStatus는 엔티티에서 기본값 처리됨
                         .build();
         }
 }
