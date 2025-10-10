@@ -3,16 +3,19 @@ package com.delivery.justonebite.order.presentation.controller;
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.order.application.service.OrderService;
 import com.delivery.justonebite.order.domain.entity.Order;
+import com.delivery.justonebite.order.presentation.dto.request.CancelOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
+import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -81,9 +84,11 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/{order-id}")
-    public ResponseEntity<Void> cancelOrder(@PathVariable(name = "order-id") UUID orderId,
+    @PatchMapping("/{order-id}")
+    public ResponseEntity<OrderCancelResponse> cancelOrder(@Valid @RequestBody CancelOrderRequest request,
+        @PathVariable(name = "order-id") UUID orderId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        orderService.cancelOrder(orderId, userDetails.getUser());
+        OrderCancelResponse response = orderService.cancelOrder(request, orderId, userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
