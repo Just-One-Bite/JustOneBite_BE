@@ -6,6 +6,7 @@ import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -57,8 +58,9 @@ public class OrderController {
     }
 
     @GetMapping("/{order-id}")
-    public ResponseEntity<OrderDetailsResponse> getOrderDetails(@PathVariable(name="order-id") UUID orderId) {
-        OrderDetailsResponse response = orderService.getOrderDetails(orderId);
+    public ResponseEntity<OrderDetailsResponse> getOrderDetails(@PathVariable(name="order-id") UUID orderId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        OrderDetailsResponse response = orderService.getOrderDetails(orderId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -68,5 +70,13 @@ public class OrderController {
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         orderService.updateOrderStatus(orderId, request, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/{order-id}/status")
+    public ResponseEntity<GetOrderStatusResponse> getOrderStatusHistories(@PathVariable(name = "order-id") UUID orderId,
+    @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        GetOrderStatusResponse response = orderService.getOrderStatusHistories(orderId,
+            userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
