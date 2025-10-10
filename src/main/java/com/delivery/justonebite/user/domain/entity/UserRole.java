@@ -32,4 +32,24 @@ public enum UserRole {
         public static final String MANAGER = "ROLE_MANAGER";
         public static final String MASTER = "ROLE_MASTER";
     }
+
+    public boolean isCustomer() {
+        return this.role.equals(Role.CUSTOMER);
+    }
+
+    public boolean isOwner() {
+        return this.role.equals(Role.OWNER);
+    }
+
+    public boolean isManager() {
+        return this.role.equals(Role.MANAGER);
+    }
+
+    public boolean isMaster() {
+        return this.role.equals(Role.MASTER);
+    }
+
+    public boolean isAdmin() {
+        return this.role.equals(Role.MANAGER) || this.role.equals(Role.MASTER);
+    }
 }

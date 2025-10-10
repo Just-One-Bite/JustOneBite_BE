@@ -43,6 +43,8 @@ public class OrderItem {
     private Integer count;
 
     public OrderItem(Order order, Item item, Integer count) {
+        // OrderItemId 객체를 생성하고 복합 키를 설정
+        this.id = new OrderItemId(order.getId(), item.getItemId());
         this.order = order;
         this.item = item;
         this.itemName = item.getName();

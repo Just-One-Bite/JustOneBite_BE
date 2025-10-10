@@ -6,15 +6,15 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record ItemReponse(
+public record ItemResponse(
     UUID itemId,
     String name,
     int price,
     String image,
     boolean isHidden
 ) {
-    public static ItemReponse from(Item item) {
-        return ItemReponse.builder()
+    public static ItemResponse from(Item item) {
+        return ItemResponse.builder()
             .itemId(item.getItemId())
             .name(item.getName())
             .price(item.getPrice())
