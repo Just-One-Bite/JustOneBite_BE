@@ -17,13 +17,13 @@ public record ShopCreateRequest(
         @Pattern(regexp = "^[0-9\\-]+$", message = "사업자 등록번호는 숫자와 하이픈만 허용합니다.")
         String registrationNumber,
 
-        @NotBlank(message = "도시 정보는 필수입니다.")
+        @NotBlank(message = "주소는 필수 입력값입니다.")
         String province,
 
-        @NotBlank(message = "도시 정보는 필수입니다.")
+        @NotBlank(message = "주소는 필수 입력값입니다.")
         String city,
 
-        @NotBlank(message = "도시 정보는 필수입니다.")
+        @NotBlank(message = "주소는 필수 입력값입니다.")
         String district,
 
         @NotBlank(message = "주소는 필수 입력값입니다.")
