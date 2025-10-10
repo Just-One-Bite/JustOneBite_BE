@@ -16,6 +16,9 @@ public interface ItemRepository extends SoftDeleteRepository<Item, UUID> {
 
     List<Item> findAllByItemIdIn(List<UUID> itemIds);
 
+    @Query("SELECT i FROM Item i WHERE i.itemId = :item_id and i.isHidden = false")
+    Optional<Item> findByItemIdWithoutHidden(@Param("item_id") UUID itemId);
+
     @Query("SELECT i FROM Item i WHERE i.shop.id = :shop_id and i.isHidden = false")
     Page<Item> findAllByShopIdWithoutHidden(@Param("shop_id") UUID shopId, Pageable pageable);
 
