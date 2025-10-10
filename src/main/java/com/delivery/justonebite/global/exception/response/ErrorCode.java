@@ -35,6 +35,8 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND("리뷰를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     REVIEW_ALREADY_EXISTS("해당 주문에는 이미 리뷰가 존재합니다.", HttpStatus.CONFLICT),
     ORDER_NOT_COMPLETED("주문이 아직 완료상태가 아닙니다.", HttpStatus.FORBIDDEN),
+    ALREADY_DELETED_REVIEW("이미 삭제된 리뷰입니다.", HttpStatus.CONFLICT),
+    ALREADY_ACTIVE_REVIEW("이미 삭제되지 않은 리뷰입니다.", HttpStatus.CONFLICT),
 
 
     //주문
