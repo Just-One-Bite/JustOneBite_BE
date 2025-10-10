@@ -77,21 +77,30 @@ public class ReviewService {
     }
 
     @Transactional
-    public void softDelete(UUID reviewId, Long currentUserId, UserRole currentUserRole) {
+    public void softDelete(UUID reviewId, Long currentUserId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
-        assertDeletable(review, currentUserId, currentUserRole);
+        assertDeletable(review, currentUserId);
+
+        if (review.isDeleted()) {
+            throw new CustomException(ErrorCode.ALREADY_DELETED_REVIEW);
+        }
         review.softDelete(currentUserId);
     }
 
     @Transactional
-    public void restore(UUID reviewId, Long currentUserId, UserRole currentUserRole) {
-        assertAdmin(currentUserRole);
-
+    public void restore(UUID reviewId, Long currentUserId) {
         Review review = reviewRepository.findByIdIncludingDeleted(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
+        if (!review.getUserId().equals(currentUserId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        if (!review.isDeleted()) {
+            throw new CustomException(ErrorCode.ALREADY_ACTIVE_REVIEW);
+        }
         review.restore();
     }
 
@@ -154,10 +163,8 @@ public class ReviewService {
         if (req.rating() != null)  review.updateRating(req.rating());
     }
 
-    private void assertDeletable(Review review, Long userId, UserRole role) {
-        boolean isAuthor = review.getUserId().equals(userId);
-        boolean isAdmin = (role == UserRole.MANAGER || role == UserRole.MASTER);
-        if (!isAuthor && !isAdmin) {
+    private void assertDeletable(Review review, Long userId) {
+        if (!review.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }

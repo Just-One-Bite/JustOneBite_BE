@@ -6,6 +6,7 @@ import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -31,19 +32,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class OrderController {
 
-    // TODO: 스프링 시큐리티 처리 완료되면 모든 엔드포인트에 @AuthenticationPrincipal 추가
-
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Void> createOrder(@Valid  @RequestBody CreateOrderRequest request) {
-        orderService.createOrder(request);
+    public ResponseEntity<Void> createOrder(@Valid  @RequestBody CreateOrderRequest request,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        orderService.createOrder(request, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping
     public ResponseEntity<Page<CustomerOrderResponse>> getCustomerOrders(
-//        @AuthenticationPrincipal User user,
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
         @RequestParam(name = "page", defaultValue = "1") int page,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy
@@ -51,14 +51,16 @@ public class OrderController {
         Page<CustomerOrderResponse> response = orderService.getCustomerOrders(
             page - 1,
             size,
-            sortBy
+            sortBy,
+            userDetails.getUser()
         );
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/{order-id}")
-    public ResponseEntity<OrderDetailsResponse> getOrderDetails(@PathVariable(name="order-id") UUID orderId) {
-        OrderDetailsResponse response = orderService.getOrderDetails(orderId);
+    public ResponseEntity<OrderDetailsResponse> getOrderDetails(@PathVariable(name="order-id") UUID orderId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        OrderDetailsResponse response = orderService.getOrderDetails(orderId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -68,5 +70,13 @@ public class OrderController {
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         orderService.updateOrderStatus(orderId, request, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/{order-id}/status")
+    public ResponseEntity<GetOrderStatusResponse> getOrderStatusHistories(@PathVariable(name = "order-id") UUID orderId,
+    @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        GetOrderStatusResponse response = orderService.getOrderStatusHistories(orderId,
+            userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

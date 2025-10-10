@@ -2,6 +2,9 @@ package com.delivery.justonebite.shop.domain.repository;
 
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.projection.ShopAvgProjection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -44,4 +47,8 @@ UPDATE h_shop s
 """, nativeQuery = true)
     int bulkResetAvgForZeroReview();
 
+
+    Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String name, String description, Pageable pageable
+    );
 }

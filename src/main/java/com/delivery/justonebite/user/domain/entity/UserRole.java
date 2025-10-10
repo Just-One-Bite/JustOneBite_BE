@@ -1,5 +1,7 @@
 package com.delivery.justonebite.user.domain.entity;
 
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +23,7 @@ public enum UserRole {
         return Arrays.stream(UserRole.values())
                 .filter(a -> a.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new CustomException(ErrorCode.ROLE_NOT_FOUND));
     }
 
     private static class Role {
@@ -29,5 +31,25 @@ public enum UserRole {
         public static final String OWNER = "ROLE_OWNER";
         public static final String MANAGER = "ROLE_MANAGER";
         public static final String MASTER = "ROLE_MASTER";
+    }
+
+    public boolean isCustomer() {
+        return this.role.equals(Role.CUSTOMER);
+    }
+
+    public boolean isOwner() {
+        return this.role.equals(Role.OWNER);
+    }
+
+    public boolean isManager() {
+        return this.role.equals(Role.MANAGER);
+    }
+
+    public boolean isMaster() {
+        return this.role.equals(Role.MASTER);
+    }
+
+    public boolean isAdmin() {
+        return this.role.equals(Role.MANAGER) || this.role.equals(Role.MASTER);
     }
 }
