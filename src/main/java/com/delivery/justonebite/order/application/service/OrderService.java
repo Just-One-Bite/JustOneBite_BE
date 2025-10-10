@@ -154,6 +154,8 @@ public class OrderService {
     @Transactional(readOnly = true)
     public GetOrderStatusResponse getOrderStatusHistories(UUID orderId, User user) {
         authorizeUser(user);
+        if (!isAuthorizedUserRole(orderId, user)) { throw new CustomException(ErrorCode.FORBIDDEN_ACCESS); }
+
         // 주문에 해당하는 주문 상태 기록 내역을 최신 순으로 정렬
         List<OrderHistory> histories = orderHistoryRepository.findAllByOrder_IdOrderByCreatedAtDesc(orderId);
 
@@ -193,5 +195,20 @@ public class OrderService {
         // DB에 User로 존재하는지 유효성 검사
         userRepository.findById(user.getId())
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private boolean isAuthorizedUserRole(UUID orderId, User user) {
+        // 유저 접근 권한 확인
+        UserRole userRole = user.getUserRole();
+        if (userRole.isAdmin()) {
+            return true;
+        }
+        if (userRole.isCustomer()) {
+            return orderRepository.existsByIdAndCustomer_Id(orderId, user.getId());
+        }
+        if (userRole.isOwner()) {
+            return orderRepository.existsByIdAndShop_Owner(orderId, user.getId());
+        }
+        return false;
     }
 }
