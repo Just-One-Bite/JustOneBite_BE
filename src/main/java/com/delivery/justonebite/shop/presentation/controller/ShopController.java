@@ -1,15 +1,21 @@
 package com.delivery.justonebite.shop.presentation.controller;
 
+import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.shop.application.service.ShopService;
 import com.delivery.justonebite.shop.application.service.ShopQueryService;
+import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.presentation.dto.request.ShopCreateRequest;
 import com.delivery.justonebite.shop.presentation.dto.request.ShopSearchRequest;
+import com.delivery.justonebite.shop.presentation.dto.request.ShopUpdateRequest;
 import com.delivery.justonebite.shop.presentation.dto.response.ShopCreateResponse;
 import com.delivery.justonebite.shop.presentation.dto.response.ShopDetailResponse;
 import com.delivery.justonebite.shop.presentation.dto.response.ShopSearchResponse;
+import com.delivery.justonebite.shop.presentation.dto.response.ShopUpdateResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -54,5 +60,17 @@ public class ShopController {
     ) {
         ShopDetailResponse response = shopQueryService.getShopDetail(shopId);
         return ResponseEntity.ok(response);
+    }
+
+
+    //가게 정보 수정 -> 필드 일부 수정 가능(주소 등은 x)
+    @PutMapping("/{store-id}")
+    public ResponseEntity<Shop> updateShop(
+            @PathVariable("store-id") UUID storeId,
+            @Valid @RequestBody ShopUpdateRequest request
+    ) {
+        Long userId = 1L; // TODO: Security 적용
+        Shop updated = shopService.updateShop(request, storeId, userId);
+        return ResponseEntity.ok(updated);
     }
 }
