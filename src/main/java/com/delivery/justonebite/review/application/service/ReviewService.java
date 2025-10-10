@@ -95,7 +95,6 @@ public class ReviewService {
         review.restore();
     }
 
-
     private void validateCanWrite(UserRole role) {
         boolean canWrite = role == UserRole.CUSTOMER || role == UserRole.MANAGER || role == UserRole.MASTER;
         if (!canWrite) throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
