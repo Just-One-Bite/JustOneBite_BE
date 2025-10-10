@@ -26,6 +26,10 @@ import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -217,5 +221,39 @@ public class OrderService {
             return orderRepository.existsByIdAndShop_Owner(orderId, user.getId());
         }
         return false;
+    }
+
+    @Transactional
+    public void cancelOrder(UUID orderId, User user) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        OrderHistory currentHistory = orderHistoryRepository.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        validateCancellationTime(order.getCreatedAt());
+
+        if (currentHistory.getStatus() != OrderStatus.PENDING) {
+            throw new CustomException(ErrorCode.ORDER_STATUS_CANCEL_NOT_ALLOWED);
+        }
+
+        orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
+    }
+
+    private void validateCancellationTime(LocalDateTime createdAt) {
+        // TODO: Order 객체에 currentStatus 필드 추가하여 취소 행위를 위임하도록 수정해야 함
+        // 시간 검증, 상태 검증, 상태 변경이 모두 Order 객체 내부에서 일어나도록
+
+        // 취소 제한 시간 (5분)
+        final long CANCEL_LIMIT_SECONDS = 5 * 60;
+        LocalDateTime now = LocalDateTime.now();
+
+        // 현재 시간과 주문 생성 시간의 차이 계산
+        long elapsed = ChronoUnit.SECONDS.between(createdAt, now);
+
+        // 5분이 지났다면
+        if (elapsed >= CANCEL_LIMIT_SECONDS) {
+            throw new CustomException(ErrorCode.ORDER_CANCEL_TIME_EXCEEDED);
+        }
     }
 }

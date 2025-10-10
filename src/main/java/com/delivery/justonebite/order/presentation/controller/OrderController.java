@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,5 +79,11 @@ public class OrderController {
         GetOrderStatusResponse response = orderService.getOrderStatusHistories(orderId,
             userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/{order-id}")
+    public ResponseEntity<Void> cancelOrder(@PathVariable(name = "order-id") UUID orderId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        orderService.cancelOrder(orderId, userDetails.getUser());
     }
 }

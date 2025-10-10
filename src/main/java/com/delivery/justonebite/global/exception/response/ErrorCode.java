@@ -51,6 +51,8 @@ public enum ErrorCode {
     INVALID_USER_ROLE("유효하지 않은 회원 유형입니다.", HttpStatus.UNAUTHORIZED),
     INVALID_ORDER_STATUS("유효하지 않은 주문 상태입니다.", HttpStatus.UNAUTHORIZED),
     TOTAL_PRICE_NOT_MATCH("전체 주문금액이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    ORDER_STATUS_CANCEL_NOT_ALLOWED("취소할 수 없는 주문 상태입니다.", HttpStatus.UNAUTHORIZED),
+    ORDER_CANCEL_TIME_EXCEEDED("주문 시점으로부터 5분이 경과하여 취소할 수 없습니다.", HttpStatus.UNAUTHORIZED),
 
     ;
 
