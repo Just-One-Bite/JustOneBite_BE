@@ -2,6 +2,7 @@ package com.delivery.justonebite.order.presentation.dto.request;
 
 import com.delivery.justonebite.order.presentation.dto.OrderItemDto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +26,10 @@ public record CreateOrderRequest(
     @NotEmpty(message = "주문 항목은 최소 1개 이상이어야 합니다")
     @Size(max = 100, message = "주문 항목은 최대 100개까지만 주문 가능합니다")
     @Valid
-    List<OrderItemDto> orderItems
+    List<OrderItemDto> orderItems,
+    @NotNull(message = "총 금액은 필수입니다.")
+    @Min(value = 1000, message = "총 금액은 1000원 이상이어야 합니다.")
+    Integer totalPrice
 ) {
 
 }

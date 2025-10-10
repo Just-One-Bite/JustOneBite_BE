@@ -61,9 +61,11 @@ public class Order extends BaseEntity {
     @Column(name = "delivery_request", length = 100)
     private String deliveryRequest;
 
-    private Order(String address, String userPhoneNumber,
+    private Order(User user, Shop shop, String address, String userPhoneNumber,
         String orderName, Integer totalPrice,
         String orderRequest, String deliveryRequest) {
+        this.customer = user;
+        this.shop = shop;
         this.address = address;
         this.userPhoneNumber = userPhoneNumber;
         this.orderName = orderName;
@@ -73,7 +75,10 @@ public class Order extends BaseEntity {
     }
 
     // TODO: User, Shop 객체 넘기기
-    public static Order create(String address,
+    public static Order create(
+        User user,
+        Shop shop,
+        String address,
         String userPhoneNumber,
         String orderName,
         Integer totalPrice,
@@ -81,6 +86,8 @@ public class Order extends BaseEntity {
         String deliveryRequest
     ) {
         return new Order(
+            user,
+            shop,
             address,
             userPhoneNumber,
             orderName,
