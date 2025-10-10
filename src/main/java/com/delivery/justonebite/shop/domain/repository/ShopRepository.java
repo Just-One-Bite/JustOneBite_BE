@@ -27,7 +27,7 @@ UPDATE h_shop s
          WHERE r.deleted_at IS NULL
       GROUP BY r.shop_id
   ) sub
- WHERE s.id = sub.shop_id
+ WHERE s.shop_id = sub.shop_id
 """, nativeQuery = true)
     int bulkUpdateAllAvg();
 
@@ -39,7 +39,7 @@ UPDATE h_shop s
         SELECT 1
           FROM h_review r
          WHERE r.deleted_at IS NULL
-           AND r.shop_id = s.id
+           AND r.shop_id = s.shop_id
   )
 """, nativeQuery = true)
     int bulkResetAvgForZeroReview();
