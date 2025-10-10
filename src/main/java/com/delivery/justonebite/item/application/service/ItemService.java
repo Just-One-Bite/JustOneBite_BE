@@ -143,11 +143,7 @@ public class ItemService {
             () -> new CustomException(ErrorCode.INVALID_ITEM)
         );
 
-        Shop shop = shopRepository.findById(item.getShop().getId()).orElseThrow(
-            () -> new CustomException(ErrorCode.INVALID_SHOP)
-        );
-
-        isOwner(shop, userId, role);
+        isOwner(item.getShop(), userId, role);
 
         return item;
     }
