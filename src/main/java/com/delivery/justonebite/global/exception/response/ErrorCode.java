@@ -16,6 +16,12 @@ public enum ErrorCode {
     EXPIRED_TOKEN("토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     FORBIDDEN_ACCESS("접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
+    // 유저
+    ROLE_NOT_FOUND("권한을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    EMAIL_ALREADY_EXISTS("사용중인 이메일입니다.", HttpStatus.CONFLICT),
+    NOT_FOUND_USER("유저를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_PASSWORD("이메일이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+
     // 공통
     INVALID_INPUT_DATA("잘못된 입력 데이터입니다.", HttpStatus.BAD_REQUEST),
     DATA_INTEGRITY_VIOLATION("데이터 무결성에 위배되었습니다.", HttpStatus.CONFLICT),
@@ -44,7 +50,7 @@ public enum ErrorCode {
     INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
     INVALID_USER_ROLE("유효하지 않은 회원 유형입니다.", HttpStatus.UNAUTHORIZED),
     INVALID_ORDER_STATUS("유효하지 않은 주문 상태입니다.", HttpStatus.UNAUTHORIZED),
-
+    TOTAL_PRICE_NOT_MATCH("전체 주문금액이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     ;
 

@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @SuperBuilder
@@ -16,6 +18,7 @@ public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false)
@@ -30,7 +33,11 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(
+            name = "role",
+            nullable = false
+    )
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 

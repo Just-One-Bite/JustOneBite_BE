@@ -8,6 +8,7 @@ import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.entity.OrderHistory;
 import com.delivery.justonebite.order.domain.entity.OrderItem;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
+import com.delivery.justonebite.order.domain.factory.OrderFactory;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
 import com.delivery.justonebite.order.domain.repository.OrderItemRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
@@ -21,6 +22,10 @@ import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResp
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
+import com.delivery.justonebite.shop.domain.entity.Shop;
+import com.delivery.justonebite.shop.domain.repository.ShopRepository;
+import com.delivery.justonebite.user.domain.entity.User;
+import com.delivery.justonebite.user.domain.entity.UserRole;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,68 +45,48 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final ShopRepository shopRepository;
     private final OrderHistoryRepository orderHistoryRepository;
     private final ItemRepository itemRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
+    private final OrderFactory orderFactory;
 
-    // TODO: User, Shop 정보 받아와야 함 (추후 더미 데이터 수정 필요)
     @Transactional
-    public void createOrder(CreateOrderRequest request) {
+    public void createOrder(CreateOrderRequest request, User user) {
+        // 유저 Role 권한 검증
+        authorizeCustomer(user);
 
         // TODO: Address 테이블에서 Id로 주소값 가져와야 함 (없으면 예외처리)
         String address = "서울시 종로구 사직로 155-2";
 
-        List<UUID> itemIds = request.orderItems().stream()
-            .map(OrderItemDto::itemId)
-            .toList();
-
-        List<Item> foundItems = itemRepository.findAllByItemIdIn(itemIds);
-
-        // 상품 개수 검증
-        if (foundItems.size() != itemIds.size()) {
-            // 요청된 상품의 itemId 중 유효하지 않은게 있을 경우
-            throw new CustomException(ErrorCode.INVALID_ITEM);
-        }
+        List<Item> validatedItems = getValidatedItems(request);
 
         // Map으로 변환하여 조회 속도 개선
-        Map<UUID, Item> itemMap = foundItems.stream()
+        Map<UUID, Item> itemMap = validatedItems.stream()
             .collect(Collectors.toMap(Item::getItemId, item -> item));
 
-        // Item별 가격과 count 곱하여 총 금액 계산
-        Integer totalPrice = request.orderItems().stream()
-            .mapToInt(dto -> itemMap.get(dto.itemId()).getPrice() * dto.count())
-            .sum();
+        Shop shop = shopRepository.findById(request.shopId())
+            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        // 추후에 created_by에 userId 추가
-        Order order = Order.create(address,
-                request.userPhoneNumber(),
-                convertToOrderName(request, itemMap),
-                totalPrice,
-                request.orderRequest(),
-                request.deliveryRequest()
-            );
+        // OrderFactory에서 총 금액 계산 및 Order 객체 생성, OrderItem 객체 생성 모두 처리
+        // TODO: 추후에 created_by에 userId 추가 (AUDITOR AWARE)
+        Order order = orderFactory.create(user, shop, address, request, itemMap);
+        // 총 금액 검증
+        validateOrderTotalPrice(request, order);
 
         orderRepository.save(order);
 
-        // OrderItem 생성 및 여러 주문 아이템 한번에 저장 (트랜잭션 최적화)s
-        List<OrderItem> orderItems = request.orderItems().stream()
-            .map(dto -> {
-                Item item = itemMap.get(dto.itemId());
-                return OrderItem.create(order, item, dto.count());
-            })
-            .toList();
-
-        orderItemRepository.saveAll(orderItems);
+        // OrderFactory가 생성한 OrderItem 리스트를 가져와 저장
+        orderItemRepository.saveAll(orderFactory.getOrderItems(order, request.orderItems(), itemMap));
 
         // 주문 내역 저장
         orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.PENDING));
     }
 
     @Transactional(readOnly = true)
-    public Page<CustomerOrderResponse> getCustomerOrders(int page, int size, String sortBy) {
-        // TODO: USE ROLE이 CUSTOMER일 경우에만 조회 가능하도록 처리 필요
-//        UserRoleEnum role = user.getRole();
+    public Page<CustomerOrderResponse> getCustomerOrders(int page, int size, String sortBy, User user) {
+        authorizeCustomer(user);
 
         // 주문 목록은 기본적으로 내림차순으로 표시됨
         Sort.Direction dir = Direction.DESC;
@@ -133,10 +118,10 @@ public class OrderService {
             .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
-    private String convertToOrderName(CreateOrderRequest request, Map<UUID, Item> itemMap) {
-        String firstItem = itemMap.get(request.orderItems().getFirst().itemId()).getName();
-        int count = request.orderItems().size() - 1;
-        return count > 0 ? firstItem + " 외 " + count + "건" : firstItem;
+    private void authorizeCustomer(User user) {
+        if (!(user.getUserRole().equals(UserRole.CUSTOMER))) {
+            throw new CustomException(ErrorCode.INVALID_MEMBER);
+        }
     }
 
     @Transactional
@@ -173,12 +158,34 @@ public class OrderService {
         }
     }
 
+    private List<Item> getValidatedItems(CreateOrderRequest request) {
+        // 유효한 아이템 객체들만 반환
+        List<UUID> itemIds = request.orderItems().stream()
+            .map(OrderItemDto::itemId)
+            .toList();
+
+        List<Item> foundItems = itemRepository.findAllByItemIdIn(itemIds);
+
+        // 상품 개수 검증
+        if (foundItems.size() != itemIds.size()) {
+            // 요청된 상품의 itemId 중 유효하지 않은게 있을 경우
+            throw new CustomException(ErrorCode.INVALID_ITEM);
+        }
+        return foundItems;
+    }
+
+    private void validateOrderTotalPrice(CreateOrderRequest request, Order order) {
+        // 클라이언트에서 받아온 총 금액과 실제 상품 금액을 다 합한 총 금액이 같은지 검증
+        if (!request.totalPrice().equals(order.getTotalPrice())) {
+            throw new CustomException(ErrorCode.TOTAL_PRICE_NOT_MATCH);
+        }
+    }
+
     private Order getValidatedOrder(UUID orderId, String newStatus) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        // TODO: 추후에 develop 머지 된걸로 수정 예정 (추후, Order Status 필드 Order 엔티티로 이동)
-        OrderHistory orderHistory = orderHistoryRepository.findByOrderId(orderId)
+        OrderHistory orderHistory = orderHistoryRepository.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
             .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         OrderStatus currentStatus = OrderStatus.of(orderHistory.getStatus().name());
