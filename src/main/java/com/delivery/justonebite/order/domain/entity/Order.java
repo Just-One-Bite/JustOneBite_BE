@@ -17,6 +17,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -86,7 +88,33 @@ public class Order extends BaseEntity {
 
     public void updateCurrentStatus(OrderStatus nextStatus) {
         getValidatedOrder(nextStatus);
+        if (nextStatus == OrderStatus.ORDER_CANCELLED) {
+            validateCancellationStatus(nextStatus);
+            validateCancellationTime(nextStatus);
+        }
         this.currentStatus = nextStatus;
+    }
+
+    public void validateCancellationStatus(OrderStatus status) {
+        // 현재 상태가 PENDING 상태여야만 주문 취소 가능
+        if (this.currentStatus != OrderStatus.PENDING) {
+            throw new CustomException(ErrorCode.ORDER_STATUS_CANCEL_NOT_ALLOWED);
+        }
+    }
+
+    private void validateCancellationTime(OrderStatus status) {
+        // 취소 가능한 시간 검증
+        // 취소 제한 시간 (5분)
+        final long CANCEL_LIMIT_SECONDS = 5 * 60;
+        LocalDateTime now = LocalDateTime.now();
+
+        // 현재 시간과 주문 생성 시간의 차이 계산
+        long elapsed = ChronoUnit.SECONDS.between(this.getCreatedAt(), now);
+
+        // 5분이 지났다면
+        if (elapsed >= CANCEL_LIMIT_SECONDS) {
+            throw new CustomException(ErrorCode.ORDER_CANCEL_TIME_EXCEEDED);
+        }
     }
 
     private void getValidatedOrder(OrderStatus status) {

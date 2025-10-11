@@ -29,7 +29,7 @@ public enum OrderStatus {
     }
 
     static {
-        PENDING.nextValidStatuses = EnumSet.of(ORDER_ACCEPTED, ORDER_REJECTED);
+        PENDING.nextValidStatuses = EnumSet.of(ORDER_ACCEPTED, ORDER_REJECTED, ORDER_CANCELLED);
         ORDER_ACCEPTED.nextValidStatuses = EnumSet.of(PREPARING, ORDER_REJECTED);
         // ORDER_REJECTED, ORDER_CANCELLED, COMPLETED는 다음 상태가 없으므로 비어있는 Set 할당
         ORDER_REJECTED.nextValidStatuses = Collections.emptySet();

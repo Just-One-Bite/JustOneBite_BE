@@ -156,44 +156,21 @@ public class OrderService {
 
         authorizeCustomer(user);
 
-        // TODO: 두 번의 DB 조회를 수행함. 추후 ORDER 엔티티에 currentStatus 필드 추가하면서 수정될 예정
         Order order = orderRepository.findByIdWithCustomer(orderId)
             .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        OrderHistory currentHistory = orderHistoryRepository.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
         // 현재 로그인한 사용자가 주문자와 동일하지 않을 경우
-        if (!user.equals(order.getCustomer())) {
+        if (!user.getId().equals(order.getCustomer().getId())) {
             throw new CustomException(ErrorCode.ORDER_USER_NOT_MATCH);
         }
 
-        validateCancellationTime(order.getCreatedAt());
+        // Order의 currentStatus 업데이트 (모든 비즈니스 규칙 위임)
+        order.updateCurrentStatus(OrderStatus.ORDER_CANCELLED);
 
-        if (currentHistory.getStatus() != OrderStatus.PENDING) {
-            throw new CustomException(ErrorCode.ORDER_STATUS_CANCEL_NOT_ALLOWED);
-        }
-
+        // 트랜잭션 종료 시점 변경 내용 반영 (상태 동기화)
         orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
 
-        return OrderCancelResponse.toDto(order, OrderStatus.ORDER_CANCELLED, LocalDateTime.now());
-    }
-
-    private void validateCancellationTime(LocalDateTime createdAt) {
-        // TODO: Order 객체에 currentStatus 필드 추가하여 취소 행위를 위임하도록 수정해야 함
-        // 시간 검증, 상태 검증, 상태 변경이 모두 Order 객체 내부에서 일어나도록
-
-        // 취소 제한 시간 (5분)
-        final long CANCEL_LIMIT_SECONDS = 5 * 60;
-        LocalDateTime now = LocalDateTime.now();
-
-        // 현재 시간과 주문 생성 시간의 차이 계산
-        long elapsed = ChronoUnit.SECONDS.between(createdAt, now);
-
-        // 5분이 지났다면
-        if (elapsed >= CANCEL_LIMIT_SECONDS) {
-            throw new CustomException(ErrorCode.ORDER_CANCEL_TIME_EXCEEDED);
-        }
+        return OrderCancelResponse.toDto(order, LocalDateTime.now());
     }
 
     private void authorizeOwner(User user) {
