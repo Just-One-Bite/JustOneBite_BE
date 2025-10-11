@@ -101,4 +101,11 @@ public class Shop extends BaseEntity {
         if (operatingHour != null) this.operatingHour = operatingHour;
         if (description != null) this.description = description;
     }
+
+    //가게 삭제
+    public void requestDelete() {
+        this.deleteAcceptStatus = RejectStatus.PENDING;
+        this.deleteRejectReason = null;  // 관리자가 승인 후 작성됨
+    }
+
 }
