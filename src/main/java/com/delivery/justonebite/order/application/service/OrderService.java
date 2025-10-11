@@ -6,29 +6,28 @@ import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.entity.OrderHistory;
-import com.delivery.justonebite.order.domain.entity.OrderItem;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.domain.factory.OrderFactory;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
 import com.delivery.justonebite.order.domain.repository.OrderItemRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.order.presentation.dto.OrderItemDto;
+import com.delivery.justonebite.order.presentation.dto.request.CancelOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
-import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse.OrderHistoryDto;
+import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
-import com.delivery.justonebite.user.domain.entity.User;
-import com.delivery.justonebite.user.domain.entity.UserRole;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -149,6 +148,55 @@ public class OrderService {
         }
 
         return GetOrderStatusResponse.toDto(orderId, histories);
+    }
+
+    @Transactional
+    public OrderCancelResponse cancelOrder(CancelOrderRequest request, UUID orderId, User user) {
+        // 취소 요청만 허용
+        if (!OrderStatus.ORDER_CANCELLED.name().equals(request.status())) {
+            throw new CustomException(ErrorCode.INVALID_CANCEL_STATUS_VALUE);
+        }
+
+        authorizeCustomer(user);
+
+        // TODO: 두 번의 DB 조회를 수행함. 추후 ORDER 엔티티에 currentStatus 필드 추가하면서 수정될 예정
+        Order order = orderRepository.findByIdWithCustomer(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        OrderHistory currentHistory = orderHistoryRepository.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 현재 로그인한 사용자가 주문자와 동일하지 않을 경우
+        if (!user.equals(order.getCustomer())) {
+            throw new CustomException(ErrorCode.ORDER_USER_NOT_MATCH);
+        }
+
+        validateCancellationTime(order.getCreatedAt());
+
+        if (currentHistory.getStatus() != OrderStatus.PENDING) {
+            throw new CustomException(ErrorCode.ORDER_STATUS_CANCEL_NOT_ALLOWED);
+        }
+
+        orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
+
+        return OrderCancelResponse.toDto(order, OrderStatus.ORDER_CANCELLED, LocalDateTime.now());
+    }
+
+    private void validateCancellationTime(LocalDateTime createdAt) {
+        // TODO: Order 객체에 currentStatus 필드 추가하여 취소 행위를 위임하도록 수정해야 함
+        // 시간 검증, 상태 검증, 상태 변경이 모두 Order 객체 내부에서 일어나도록
+
+        // 취소 제한 시간 (5분)
+        final long CANCEL_LIMIT_SECONDS = 5 * 60;
+        LocalDateTime now = LocalDateTime.now();
+
+        // 현재 시간과 주문 생성 시간의 차이 계산
+        long elapsed = ChronoUnit.SECONDS.between(createdAt, now);
+
+        // 5분이 지났다면
+        if (elapsed >= CANCEL_LIMIT_SECONDS) {
+            throw new CustomException(ErrorCode.ORDER_CANCEL_TIME_EXCEEDED);
+        }
     }
 
     private void authorizeOwner(User user) {
