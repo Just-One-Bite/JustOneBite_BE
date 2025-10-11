@@ -19,8 +19,10 @@ import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderRes
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
+import com.delivery.justonebite.user.domain.entity.Address;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import com.delivery.justonebite.user.domain.repository.AddressRepository;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
@@ -49,6 +51,7 @@ public class OrderService {
     private final ItemRepository itemRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
     private final OrderFactory orderFactory;
 
     @Transactional
@@ -56,8 +59,10 @@ public class OrderService {
         // 유저 Role 권한 검증
         authorizeCustomer(user);
 
-        // TODO: Address 테이블에서 Id로 주소값 가져와야 함 (없으면 예외처리)
+        // TODO: DUMMY 데이터 (고객 Address 등록 기능 개발 이후 삭제 예정)
         String address = "서울시 종로구 사직로 155-2";
+//        Address address = addressRepository.findByUser_IdAndIsDefaultTrue(user.getId())
+//            .orElseThrow(() -> new CustomException(ErrorCode.ADDRESS_NOT_FOUND));
 
         List<Item> validatedItems = getValidatedItems(request);
 
@@ -69,7 +74,6 @@ public class OrderService {
             .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
 
         // OrderFactory에서 총 금액 계산 및 Order 객체 생성, OrderItem 객체 생성 모두 처리
-        // TODO: 추후에 created_by에 userId 추가 (AUDITOR AWARE)
         Order order = orderFactory.create(user, shop, address, request, itemMap);
         // 총 금액 검증
         validateOrderTotalPrice(request, order);
@@ -262,7 +266,7 @@ public class OrderService {
             return orderRepository.existsByIdAndCustomer_Id(orderId, user.getId());
         }
         if (userRole.isOwner()) {
-            return orderRepository.existsByIdAndShop_Owner(orderId, user.getId());
+            return orderRepository.existsByIdAndShop_OwnerId(orderId, user.getId());
         }
         return false;
     }

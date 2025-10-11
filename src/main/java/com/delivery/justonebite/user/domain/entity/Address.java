@@ -1,6 +1,5 @@
 package com.delivery.justonebite.user.domain.entity;
 
-import com.delivery.justonebite.shop.domain.entity.Shop;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,7 +26,7 @@ public class Address {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User customer;
+    private User user;
 
     @Column(name = "province", nullable = false, length = 20)
     private String province;

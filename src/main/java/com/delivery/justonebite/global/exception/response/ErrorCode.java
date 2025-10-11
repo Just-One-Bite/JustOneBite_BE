@@ -21,6 +21,7 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS("사용중인 이메일입니다.", HttpStatus.CONFLICT),
     NOT_FOUND_USER("유저를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_PASSWORD("이메일이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    ADDRESS_NOT_FOUND("주소를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // 공통
     INVALID_INPUT_DATA("잘못된 입력 데이터입니다.", HttpStatus.BAD_REQUEST),
