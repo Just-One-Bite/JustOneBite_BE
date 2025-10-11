@@ -6,11 +6,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
 
-// TODO: 빠진 부분 데이터 추가 필요
 @Builder
 public record CustomerOrderResponse(
     UUID orderId,
-//    String shopName,
+    String shopName,
     String shopImage,
     String orderStatus,
     LocalDateTime orderedDate,
@@ -18,11 +17,11 @@ public record CustomerOrderResponse(
     String itemName
 ) {
 
-    public static CustomerOrderResponse toDto(Order order, OrderStatus status) {
+    public static CustomerOrderResponse toDto(Order order) {
         return CustomerOrderResponse.builder()
             .orderId(order.getId())
-//            .shopName(order.getShop().getShopName())
-            .orderStatus(status.name())
+            .shopName(order.getShop().getName())
+            .orderStatus(order.getCurrentStatus().name())
             .orderedDate(order.getCreatedAt())
             .totalFee(order.getTotalPrice())
             .itemName(order.getOrderName())

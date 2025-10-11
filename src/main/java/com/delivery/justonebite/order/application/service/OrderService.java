@@ -93,7 +93,8 @@ public class OrderService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return orderRepository.findAll(pageable)
-            .map(order -> CustomerOrderResponse.toDto(order, getOrderStatus(order)));
+            .map(CustomerOrderResponse::toDto);
+//            .map(order -> CustomerOrderResponse.toDto(order, getOrderStatus(order)));
     }
 
     @Transactional(readOnly = true)
@@ -111,11 +112,11 @@ public class OrderService {
         return OrderDetailsResponse.toDto(order, orderItems);
     }
 
-    private OrderStatus getOrderStatus(Order order) {
-        return orderHistoryRepository.findByOrderId(order.getId())
-            .map(OrderHistory::getStatus)
-            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
-    }
+//    private OrderStatus getOrderStatus(Order order) {
+//        return orderHistoryRepository.findByOrderId(order.getId())
+//            .map(OrderHistory::getStatus)
+//            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+//    }
 
     private void authorizeCustomer(User user) {
         if (!(user.getUserRole().equals(UserRole.CUSTOMER))) {

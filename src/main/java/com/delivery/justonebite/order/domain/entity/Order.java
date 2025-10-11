@@ -1,10 +1,13 @@
 package com.delivery.justonebite.order.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -52,6 +55,10 @@ public class Order extends BaseEntity {
     // 단품 개수
     @Column(name = "total_price", nullable = false)
     private Integer totalPrice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "current_status", nullable = false, length = 30)
+    private OrderStatus currentStatus;
 
     // 주문 요청사항
     @Column(name = "order_request", length = 100)
