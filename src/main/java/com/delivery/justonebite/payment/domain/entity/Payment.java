@@ -1,36 +1,35 @@
 package com.delivery.justonebite.payment.domain.entity;
 
+import com.delivery.justonebite.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.UUID;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "payments")
-public class Payment {
+@Table(name = "h_payment")
+public class Payment extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "payment_id")
-    private Long paymentId;
+    private UUID paymentId;
     
     @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    private UUID orderId;
     
     @Column(name = "order_name", nullable = false)
     private String orderName;
     
     @Column(name = "shop_id", nullable = false)
-    private Long shopId;
+    private UUID shopId;
     
-    @Column(name = "method", nullable = false)
+    @Column(name = "method")
     private String method;
     
     @Column(name = "total_amount", nullable = false)
@@ -38,11 +37,5 @@ public class Payment {
     
     @Column(name = "status", nullable = false)
     private String status;
-    
-    @Column(name = "requested_at", nullable = false)
-    private Timestamp requestedAt;
-    
-    @Column(name = "approved_at")
-    private LocalDateTime approvedAt;
 
 }
