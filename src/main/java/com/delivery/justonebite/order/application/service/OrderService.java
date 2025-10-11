@@ -6,6 +6,7 @@ import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.entity.OrderHistory;
+import com.delivery.justonebite.order.domain.entity.OrderItem;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.domain.factory.OrderFactory;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
@@ -94,7 +95,6 @@ public class OrderService {
 
         return orderRepository.findAll(pageable)
             .map(CustomerOrderResponse::toDto);
-//            .map(order -> CustomerOrderResponse.toDto(order, getOrderStatus(order)));
     }
 
     @Transactional(readOnly = true)
@@ -111,12 +111,6 @@ public class OrderService {
             .toList();
         return OrderDetailsResponse.toDto(order, orderItems);
     }
-
-//    private OrderStatus getOrderStatus(Order order) {
-//        return orderHistoryRepository.findByOrderId(order.getId())
-//            .map(OrderHistory::getStatus)
-//            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
-//    }
 
     private void authorizeCustomer(User user) {
         if (!(user.getUserRole().equals(UserRole.CUSTOMER))) {
@@ -248,7 +242,7 @@ public class OrderService {
             return orderRepository.existsByIdAndCustomer_Id(orderId, user.getId());
         }
         if (userRole.isOwner()) {
-            return orderRepository.existsByIdAndShop_Owner(orderId, user.getId());
+            return orderRepository.existsByIdAndShop_OwnerId(orderId, user.getId());
         }
         return false;
     }

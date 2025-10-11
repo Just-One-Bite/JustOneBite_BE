@@ -11,6 +11,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     boolean existsByIdAndCustomer_Id(UUID id, Long userId);
 
+<<<<<<< HEAD
     boolean existsByIdAndShop_Owner(UUID id, Long userId);
 
     /**
@@ -19,6 +20,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
      */
     @Query("SELECT o FROM Order o JOIN FETCH o.customer WHERE o.id = :orderId")
     Optional<Order> findByIdWithCustomer(@Param("orderId") UUID orderId);
+=======
+    boolean existsByIdAndShop_OwnerId(UUID id, Long userId);
+>>>>>>> d18e459 (fix: small fix (주석 정리))
 }
 /**
  * // OrderRepository.java
