@@ -129,8 +129,10 @@ public class OrderService {
         // 유저 Role 권한 검증 : 가게 주인(OWNER)만 가능
         authorizeOwner(user);
 
-        // 주문 엔티티 조회 및 검증 (상태 전이 유효성 검사 포함)
-        Order order = this.getValidatedOrder(orderId, request.newStatus());
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        order.updateCurrentStatus(OrderStatus.of(request.newStatus()));
 
         // OrderHistory 엔티티에는 새로운 상태와 함께 생성 시간이 기록되어야 함 (점이력)
         orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.of(request.newStatus())));
@@ -228,23 +230,6 @@ public class OrderService {
         if (!request.totalPrice().equals(order.getTotalPrice())) {
             throw new CustomException(ErrorCode.TOTAL_PRICE_NOT_MATCH);
         }
-    }
-
-    private Order getValidatedOrder(UUID orderId, String newStatus) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
-        OrderHistory orderHistory = orderHistoryRepository.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
-        OrderStatus currentStatus = OrderStatus.of(orderHistory.getStatus().name());
-        OrderStatus nextStatus = OrderStatus.of(newStatus);
-
-        // 주문 상태 전이 유효성 검증
-        if (!currentStatus.isValidNextStatus(nextStatus)) {
-            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
-        }
-        return order;
     }
 
     private void authorizeUser(User user) {

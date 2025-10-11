@@ -1,6 +1,8 @@
 package com.delivery.justonebite.order.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.user.domain.entity.User;
@@ -69,19 +71,31 @@ public class Order extends BaseEntity {
     private String deliveryRequest;
 
     private Order(User user, Shop shop, String address, String userPhoneNumber,
-        String orderName, Integer totalPrice,
+        String orderName, Integer totalPrice, OrderStatus currentStatus,
         String orderRequest, String deliveryRequest) {
         this.customer = user;
         this.shop = shop;
         this.address = address;
         this.userPhoneNumber = userPhoneNumber;
         this.orderName = orderName;
+        this.currentStatus = currentStatus;
         this.totalPrice = totalPrice;
         this.orderRequest = orderRequest;
         this.deliveryRequest = deliveryRequest;
     }
 
-    // TODO: User, Shop 객체 넘기기
+    public void updateCurrentStatus(OrderStatus nextStatus) {
+        getValidatedOrder(nextStatus);
+        this.currentStatus = nextStatus;
+    }
+
+    private void getValidatedOrder(OrderStatus status) {
+        // 주문 상태 전이 유효성 검증
+        if (!this.currentStatus.isValidNextStatus(status)) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+    }
+
     public static Order create(
         User user,
         Shop shop,
@@ -89,6 +103,7 @@ public class Order extends BaseEntity {
         String userPhoneNumber,
         String orderName,
         Integer totalPrice,
+        OrderStatus currentStatus,
         String orderRequest,
         String deliveryRequest
     ) {
@@ -99,6 +114,7 @@ public class Order extends BaseEntity {
             userPhoneNumber,
             orderName,
             totalPrice,
+            currentStatus,
             orderRequest,
             deliveryRequest
         );
