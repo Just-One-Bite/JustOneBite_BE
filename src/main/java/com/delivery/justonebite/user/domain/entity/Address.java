@@ -41,9 +41,27 @@ public class Address {
     private String address;
 
     @Column(name = "is_default", nullable = false)
-    private boolean isDefault = false; // 대표 주소 여부
+    private boolean isDefault; // 대표 주소 여부
 
     public void updateIsDefault(boolean isDefault) {
         this.isDefault = isDefault;
+    }
+
+    private Address(User user, String province, String city, String district, String address, boolean isDefault) {
+        this.user = user;
+        this.province = province;
+        this.city = city;
+        this.district = district;
+        this.address = address;
+        this.isDefault = isDefault;
+    }
+
+    public static Address create(User user,
+                            String province,
+                            String city,
+                            String district,
+                            String address,
+                            boolean isDefault) {
+        return new Address(user, province, city, district, address, false);
     }
 }
