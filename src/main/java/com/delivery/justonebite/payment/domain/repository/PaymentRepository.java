@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+import java.util.Optional;
+
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
+    Optional<Payment> findByOrderId(UUID orderId);
 }
