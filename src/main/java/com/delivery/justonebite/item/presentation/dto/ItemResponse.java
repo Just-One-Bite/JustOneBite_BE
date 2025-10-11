@@ -10,8 +10,7 @@ public record ItemResponse(
     UUID itemId,
     String name,
     int price,
-    String image,
-    boolean isHidden
+    String image
 ) {
     public static ItemResponse from(Item item) {
         return ItemResponse.builder()
@@ -19,7 +18,6 @@ public record ItemResponse(
             .name(item.getName())
             .price(item.getPrice())
             .image(item.getImage())
-            .isHidden(item.isHidden())
             .build();
     }
 }

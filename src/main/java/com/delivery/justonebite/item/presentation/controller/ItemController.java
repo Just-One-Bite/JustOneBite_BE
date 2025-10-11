@@ -2,10 +2,7 @@ package com.delivery.justonebite.item.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.item.application.service.ItemService;
-import com.delivery.justonebite.item.presentation.dto.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemRequest;
-import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
+import com.delivery.justonebite.item.presentation.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,8 +36,8 @@ public class ItemController {
 
     // 숨김 및 삭제 상품 포함 단건 Read
     @GetMapping("/owner/{item-id}")
-    public ResponseEntity<ItemDetailResponse> getItemFromOwner(@PathVariable("item-id") UUID itemId,
-                                                               @AuthenticationPrincipal UserDetailsImpl user) {
+    public ResponseEntity<ItemOwnerDetailResponse> getItemFromOwner(@PathVariable("item-id") UUID itemId,
+                                                                    @AuthenticationPrincipal UserDetailsImpl user) {
         return ResponseEntity.status(HttpStatus.OK).body(
             itemService.getItemFromOwner(user.getUserId(), user.getUserRole(), itemId)
         );

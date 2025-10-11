@@ -7,10 +7,7 @@ import com.delivery.justonebite.ai_history.domain.repository.AiRequestHistoryRep
 import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.item.infrastructure.api.gemini.client.GeminiClient;
-import com.delivery.justonebite.item.presentation.dto.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemRequest;
-import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
+import com.delivery.justonebite.item.presentation.dto.*;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
@@ -54,10 +51,10 @@ public class ItemService {
     }
 
     // 숨김 및 삭제 상품 포함 단건 Read
-    public ItemDetailResponse getItemFromOwner(Long userId, UserRole role, UUID itemId) {
+    public ItemOwnerDetailResponse getItemFromOwner(Long userId, UserRole role, UUID itemId) {
         Item item = checkValidRequestWithItem(userId, role, itemId);
 
-        return ItemDetailResponse.from(item);
+        return ItemOwnerDetailResponse.from(item);
     }
 
     // 숨김 및 삭제 상품 제외 단건 Read
