@@ -166,7 +166,7 @@ public class ItemService {
     }
 
     private void isOwner(Shop shop, Long userId, UserRole role) {
-        if (role.equals(UserRole.MANAGER) || role.equals(UserRole.MASTER) || shop.getOwner().equals(userId)) {
+        if (role.equals(UserRole.MANAGER) || role.equals(UserRole.MASTER) || shop.getOwnerId().equals(userId)) {
             return;
         }
         throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
