@@ -4,8 +4,10 @@ import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.payment.domain.entity.Payment;
 import com.delivery.justonebite.payment.domain.repository.PaymentRepository;
-import com.delivery.justonebite.payment.presentation.dto.PaymentRequest;
-import com.delivery.justonebite.payment.presentation.dto.PaymentResponse;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentFailResponse;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +33,7 @@ public class PaymentService {
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
-    // TODO: USER, ORDER 연결
+    // TODO: USER, ORDER 연결 (회원만 주문요청을 날릴 수 있게)
     @Transactional
     public PaymentResponse requestPayment(PaymentRequest request) {
         boolean isValid = validatePayment(request);
@@ -46,27 +48,16 @@ public class PaymentService {
                 .build();
         paymentRepository.save(payment);
 
+        // TODO: 결제 실패 로그 저장, 주문 취소 처리 등
         if (!isValid) {
             log.warn("❌ 결제 요청 검증 실패: {}", request);
-//            return "Fail";
-//            return PaymentResponse.fail(request.getOrderId(), "http://localhost:8080/payments/fail?orderId=" + request.getOrderId());
+            payment.updateStatus("FAIL");
+            return new PaymentFailResponse(request.getOrderId(), "PAY_PROCESS_CANCELED","사용자에 의해 결제가 취소되었습니다.");
         }
 
         log.info("✅ 결제 요청 검증 성공");
         payment.updateStatus("SUCCESS");
-        return PaymentResponse.success(request.getOrderId(), paymentKey, request.getAmount());
-    }
-
-    // 결제 성공 처리
-    public void handlePaymentSuccess(PaymentRequest request) {
-        log.info("✅ [결제 성공 처리 완료] ");
-        // TODO: DB 상태 변경 (예: 주문 상태를 "PAID"로)
-    }
-
-    // 결제 실패 처리
-    public void handlePaymentFail(String orderId) {
-        log.warn("❌ [결제 실패 처리] 주문 ID: {}", orderId);
-        // TODO: 결제 실패 로그 저장, 주문 취소 처리 등
+        return new PaymentSuccessResponse(request.getOrderId(), paymentKey, request.getAmount());
     }
 
     // 결제 유효 검증

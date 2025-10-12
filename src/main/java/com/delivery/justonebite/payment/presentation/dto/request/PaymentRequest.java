@@ -1,4 +1,4 @@
-package com.delivery.justonebite.payment.presentation.dto;
+package com.delivery.justonebite.payment.presentation.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
