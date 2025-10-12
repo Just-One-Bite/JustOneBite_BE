@@ -11,7 +11,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     boolean existsByIdAndCustomer_Id(UUID id, Long userId);
 
-    boolean existsByIdAndShop_Owner(UUID id, Long userId);
+    boolean existsByIdAndShop_OwnerId(UUID id, Long userId);
 
     /**
      * JOIN FETCH o.customer : INNER JOIN h_user u ON o.user_id = u.user_id
