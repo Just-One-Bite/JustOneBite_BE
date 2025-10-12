@@ -18,14 +18,9 @@ public class AiRequestHistoryService {
 
     private final AiRequestHistoryRepository aiRequestHistoryRepository;
 
-    public AiRequestHistoryResponse getHistory(Long userId, UUID id) {
+    public AiRequestHistoryResponse getHistory(UUID id) {
         AiRequestHistory history = aiRequestHistoryRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
-
-        if (!history.getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-
         return AiRequestHistoryResponse.from(history);
     }
 

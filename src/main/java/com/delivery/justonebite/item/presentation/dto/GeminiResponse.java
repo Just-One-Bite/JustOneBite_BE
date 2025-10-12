@@ -1,4 +1,4 @@
-package com.delivery.justonebite.item.infrastructure.api.gemini.dto;
+package com.delivery.justonebite.item.presentation.dto;
 
 import java.util.List;
 
