@@ -3,6 +3,7 @@ package com.delivery.justonebite.payment.presentation.controller;
 import com.delivery.justonebite.payment.application.service.TossPaymentService;
 import com.delivery.justonebite.payment.domain.entity.Payment;
 import com.delivery.justonebite.payment.application.service.PaymentService;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentHistoryResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
@@ -23,7 +24,7 @@ public class PaymentController {
     private final TossPaymentService tossPaymentService;
 
     @GetMapping("/{paymentId}")
-    public ResponseEntity<PaymentHistoryResponse> getPaymentById(@PathVariable UUID paymentId) {
+    public ResponseEntity<PaymentHistoryResponse> getPaymentById(@PathVariable String paymentId) {
         Payment payment = paymentService.getPaymentById(paymentId);
         return ResponseEntity.status(HttpStatus.OK).body(PaymentHistoryResponse.from(payment));
     }
@@ -41,9 +42,15 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    // 결제 승인 요청 (Toss API 테스트)
     @PostMapping("/confirm")
-    public String confirmPayment(@RequestBody TossPaymentConfirmRequest request) {
-        return tossPaymentService.confirmPayment(request);
+    public ResponseEntity<Object> confirmPayment(@RequestBody PaymentConfirmRequest request) {
+        Object response = paymentService.confirmPayment(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    // 결제 승인 요청 (Toss API 테스트)
+//    @PostMapping("/confirm")
+//    public String confirmPayment(@RequestBody TossPaymentConfirmRequest request) {
+//        return tossPaymentService.confirmPayment(request);
+//    }
 }

@@ -16,7 +16,7 @@ public class PaymentSuccessResponse implements PaymentResponse{
 
     public PaymentSuccessResponse (UUID orderId, String paymentId, Integer amount) {
         this.redirectUrl = "http://localhost:8080/payments/success?paymentType=NORMAL&orderId=" + orderId +
-                "&paymentKey=" + paymentId + "&amount=" + amount;
+                "&paymentId=" + paymentId + "&amount=" + amount;
         this.orderId = orderId;
         this.paymentId = paymentId;
         this.amount = amount;

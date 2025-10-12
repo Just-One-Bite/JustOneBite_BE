@@ -1,9 +1,6 @@
 package com.delivery.justonebite.payment.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -28,9 +25,6 @@ public class Transaction {
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
-
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
@@ -40,4 +34,15 @@ public class Transaction {
     @CreatedDate
     @Column(name = "transaction_at", updatable = false, nullable = false)
     private LocalDateTime transactionAt;
+
+    public static Transaction of(Payment payment, String transactionKey) {
+        return Transaction.builder()
+                .paymentId(payment.getPaymentId())
+                .transactionId(transactionKey)
+                .orderId(payment.getOrderId())
+                .amount(payment.getBalanceAmount())
+                .status(payment.getStatus())
+                .transactionAt(LocalDateTime.now())
+                .build();
+    }
 }

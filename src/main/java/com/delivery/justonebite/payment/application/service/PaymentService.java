@@ -3,8 +3,13 @@ package com.delivery.justonebite.payment.application.service;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.payment.domain.entity.Payment;
+import com.delivery.justonebite.payment.domain.entity.PaymentStatus;
+import com.delivery.justonebite.payment.domain.entity.Transaction;
 import com.delivery.justonebite.payment.domain.repository.PaymentRepository;
+import com.delivery.justonebite.payment.domain.repository.TransactionRepository;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentConfirmResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentFailResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
@@ -14,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -22,8 +28,9 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final TransactionRepository transactionRepository;
 
-    public Payment getPaymentById(UUID paymentId) {
+    public Payment getPaymentById(String paymentId) {
         return paymentRepository.findById(paymentId)
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
@@ -33,22 +40,17 @@ public class PaymentService {
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
-    // TODO: USER, ORDER 연결 (회원만 주문요청을 날릴 수 있게)
+    // TODO: ORDER 연결
     @Transactional
     public PaymentResponse requestPayment(PaymentRequest request) {
         boolean isValid = validatePayment(request);
 
         String paymentKey = generateRandomString();
-        Payment payment = Payment.builder()
-                .paymentId(paymentKey)
-                .orderId(request.getOrderId())
-                .orderName(request.getOrderName())
-                .amount(request.getAmount())
-                .status("PENDING")
-                .build();
+        Payment payment = Payment.createPayment(paymentKey, request.getOrderId(), request.getOrderName(), request.getAmount());
+
         paymentRepository.save(payment);
 
-        // TODO: 결제 실패 로그 저장, 주문 취소 처리 등
+        // TODO: 결제 실패 로그, 주문 취소 처리 등
         if (!isValid) {
             log.warn("❌ 결제 요청 검증 실패: {}", request);
             payment.updateStatus("FAIL");
@@ -59,6 +61,41 @@ public class PaymentService {
         payment.updateStatus("SUCCESS");
         return new PaymentSuccessResponse(request.getOrderId(), paymentKey, request.getAmount());
     }
+
+    /*
+        결제 승인 (서버)
+     */
+    @Transactional
+    public Object confirmPayment(PaymentConfirmRequest request) {
+        Payment payment = paymentRepository.findByPaymentId(request.getPaymentId())
+                .orElseThrow(() -> new IllegalArgumentException("결제 요청 내역을 찾을 수 없습니다.")); //TODO: 오류 처리
+
+        try {
+            // 금액 검증
+            if (!payment.getTotalAmount().equals(request.getAmount())) {
+                throw new IllegalArgumentException("결제 금액이 일치하지 않습니다."); //TODO: 오류 처리
+            }
+
+            String transactionKey = generateRandomString();
+
+            payment.updateStatus(PaymentStatus.DONE.name());
+            payment.updateApprovedAt(LocalDateTime.now());
+            payment.updateLastTransactionId(transactionKey);
+            paymentRepository.save(payment);
+
+            Transaction transaction = Transaction.of(payment, transactionKey);
+            transactionRepository.save(transaction);
+
+            return PaymentConfirmResponse.from(payment);
+
+        } catch (Exception e) {
+            payment.updateStatus(PaymentStatus.ABORTED.name());
+            paymentRepository.save(payment);
+            throw new RuntimeException("결제 승인 실패: " + e.getMessage()); //TODO: 실패 방식 변경
+        }
+
+    }
+
 
     // 결제 유효 검증
     // TODO: 상황별 오류 코드 출력
@@ -79,7 +116,4 @@ public class PaymentService {
         }
         return sb.toString();
     }
-
-
-
 }
