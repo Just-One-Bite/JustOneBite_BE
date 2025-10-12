@@ -6,6 +6,7 @@ import com.delivery.justonebite.payment.domain.entity.Payment;
 import com.delivery.justonebite.payment.domain.repository.PaymentRepository;
 import com.delivery.justonebite.payment.presentation.dto.PaymentRequest;
 import com.delivery.justonebite.payment.presentation.dto.PaymentResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,33 +32,34 @@ public class PaymentService {
     }
 
     // TODO: USER, ORDER 연결
-    public String requestPayment(PaymentRequest request) {
-        log.info("[결제 요청 시작] orderId={}, amount={}", request.getOrderId(), request.getAmount());
-
+    @Transactional
+    public PaymentResponse requestPayment(PaymentRequest request) {
         boolean isValid = validatePayment(request);
+
+        String paymentKey = generateRandomString();
+        Payment payment = Payment.builder()
+                .paymentId(paymentKey)
+                .orderId(request.getOrderId())
+                .orderName(request.getOrderName())
+                .amount(request.getAmount())
+                .status("PENDING")
+                .build();
+        paymentRepository.save(payment);
+
         if (!isValid) {
             log.warn("❌ 결제 요청 검증 실패: {}", request);
-            return "Fail";
+//            return "Fail";
 //            return PaymentResponse.fail(request.getOrderId(), "http://localhost:8080/payments/fail?orderId=" + request.getOrderId());
         }
 
         log.info("✅ 결제 요청 검증 성공");
-        String paymentId = generateRandomString();
-        Payment payment = Payment.builder()
-            .paymentId(paymentId)
-            .orderId(request.getOrderId())
-            .orderName(request.getOrderName())
-            .totalAmount(request.getAmount())
-            .status("PENDING")
-            .build();
-        System.out.println("payment = " + payment);
-        return "http://localhost:8080/payments/success?paymentType=NORMAL&orderId=" + request.getOrderId()
-                + "&paymentKey=" + paymentId + "&amount="+ request.getAmount();
+        payment.updateStatus("SUCCESS");
+        return PaymentResponse.success(request.getOrderId(), paymentKey, request.getAmount());
     }
 
     // 결제 성공 처리
-    public void handlePaymentSuccess(String orderId) {
-        log.info("✅ [결제 성공 처리 완료] 주문 ID: {}", orderId);
+    public void handlePaymentSuccess(PaymentRequest request) {
+        log.info("✅ [결제 성공 처리 완료] ");
         // TODO: DB 상태 변경 (예: 주문 상태를 "PAID"로)
     }
 
