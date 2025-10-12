@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
@@ -17,13 +18,13 @@ import java.util.UUID;
 @SuperBuilder
 @NoArgsConstructor
 @Table(name = "h_item")
+@SQLRestriction("deleted_at is NULL")
 public class Item extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "item_id")
     private UUID itemId;
-
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,5 +63,13 @@ public class Item extends BaseEntity {
 
     public void toggleIsHidden() {
         this.isHidden = !this.isHidden;
+    }
+
+    public void softDelete(Long deleterId) {
+        super.markDeleted(deleterId);
+    }
+
+    public void restore() {
+        super.restoreDeletion();
     }
 }
