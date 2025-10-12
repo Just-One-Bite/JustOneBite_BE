@@ -10,6 +10,12 @@ import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderRes
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Order API", description = "주문 생성/조회/취소/상태관리 등을 담당합니다.")
 @RestController
 @RequestMapping("/v1/orders")
 @RequiredArgsConstructor
@@ -38,6 +45,19 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @Operation(
+        summary = "주문 생성 요청",
+        description = "사용자(CUSTOMER)가 주문을 요청합니다. 해당 API 요청 권한은 CUSTOMER만 가능합니다.",
+//        parameters = {
+//            @Parameter(name = "order-id", description = "조회할 주문의 고유 ID", required = true)
+//        }
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "주문 성공"
+            )
+        }
+    )
     @PostMapping
     public ResponseEntity<Void> createOrder(@Valid  @RequestBody CreateOrderRequest request,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
