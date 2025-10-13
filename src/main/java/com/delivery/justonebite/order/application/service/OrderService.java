@@ -6,6 +6,7 @@ import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.entity.OrderHistory;
+import com.delivery.justonebite.order.domain.entity.OrderItem;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.domain.factory.OrderFactory;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
@@ -93,7 +94,7 @@ public class OrderService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return orderRepository.findAll(pageable)
-            .map(order -> CustomerOrderResponse.toDto(order, getOrderStatus(order)));
+            .map(CustomerOrderResponse::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -111,12 +112,6 @@ public class OrderService {
         return OrderDetailsResponse.toDto(order, orderItems);
     }
 
-    private OrderStatus getOrderStatus(Order order) {
-        return orderHistoryRepository.findByOrderId(order.getId())
-            .map(OrderHistory::getStatus)
-            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
-    }
-
     private void authorizeCustomer(User user) {
         if (!(user.getUserRole().equals(UserRole.CUSTOMER))) {
             throw new CustomException(ErrorCode.INVALID_MEMBER);
@@ -128,8 +123,10 @@ public class OrderService {
         // 유저 Role 권한 검증 : 가게 주인(OWNER)만 가능
         authorizeOwner(user);
 
-        // 주문 엔티티 조회 및 검증 (상태 전이 유효성 검사 포함)
-        Order order = this.getValidatedOrder(orderId, request.newStatus());
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        order.updateCurrentStatus(OrderStatus.of(request.newStatus()));
 
         // OrderHistory 엔티티에는 새로운 상태와 함께 생성 시간이 기록되어야 함 (점이력)
         orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.of(request.newStatus())));
@@ -159,44 +156,21 @@ public class OrderService {
 
         authorizeCustomer(user);
 
-        // TODO: 두 번의 DB 조회를 수행함. 추후 ORDER 엔티티에 currentStatus 필드 추가하면서 수정될 예정
         Order order = orderRepository.findByIdWithCustomer(orderId)
             .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        OrderHistory currentHistory = orderHistoryRepository.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
         // 현재 로그인한 사용자가 주문자와 동일하지 않을 경우
-        if (!user.equals(order.getCustomer())) {
+        if (!user.getId().equals(order.getCustomer().getId())) {
             throw new CustomException(ErrorCode.ORDER_USER_NOT_MATCH);
         }
 
-        validateCancellationTime(order.getCreatedAt());
+        // Order의 currentStatus 업데이트 (모든 비즈니스 규칙 위임)
+        order.updateCurrentStatus(OrderStatus.ORDER_CANCELLED);
 
-        if (currentHistory.getStatus() != OrderStatus.PENDING) {
-            throw new CustomException(ErrorCode.ORDER_STATUS_CANCEL_NOT_ALLOWED);
-        }
-
+        // 트랜잭션 종료 시점 변경 내용 반영 (상태 동기화)
         orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
 
-        return OrderCancelResponse.toDto(order, OrderStatus.ORDER_CANCELLED, LocalDateTime.now());
-    }
-
-    private void validateCancellationTime(LocalDateTime createdAt) {
-        // TODO: Order 객체에 currentStatus 필드 추가하여 취소 행위를 위임하도록 수정해야 함
-        // 시간 검증, 상태 검증, 상태 변경이 모두 Order 객체 내부에서 일어나도록
-
-        // 취소 제한 시간 (5분)
-        final long CANCEL_LIMIT_SECONDS = 5 * 60;
-        LocalDateTime now = LocalDateTime.now();
-
-        // 현재 시간과 주문 생성 시간의 차이 계산
-        long elapsed = ChronoUnit.SECONDS.between(createdAt, now);
-
-        // 5분이 지났다면
-        if (elapsed >= CANCEL_LIMIT_SECONDS) {
-            throw new CustomException(ErrorCode.ORDER_CANCEL_TIME_EXCEEDED);
-        }
+        return OrderCancelResponse.toDto(order, LocalDateTime.now());
     }
 
     private void authorizeOwner(User user) {
@@ -227,23 +201,6 @@ public class OrderService {
         if (!request.totalPrice().equals(order.getTotalPrice())) {
             throw new CustomException(ErrorCode.TOTAL_PRICE_NOT_MATCH);
         }
-    }
-
-    private Order getValidatedOrder(UUID orderId, String newStatus) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
-        OrderHistory orderHistory = orderHistoryRepository.findTopByOrder_IdOrderByCreatedAtDesc(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
-        OrderStatus currentStatus = OrderStatus.of(orderHistory.getStatus().name());
-        OrderStatus nextStatus = OrderStatus.of(newStatus);
-
-        // 주문 상태 전이 유효성 검증
-        if (!currentStatus.isValidNextStatus(nextStatus)) {
-            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
-        }
-        return order;
     }
 
     private void authorizeUser(User user) {
