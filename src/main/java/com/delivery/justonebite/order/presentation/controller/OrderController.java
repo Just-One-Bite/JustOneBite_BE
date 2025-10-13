@@ -60,6 +60,9 @@ public class OrderController {
     @Operation(
         summary = "주문 생성 요청 API",
         description = "사용자(CUSTOMER)가 주문을 요청합니다. 해당 API 요청 권한은 CUSTOMER만 가능합니다.",
+//        parameters = {
+//            @Parameter(name = "order-id", description = "조회할 주문의 고유 ID", required = true)
+//        }
         security = @SecurityRequirement(name = "Authorization"),
         responses = {
             @ApiResponse(responseCode = "201", description = "주문 생성에 성공하였습니다."),
@@ -77,6 +80,22 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @Operation(
+        summary = "주문 목록 요청 API",
+        description = "사용자(CUSTOMER)가 주문 목록을 페이지 단위로 요청합니다. 해당 API 요청 권한은 CUSTOMER만 가능합니다.",
+        security = @SecurityRequirement(name = "Authorization"),
+        parameters = {
+            @Parameter(name = "page", description = "조회할 목록의 페이지 번호", required = true),
+            @Parameter(name = "size", description = "페이지 당 조회 개수", required = true),
+            @Parameter(name = "sort-by", description = "주문 생성 시점 기준 정렬", required = true),
+        },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "주문 목록 조회에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (ROLE_CUSTOMER 아님)", content = @Content(mediaType = "application/json"))
+        }
+    )
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping
     public ResponseEntity<Page<CustomerOrderResponse>> getCustomerOrders(
         @AuthenticationPrincipal UserDetailsImpl userDetails,

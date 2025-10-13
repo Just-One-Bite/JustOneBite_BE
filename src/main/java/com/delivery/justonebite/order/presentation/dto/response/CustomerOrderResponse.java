@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
 
+// TODO: 빠진 부분 데이터 추가 필요 (SWAGGER 추후에 적용 예정, 리팩토링 된 부분 반영 안되었음)
 @Builder
 public record CustomerOrderResponse(
     UUID orderId,
