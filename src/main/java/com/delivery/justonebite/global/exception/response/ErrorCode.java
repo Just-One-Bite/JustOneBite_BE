@@ -11,7 +11,7 @@ public enum ErrorCode {
 
     // 예외가 생길때마다 이런식으로 추가
     // 인증/인가
-    INVALID_MEMBER("유효하지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_MEMBER("유효하지 않은 사용자입니다.", HttpStatus.FORBIDDEN),
     NOT_VALID_TOKEN("토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
     EXPIRED_TOKEN("토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     FORBIDDEN_ACCESS("접근 권한이 없습니다.", HttpStatus.FORBIDDEN),

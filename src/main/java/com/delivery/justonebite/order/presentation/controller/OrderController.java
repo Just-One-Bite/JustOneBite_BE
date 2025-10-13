@@ -1,6 +1,7 @@
 package com.delivery.justonebite.order.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.order.application.service.OrderService;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.presentation.dto.request.CancelOrderRequest;
@@ -15,6 +16,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -26,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,19 +49,27 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    /**
+     * @Tag: API를 그룹화하는 데 사용 (Controller 레벨)
+     * @Operation : 각 API 메서드에 대한 설명 추가하는 어노테이션 (설명, 요약)
+     * @Parameter: 메서드의 인자(경로 변수, 쿼리 파라미터)에 대한 설명을 정의
+     * @RequestBody: 요청 본문의 DTO 구조를 문서화 (@Schema와 함께 사용)
+     * @ApiResponse: HTTP 응답 코드(200, 201, 400 등)별 상세 설명과 반환될 DTO 구조를 정의
+     * @PreAuthorize("hasRole('CUSTOMER')") : Spring Security 인증 토큰 및 사용자 역할 검증
+     */
     @Operation(
-        summary = "주문 생성 요청",
+        summary = "주문 생성 요청 API",
         description = "사용자(CUSTOMER)가 주문을 요청합니다. 해당 API 요청 권한은 CUSTOMER만 가능합니다.",
-//        parameters = {
-//            @Parameter(name = "order-id", description = "조회할 주문의 고유 ID", required = true)
-//        }
+        security = @SecurityRequirement(name = "Authorization"),
         responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "주문 성공"
-            )
+            @ApiResponse(responseCode = "201", description = "주문 생성에 성공하였습니다."),
+            @ApiResponse(responseCode = "404", description = "주문할 가게 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "요청한 총 금액이 서버의 총 금액과 일치하지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (ROLE_CUSTOMER 아님)", content = @Content(mediaType = "application/json"))
         }
     )
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
     public ResponseEntity<Void> createOrder(@Valid  @RequestBody CreateOrderRequest request,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
