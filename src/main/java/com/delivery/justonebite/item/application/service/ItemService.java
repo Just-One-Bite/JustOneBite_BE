@@ -34,6 +34,8 @@ public class ItemService {
 
     // 상품 CREATE
     @Transactional
+
+
     public ItemResponse createItem(Long userId, UserRole role, ItemRequest request) {
         Shop shop = checkValidRequestWithShop(userId, role, UUID.fromString(request.shopId()));
 

@@ -1,6 +1,7 @@
 package com.delivery.justonebite.shop.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
+import com.delivery.justonebite.shop.presentation.dto.request.ShopUpdateRequest;
 import com.delivery.justonebite.user.domain.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
@@ -12,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -84,11 +86,26 @@ public class Shop extends BaseEntity {
 
 
 
-
+    //가게 등록
     public void addCategory(Category category) {
         ShopCategory shopCategory = ShopCategory.create(this, category);
         if (!this.categories.contains(shopCategory)) {
             this.categories.add(shopCategory);
         }
     }
+
+    //가게 수정
+    public void updateInfo(String name, String phone, String operatingHour, String description) {
+        if (name != null) this.name = name;
+        if (phone != null) this.phoneNumber = phone;
+        if (operatingHour != null) this.operatingHour = operatingHour;
+        if (description != null) this.description = description;
+    }
+
+    //가게 삭제
+    public void requestDelete() {
+        this.deleteAcceptStatus = RejectStatus.PENDING;
+        this.deleteRejectReason = null;  // 관리자가 승인 후 작성됨
+    }
+
 }
