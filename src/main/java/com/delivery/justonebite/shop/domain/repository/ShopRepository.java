@@ -1,9 +1,10 @@
 package com.delivery.justonebite.shop.domain.repository;
 
 import com.delivery.justonebite.shop.domain.entity.Shop;
+import com.delivery.justonebite.shop.projection.ShopAvgProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.delivery.justonebite.shop.projection.ShopAvgProjection;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,10 +16,6 @@ import java.util.UUID;
 
 @Repository
 public interface ShopRepository extends JpaRepository<Shop, UUID> {
-
-    Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description, Pageable pageable
-    );
 
     @Query("select s.id as id, s.averageRating as averageRating from Shop s where s.id in :ids")
     List<ShopAvgProjection> findAvgByIds(@Param("ids") List<UUID> ids);
@@ -49,4 +46,9 @@ UPDATE h_shop s
   )
 """, nativeQuery = true)
     int bulkResetAvgForZeroReview();
+
+
+    Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String name, String description, Pageable pageable
+    );
 }
