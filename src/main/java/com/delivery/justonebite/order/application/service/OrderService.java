@@ -121,7 +121,7 @@ public class OrderService {
 
     private void authorizeCustomer(User user) {
         if (!(user.getUserRole().equals(UserRole.CUSTOMER))) {
-            throw new CustomException(ErrorCode.INVALID_MEMBER);
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 
