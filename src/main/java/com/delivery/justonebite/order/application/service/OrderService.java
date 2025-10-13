@@ -214,7 +214,7 @@ public class OrderService {
             return orderRepository.existsByIdAndCustomer_Id(orderId, user.getId());
         }
         if (userRole.isOwner()) {
-            return orderRepository.existsByIdAndShop_Owner(orderId, user.getId());
+            return orderRepository.existsByIdAndShop_OwnerId(orderId, user.getId());
         }
         return false;
     }

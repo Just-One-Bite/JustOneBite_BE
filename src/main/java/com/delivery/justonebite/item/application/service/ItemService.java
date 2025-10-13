@@ -35,7 +35,7 @@ public class ItemService {
 
     @Transactional
     public ItemResponse createItem(ItemRequest request) {
-        Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(() -> new CustomException(ErrorCode.INVALID_SHOP));
+        Shop shop = shopRepository.findById(UUID.fromString(request.shopId())).orElseThrow(() -> new CustomException(ErrorCode.SHOP_NOT_FOUND));
         Item item = request.toItem();
         item.setShop(shop);
       

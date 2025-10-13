@@ -69,7 +69,7 @@ public class ShopService {
     @Transactional
     public Shop updateShop(ShopUpdateRequest request, UUID shopId, Long userId, UserRole role) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_SHOP));
+                .orElseThrow(() -> new CustomException(ErrorCode.SHOP_NOT_FOUND));
 
         if (!(role == UserRole.OWNER || role == UserRole.MASTER || role == UserRole.MANAGER)) {
             throw new CustomException(ErrorCode.INVALID_USER_ROLE);
@@ -79,7 +79,7 @@ public class ShopService {
             throw new CustomException(ErrorCode.UNAUTHORIZED_SHOP_ACCESS);
         }
 
-        // 1. 기본 필드 수정
+        // 1. 변경된 필드 수정
         shop.updateInfo(
                 request.name(),
                 request.phone_number(),
@@ -92,7 +92,7 @@ public class ShopService {
             shop.getCategories().clear();
             for (String categoryName : request.categories()) {
                 Category category = categoryRepository.findByCategoryName(categoryName)
-                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+                        .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
                 ShopCategory sc = ShopCategory.builder().shop(shop).category(category).build();
                 shop.getCategories().add(sc);
             }
@@ -105,7 +105,7 @@ public class ShopService {
     public ShopDeleteResponse deleteShop(UUID shopId, Long userId, UserRole userRole){
         //가게 존재 확인
         Shop shop = shopRepository.findByIdAndDeletedAtIsNull(shopId)
-           .orElseThrow(()-> new CustomException(ErrorCode.INVALID_SHOP));
+           .orElseThrow(()-> new CustomException(ErrorCode.SHOP_NOT_FOUND));
 
         //owner 권한 체크
         if (!(userRole == UserRole.OWNER || userRole == UserRole.MANAGER || userRole == UserRole.MASTER)) {
@@ -121,6 +121,7 @@ public class ShopService {
         if (shop.getDeleteAcceptStatus() == RejectStatus.PENDING) {
             throw new CustomException(ErrorCode.ALREADY_PENDING_DELETE);
         }
+//        TODO :주문 상태가 COMPLETED가 아니면 삭제가 안되게 하는 로직을 추가 예장
 
         //soft Delete
         shop.markDeleted(userId);

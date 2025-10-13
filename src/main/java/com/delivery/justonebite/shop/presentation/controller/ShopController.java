@@ -3,6 +3,7 @@ package com.delivery.justonebite.shop.presentation.controller;
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
+import com.delivery.justonebite.shop.application.service.ShopOrderService;
 import com.delivery.justonebite.shop.application.service.ShopService;
 import com.delivery.justonebite.shop.application.service.ShopQueryService;
 import com.delivery.justonebite.shop.domain.entity.Shop;
@@ -10,6 +11,7 @@ import com.delivery.justonebite.shop.presentation.dto.request.ShopCreateRequest;
 import com.delivery.justonebite.shop.presentation.dto.request.ShopSearchRequest;
 import com.delivery.justonebite.shop.presentation.dto.request.ShopUpdateRequest;
 import com.delivery.justonebite.shop.presentation.dto.response.*;
+import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +26,24 @@ import java.util.UUID;
 @RequestMapping("/v1/shops")
 @RequiredArgsConstructor
 public class ShopController {
-// 테스트용으로 userId = 1L로 임시 지정
+
 
     private final ShopService shopService;
     private final ShopQueryService shopQueryService;
+    private final ShopOrderService shopOrderService;
+
+    // 테스트용으로 userId = 1L로 임시 지정
+    private User getSafeUser(UserDetailsImpl userDetails) {
+        if (userDetails != null) {
+            return userDetails.getUser();
+        }
+        // 테스트 환경용 더미 유저 생성
+        return User.builder()
+                .id(1L)
+                .userRole(UserRole.OWNER)
+                .build();
+    }
+
 
     //가게 등록
     @PostMapping
@@ -35,10 +51,8 @@ public class ShopController {
             @RequestBody ShopCreateRequest request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        Long userId = (userDetails != null) ? userDetails.getUserId() : 1L;
-        UserRole role = (userDetails != null) ? userDetails.getUserRole() : UserRole.OWNER;
-
-        var shop = shopService.createShop(request, userId, role);
+        User user = getSafeUser(userDetails);
+        var shop = shopService.createShop(request, user.getId(), user.getUserRole());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ShopCreateResponse.from(shop));
     }
@@ -59,11 +73,11 @@ public class ShopController {
         return ResponseEntity.ok(response);
     }
 
+
     //가게 상세 조회
     @GetMapping("/{shop-id}")
     public ResponseEntity<ShopDetailResponse> getShopDetail(
-            @PathVariable("shop-id") UUID shopId,
-            @AuthenticationPrincipal UserDetailsImpl userDetails
+            @PathVariable("shop-id") UUID shopId
     ) {
         ShopDetailResponse response = shopQueryService.getShopDetail(shopId);
         return ResponseEntity.ok(response);
@@ -71,16 +85,14 @@ public class ShopController {
 
 
     //가게 정보 수정 -> 필드 일부 수정 가능(주소 등은 x)
-    @PutMapping("/{shop-id}")
+    @PatchMapping("/{shop-id}")
     public ResponseEntity<Shop> updateShop(
             @PathVariable("shop-id") UUID shopId,
             @Valid @RequestBody ShopUpdateRequest request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        Long userId = (userDetails != null) ? userDetails.getUserId() : 1L;
-        UserRole role = (userDetails != null) ? userDetails.getUserRole() : UserRole.OWNER;
-
-        Shop updated = shopService.updateShop(request, shopId, userId, role);
+        User user = getSafeUser(userDetails);
+        Shop updated = shopService.updateShop(request, shopId, user.getId(), user.getUserRole());
         return ResponseEntity.ok(updated);
     }
 
@@ -90,10 +102,24 @@ public class ShopController {
             @PathVariable("shop-id") UUID shopId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        Long userId = (userDetails != null) ? userDetails.getUserId() : 1L;
-        UserRole role = (userDetails != null) ? userDetails.getUserRole() : UserRole.OWNER;
-
-        ShopDeleteResponse response = shopService.deleteShop(shopId, userId, role);
+        User user = getSafeUser(userDetails);
+        ShopDeleteResponse response = shopService.deleteShop(shopId, user.getId(), user.getUserRole());
         return ResponseEntity.ok(response);
     }
+
+
+    //가게별 주문 목록 조회
+    @GetMapping("/{shopId}/orders")
+    public ResponseEntity<ShopOrderResponse> getShopOrders(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable UUID shopId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy
+    ) {
+        User user = getSafeUser(userDetails);
+        ShopOrderResponse response = shopOrderService.getOrdersByShop(shopId, user, page, size, sortBy);
+        return ResponseEntity.ok(response);
+    }
+
 }
