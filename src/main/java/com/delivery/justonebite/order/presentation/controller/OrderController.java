@@ -54,23 +54,20 @@ public class OrderController {
      * @Tag: API를 그룹화하는 데 사용 (Controller 레벨)
      * @Operation : 각 API 메서드에 대한 설명 추가하는 어노테이션 (설명, 요약)
      * @Parameter: 메서드의 인자(경로 변수, 쿼리 파라미터)에 대한 설명을 정의 (@PathVariable 또한 마찬가지로 해당 어노테이션 사용)
-     * @RequestBody: 요청 본문의 DTO 구조를 문서화 (@Schema와 함께 사용)
+     * @RequestBody: 요청 본문의 DTO 구조를 문서화 (해당 DTO에서 @Schema와 함께 사용)
      * @ApiResponse: HTTP 응답 코드(200, 201, 400 등)별 상세 설명과 반환될 DTO 구조를 정의
      * @PreAuthorize("hasRole('CUSTOMER')") : Spring Security 인증 토큰 및 사용자 역할 검증
      */
     @Operation(
         summary = "주문 생성 요청 API",
         description = "사용자(CUSTOMER)가 주문을 요청합니다. 해당 API 요청 권한은 CUSTOMER만 가능합니다.",
-//        parameters = {
-//            @Parameter(name = "order-id", description = "조회할 주문의 고유 ID", required = true)
-//        }
         security = @SecurityRequirement(name = "Authorization"),
         responses = {
             @ApiResponse(responseCode = "201", description = "주문 생성에 성공하였습니다."),
             @ApiResponse(responseCode = "404", description = "주문할 가게 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "요청한 총 금액이 서버의 총 금액과 일치하지 않습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (ROLE_CUSTOMER 아님)", content = @Content(mediaType = "application/json"))
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (CUSTOMER 아님)", content = @Content(mediaType = "application/json"))
         }
     )
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -93,7 +90,7 @@ public class OrderController {
         responses = {
             @ApiResponse(responseCode = "200", description = "주문 목록 조회에 성공하였습니다."),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (ROLE_CUSTOMER 아님)", content = @Content(mediaType = "application/json"))
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (CUSTOMER 아님)", content = @Content(mediaType = "application/json"))
         }
     )
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -135,6 +132,23 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+        summary = "주문 상태 변경 요청 API",
+        description = "가게 주인(OWNER)이 주문 주문 상태 변경을 요청합니다. 해당 API 요청 권한은 OWNER만 가능합니다.",
+        security = @SecurityRequirement(name = "Authorization"),
+        parameters = {
+            // @PathVariable을 @Parameter 배열 내에 포함
+            @Parameter(name = "order-id", description = "주문 상태 변경할 주문의 고유 ID", required = true, example = "예시: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890"),
+        },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "주문 상태 변경에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "주문 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "변경 불가능한 주문 상태 정보입니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (OWNER 아님)", content = @Content(mediaType = "application/json"))
+        }
+    )
+    @PreAuthorize("hasRole('OWNER')")
     @PatchMapping("/{order-id}/status")
     public ResponseEntity<Void> updateOrderStatus(@PathVariable(name = "order-id") UUID orderId,
         @Valid @RequestBody UpdateOrderStatusRequest request,
