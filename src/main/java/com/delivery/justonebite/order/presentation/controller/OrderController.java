@@ -134,7 +134,7 @@ public class OrderController {
 
     @Operation(
         summary = "주문 상태 변경 요청 API",
-        description = "가게 주인(OWNER)이 주문 주문 상태 변경을 요청합니다. 해당 API 요청 권한은 OWNER만 가능합니다.",
+        description = "가게 주인(OWNER)이 주문 상태 변경을 요청합니다. 해당 API 요청 권한은 OWNER만 가능합니다.",
         security = @SecurityRequirement(name = "Authorization"),
         parameters = {
             // @PathVariable을 @Parameter 배열 내에 포함
@@ -157,6 +157,22 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Operation(
+        summary = "주문 상태 히스토리 조회 요청 API",
+        description = "사용자가 주문 상태 히스토리 조회를 요청합니다.",
+        security = @SecurityRequirement(name = "Authorization"),
+        parameters = {
+            // @PathVariable을 @Parameter 배열 내에 포함
+            @Parameter(name = "order-id", description = "상태 변경 히스토리를 조회할 주문의 고유 ID", required = true, example = "예시: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890"),
+        },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "주문 상태 히스토리 조회에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "주문 내역이 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+        }
+    )
     @GetMapping("/{order-id}/status")
     public ResponseEntity<GetOrderStatusResponse> getOrderStatusHistories(@PathVariable(name = "order-id") UUID orderId,
     @AuthenticationPrincipal UserDetailsImpl userDetails) {
