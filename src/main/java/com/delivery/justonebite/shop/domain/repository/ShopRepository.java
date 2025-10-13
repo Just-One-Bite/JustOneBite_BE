@@ -47,7 +47,6 @@ UPDATE h_shop s
 """, nativeQuery = true)
     int bulkResetAvgForZeroReview();
 
-
     Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
             String name, String description, Pageable pageable
     );
