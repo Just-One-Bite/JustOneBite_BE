@@ -34,6 +34,8 @@ public class ItemService {
 
     // 상품 CREATE
     @Transactional
+
+
     public ItemResponse createItem(Long userId, UserRole role, ItemRequest request) {
         Shop shop = checkValidRequestWithShop(userId, role, UUID.fromString(request.shopId()));
 
@@ -150,7 +152,7 @@ public class ItemService {
         authorization(Set.of(UserRole.OWNER, UserRole.MANAGER, UserRole.MASTER), role);
 
         Shop shop = shopRepository.findById(shopId).orElseThrow(
-            () -> new CustomException(ErrorCode.INVALID_SHOP)
+            () -> new CustomException(ErrorCode.SHOP_NOT_FOUND)
         );
 
         isOwner(shop, userId, role);
