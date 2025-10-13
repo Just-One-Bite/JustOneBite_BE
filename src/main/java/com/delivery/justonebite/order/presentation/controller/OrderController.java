@@ -53,7 +53,7 @@ public class OrderController {
     /**
      * @Tag: API를 그룹화하는 데 사용 (Controller 레벨)
      * @Operation : 각 API 메서드에 대한 설명 추가하는 어노테이션 (설명, 요약)
-     * @Parameter: 메서드의 인자(경로 변수, 쿼리 파라미터)에 대한 설명을 정의
+     * @Parameter: 메서드의 인자(경로 변수, 쿼리 파라미터)에 대한 설명을 정의 (@PathVariable 또한 마찬가지로 해당 어노테이션 사용)
      * @RequestBody: 요청 본문의 DTO 구조를 문서화 (@Schema와 함께 사용)
      * @ApiResponse: HTTP 응답 코드(200, 201, 400 등)별 상세 설명과 반환될 DTO 구조를 정의
      * @PreAuthorize("hasRole('CUSTOMER')") : Spring Security 인증 토큰 및 사용자 역할 검증
