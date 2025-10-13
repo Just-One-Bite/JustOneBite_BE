@@ -1,16 +1,12 @@
 package com.delivery.justonebite.payment.presentation.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class PaymentRequest {
-    private UUID orderId;
-    private String orderName;
-    private Integer amount;
-}
+@Builder
+public record PaymentRequest(
+        UUID orderId,
+        String orderName,
+        Integer amount
+) { }

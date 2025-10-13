@@ -13,12 +13,11 @@ import com.delivery.justonebite.payment.presentation.dto.response.PaymentConfirm
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentFailResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -44,20 +43,17 @@ public class PaymentService {
     @Transactional
     public PaymentResponse requestPayment(PaymentRequest request) {
         boolean isValid = validatePayment(request);
-        Payment payment = Payment.createPayment(request.getOrderId(), request.getOrderName(), request.getAmount());
+        Payment payment = Payment.createPayment(request.orderId(), request.orderName(), request.amount());
 
         paymentRepository.save(payment);
 
         // TODO: 결제 실패 로그, 주문 취소 처리 등
         if (!isValid) {
-            log.warn("❌ 결제 요청 검증 실패: {}", request);
             payment.updateStatus(PaymentStatus.FAIL);
-            return new PaymentFailResponse(request.getOrderId(), "PAY_PROCESS_CANCELED","사용자에 의해 결제가 취소되었습니다.");
+            return new PaymentFailResponse(request.orderId(), "PAY_PROCESS_CANCELED","사용자에 의해 결제가 취소되었습니다.");
         }
-
-        log.info("✅ 결제 요청 검증 성공");
         payment.updateStatus(PaymentStatus.SUCCESS);
-        return new PaymentSuccessResponse(request.getOrderId(), payment.getPaymentId(), request.getAmount());
+        return new PaymentSuccessResponse(request.orderId(), payment.getPaymentId(), request.amount());
     }
 
     /*
@@ -65,12 +61,12 @@ public class PaymentService {
      */
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
-        Payment payment = paymentRepository.findByPaymentId(request.getPaymentId())
+        Payment payment = paymentRepository.findByPaymentId(request.paymentId())
                 .orElseThrow(() -> new IllegalArgumentException("결제 요청 내역을 찾을 수 없습니다.")); //TODO: 오류 처리
 
         try {
             // 금액 검증
-            if (!payment.getTotalAmount().equals(request.getAmount())) {
+            if (!payment.getTotalAmount().equals(request.amount())) {
                 throw new IllegalArgumentException("결제 금액이 일치하지 않습니다."); //TODO: 오류 처리
             }
 
@@ -98,20 +94,7 @@ public class PaymentService {
     // 결제 유효 검증
     // TODO: 상황별 오류 코드 출력
     private boolean validatePayment(PaymentRequest request) {
-        return request.getAmount() > 0 || request.getOrderName() != null;
+        return request.amount() > 0 || request.orderName() != null;
     }
 
-    // 랜덤 키 생성 (paymentId)
-    public String generateRandomString() {
-        String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        int length = 36; // UUID와 비슷하게 임의로 맞춰봄
-
-        SecureRandom random = new SecureRandom();
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            sb.append(CHARACTERS.charAt(randomIndex));
-        }
-        return sb.toString();
-    }
 }
