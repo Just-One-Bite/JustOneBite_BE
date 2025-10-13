@@ -7,7 +7,6 @@ import com.delivery.justonebite.payment.presentation.dto.request.PaymentConfirmR
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentHistoryResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
-import com.delivery.justonebite.payment.presentation.dto.request.TossPaymentConfirmRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,7 @@ public class PaymentController {
     private final TossPaymentService tossPaymentService;
 
     @GetMapping("/{paymentId}")
-    public ResponseEntity<PaymentHistoryResponse> getPaymentById(@PathVariable String paymentId) {
+    public ResponseEntity<PaymentHistoryResponse> getPaymentById(@PathVariable UUID paymentId) {
         Payment payment = paymentService.getPaymentById(paymentId);
         return ResponseEntity.status(HttpStatus.OK).body(PaymentHistoryResponse.from(payment));
     }

@@ -16,32 +16,37 @@ import java.util.UUID;
 public class Transaction {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "transaction_id", nullable = false)
-    private String transactionId;
+    private UUID transactionId;
 
     @Column(name = "payment_id", nullable = false)
-    private String paymentId;
-
-    @Column(name = "order_id", nullable = false)
-    private UUID orderId;
+    private UUID paymentId;
 
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private PaymentStatus status;
+
+    @Column(name = "cancel_reason")
+    private String cancelReason;
+
+    @Column(name = "cancel_status")
+    private PaymentStatus cancelStatus;
 
     @CreatedDate
     @Column(name = "transaction_at", updatable = false, nullable = false)
     private LocalDateTime transactionAt;
 
-    public static Transaction of(Payment payment, String transactionKey) {
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
+    public static Transaction createTransaction(Payment payment) {
         return Transaction.builder()
                 .paymentId(payment.getPaymentId())
-                .transactionId(transactionKey)
-                .orderId(payment.getOrderId())
                 .amount(payment.getBalanceAmount())
-                .status(payment.getStatus())
+                .status(PaymentStatus.DONE)
                 .transactionAt(LocalDateTime.now())
                 .build();
     }

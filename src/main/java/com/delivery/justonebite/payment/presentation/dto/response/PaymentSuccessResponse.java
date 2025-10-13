@@ -10,11 +10,11 @@ import java.util.UUID;
 public class PaymentSuccessResponse implements PaymentResponse{
     private String redirectUrl;
     private UUID orderId;
-    private String paymentId;
+    private UUID paymentId;
     private Integer amount;
 
 
-    public PaymentSuccessResponse (UUID orderId, String paymentId, Integer amount) {
+    public PaymentSuccessResponse (UUID orderId, UUID paymentId, Integer amount) {
         this.redirectUrl = "http://localhost:8080/payments/success?paymentType=NORMAL&orderId=" + orderId +
                 "&paymentId=" + paymentId + "&amount=" + amount;
         this.orderId = orderId;

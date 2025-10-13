@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -18,11 +16,12 @@ import java.util.UUID;
 public class Payment extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "payment_id",nullable = false)
-    private String paymentId;
+    private UUID paymentId;
 
     @Column(name = "last_transaction_id")
-    private String lastTransactionId;
+    private UUID lastTransactionId;
 
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
@@ -37,31 +36,22 @@ public class Payment extends BaseEntity {
     private Integer balanceAmount;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private PaymentStatus status;
 
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    // 결제 취소 내역
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "payment_cancels",
-            joinColumns = @JoinColumn(name = "payment_id")
-    )
-    private List<PaymentCancel> cancels = new ArrayList<>();
-
-    public static Payment createPayment(String paymentId, UUID orderId, String orderName, Integer amount) {
+    public static Payment createPayment(UUID orderId, String orderName, Integer amount) {
         return Payment.builder()
-                .paymentId(paymentId)
                 .orderId(orderId)
                 .orderName(orderName)
                 .totalAmount(amount)
                 .balanceAmount(amount)
-                .status("PaymentStatus.READY.name()")
+                .status(PaymentStatus.READY)
                 .build();
     }
 
-    public void updateStatus(String status) {
+    public void updateStatus(PaymentStatus status) {
         this.status = status;
     }
 
@@ -69,7 +59,7 @@ public class Payment extends BaseEntity {
         this.approvedAt = now;
     }
 
-    public void updateLastTransactionId(String transactionKey) {
+    public void updateLastTransactionId(UUID transactionKey) {
         this.lastTransactionId = transactionKey;
     }
 }

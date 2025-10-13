@@ -30,7 +30,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
 
-    public Payment getPaymentById(String paymentId) {
+    public Payment getPaymentById(UUID paymentId) {
         return paymentRepository.findById(paymentId)
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
@@ -44,22 +44,20 @@ public class PaymentService {
     @Transactional
     public PaymentResponse requestPayment(PaymentRequest request) {
         boolean isValid = validatePayment(request);
-
-        String paymentKey = generateRandomString();
-        Payment payment = Payment.createPayment(paymentKey, request.getOrderId(), request.getOrderName(), request.getAmount());
+        Payment payment = Payment.createPayment(request.getOrderId(), request.getOrderName(), request.getAmount());
 
         paymentRepository.save(payment);
 
         // TODO: 결제 실패 로그, 주문 취소 처리 등
         if (!isValid) {
             log.warn("❌ 결제 요청 검증 실패: {}", request);
-            payment.updateStatus("FAIL");
+            payment.updateStatus(PaymentStatus.FAIL);
             return new PaymentFailResponse(request.getOrderId(), "PAY_PROCESS_CANCELED","사용자에 의해 결제가 취소되었습니다.");
         }
 
         log.info("✅ 결제 요청 검증 성공");
-        payment.updateStatus("SUCCESS");
-        return new PaymentSuccessResponse(request.getOrderId(), paymentKey, request.getAmount());
+        payment.updateStatus(PaymentStatus.SUCCESS);
+        return new PaymentSuccessResponse(request.getOrderId(), payment.getPaymentId(), request.getAmount());
     }
 
     /*
@@ -76,25 +74,25 @@ public class PaymentService {
                 throw new IllegalArgumentException("결제 금액이 일치하지 않습니다."); //TODO: 오류 처리
             }
 
-            String transactionKey = generateRandomString();
-
-            payment.updateStatus(PaymentStatus.DONE.name());
-            payment.updateApprovedAt(LocalDateTime.now());
-            payment.updateLastTransactionId(transactionKey);
-            paymentRepository.save(payment);
-
-            Transaction transaction = Transaction.of(payment, transactionKey);
+            Transaction transaction = Transaction.createTransaction(payment);
             transactionRepository.save(transaction);
+
+            payment.updateStatus(PaymentStatus.DONE);
+            payment.updateApprovedAt(LocalDateTime.now());
+            payment.updateLastTransactionId(transaction.getTransactionId());
+            paymentRepository.save(payment);
 
             return PaymentConfirmResponse.from(payment);
 
         } catch (Exception e) {
-            payment.updateStatus(PaymentStatus.ABORTED.name());
+            payment.updateStatus(PaymentStatus.ABORTED);
             paymentRepository.save(payment);
             throw new RuntimeException("결제 승인 실패: " + e.getMessage()); //TODO: 실패 방식 변경
         }
 
     }
+
+    //TODO: 거래 취소 api
 
 
     // 결제 유효 검증
