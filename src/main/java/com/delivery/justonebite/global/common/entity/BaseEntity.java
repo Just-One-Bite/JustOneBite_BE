@@ -48,6 +48,10 @@ public abstract class BaseEntity {
         this.deletedBy = deleterId;
     }
 
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
+
     public void restoreDeletion() {
         this.deletedAt = null;
         this.deletedBy = null;

@@ -42,15 +42,21 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND("리뷰를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     REVIEW_ALREADY_EXISTS("해당 주문에는 이미 리뷰가 존재합니다.", HttpStatus.CONFLICT),
     ORDER_NOT_COMPLETED("주문이 아직 완료상태가 아닙니다.", HttpStatus.FORBIDDEN),
+    ALREADY_DELETED_REVIEW("이미 삭제된 리뷰입니다.", HttpStatus.CONFLICT),
+    ALREADY_ACTIVE_REVIEW("이미 삭제되지 않은 리뷰입니다.", HttpStatus.CONFLICT),
 
 
     //주문
     ORDER_NOT_FOUND("주문을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ORDER_STATUS_NOT_FOUND("주문상태를 확인할수 없습니다", HttpStatus.NOT_FOUND),
     INVALID_ITEM("존재하지 않는 상품입니다.", HttpStatus.NOT_FOUND),
-    INVALID_USER_ROLE("유효하지 않은 회원 유형입니다.", HttpStatus.UNAUTHORIZED),
-    INVALID_ORDER_STATUS("유효하지 않은 주문 상태입니다.", HttpStatus.UNAUTHORIZED),
-    TOTAL_PRICE_NOT_MATCH("전체 주문금액이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_USER_ROLE("유효하지 않은 회원 유형입니다.", HttpStatus.FORBIDDEN),
+    INVALID_ORDER_STATUS("유효하지 않은 주문 상태입니다.", HttpStatus.BAD_REQUEST),
+    TOTAL_PRICE_NOT_MATCH("전체 주문금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    ORDER_STATUS_CANCEL_NOT_ALLOWED("취소할 수 없는 주문 상태입니다.", HttpStatus.BAD_REQUEST),
+    ORDER_CANCEL_TIME_EXCEEDED("주문 시점으로부터 5분이 경과하여 취소할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    ORDER_USER_NOT_MATCH("주문 상의 주문자와 동일한 회원이 아닙니다.", HttpStatus.FORBIDDEN),
+    INVALID_CANCEL_STATUS_VALUE("취소 요청 상태는 ORDER_CANCELLED 여야 합니다.", HttpStatus.BAD_REQUEST),
 
     ;
 

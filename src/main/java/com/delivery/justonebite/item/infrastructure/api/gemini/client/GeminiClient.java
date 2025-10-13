@@ -5,7 +5,7 @@ import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiRequestContent;
 import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiRequestPart;
 import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiRequestTextPart;
-import com.delivery.justonebite.item.presentation.dto.GeminiResponse;
+import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
