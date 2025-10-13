@@ -35,7 +35,6 @@ public class UserService {
         User foundUser = findUser(userDetails.getUserId());
         varifyPassword(request.password(), foundUser);
         foundUser.updateProfile(request);
-        userRepository.save(foundUser);
         return UpdateProfileResponse.toDto(foundUser);
     }
 
@@ -45,7 +44,6 @@ public class UserService {
         varifyPassword(request.oldPassword(), foundUser);
         String encodedPassword = passwordEncoder.encode(request.newPassword());
         foundUser.updatePassword(encodedPassword);
-        userRepository.save(foundUser);
     }
 
     // Todo: 회원 탈퇴
