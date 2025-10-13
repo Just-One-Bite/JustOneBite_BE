@@ -3,6 +3,7 @@ package com.delivery.justonebite.user.domain.entity;
 import com.delivery.justonebite.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -13,6 +14,7 @@ import org.hibernate.type.SqlTypes;
 @SuperBuilder
 @Entity
 @Table(name = "h_user")
+@EqualsAndHashCode(of = "id", callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 

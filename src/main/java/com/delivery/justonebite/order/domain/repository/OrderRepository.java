@@ -2,11 +2,14 @@ package com.delivery.justonebite.order.domain.repository;
 
 import com.delivery.justonebite.order.domain.entity.Order;
 import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
 
-
+import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 
 public interface OrderRepository extends JpaRepository<Order, UUID> {
 
@@ -14,8 +17,17 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     boolean existsByIdAndShop_OwnerId(UUID id, Long userId);
 
+
     //가게별 리뷰 목록 조회
     Page<Order> findAllByShop_Id(UUID shopId, Pageable pageable);
+
+    /**
+     * JOIN FETCH o.customer : INNER JOIN h_user u ON o.user_id = u.user_id
+     * 조회된 customer 엔티티를 즉시 로딩 대상으로 지정
+     */
+    @Query("SELECT o FROM Order o JOIN FETCH o.customer WHERE o.id = :orderId")
+    Optional<Order> findByIdWithCustomer(@Param("orderId") UUID orderId);
+
 }
 /**
  * // OrderRepository.java
