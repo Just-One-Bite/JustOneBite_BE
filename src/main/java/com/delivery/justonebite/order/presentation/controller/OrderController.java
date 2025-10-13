@@ -2,6 +2,7 @@ package com.delivery.justonebite.order.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.application.service.OrderService;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.presentation.dto.request.CancelOrderRequest;
@@ -112,6 +113,21 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+        summary = "주문 단건 상세정보 조회 요청 API",
+        description = "사용자(CUSTOMER)가 주문 상세정보를 요청합니다. 해당 API 요청 권한은 CUSTOMER만 가능합니다.",
+        security = @SecurityRequirement(name = "Authorization"),
+        parameters = {
+            // @PathVariable을 @Parameter 배열 내에 포함
+            @Parameter(name = "order-id", description = "조회할 주문의 고유 ID", required = true, example = "예시: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890"),
+        },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "주문 상세정보 조회에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "주문 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+        }
+    )
     @GetMapping("/{order-id}")
     public ResponseEntity<OrderDetailsResponse> getOrderDetails(@PathVariable(name="order-id") UUID orderId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
