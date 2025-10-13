@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+@Schema(description = "주문 변경 요청 DTO")
 public record UpdateOrderStatusRequest(
     @Schema(description = "주문 변경할 상태값", example = "ORDER_ACCEPTED")
     @NotNull(message = "상태값은 필수입니다")
