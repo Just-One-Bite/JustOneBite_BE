@@ -49,5 +49,4 @@ UPDATE h_shop s
   )
 """, nativeQuery = true)
     int bulkResetAvgForZeroReview();
-
 }
