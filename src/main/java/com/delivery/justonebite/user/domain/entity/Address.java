@@ -40,8 +40,8 @@ public class Address {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "is_default", nullable = false)
-    private boolean isDefault; // 대표 주소 여부
+    @Column(name = "is_default", nullable = false, columnDefinition = "boolean default false")
+    private boolean isDefault = false; // 대표 주소 여부 (DDL을 생성시 힌트 제공)
 
     public void updateIsDefault(boolean isDefault) {
         this.isDefault = isDefault;
@@ -62,6 +62,6 @@ public class Address {
                             String district,
                             String address,
                             boolean isDefault) {
-        return new Address(user, province, city, district, address, false);
+        return new Address(user, province, city, district, address, isDefault);
     }
 }
