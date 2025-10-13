@@ -45,7 +45,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("v1/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()      // Swagger UI HTML/JS/CSS 파일
-//                        .requestMatchers("/v3/api-docs/**").permitAll()     // OpenAPI JSON/YAML 정의 파일
+                        .requestMatchers("/v3/api-docs/**").permitAll()     // OpenAPI JSON/YAML 정의 파일
                         .requestMatchers("/api-docs/**").permitAll()        // SpringDoc v1/v2 호환 경로
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
