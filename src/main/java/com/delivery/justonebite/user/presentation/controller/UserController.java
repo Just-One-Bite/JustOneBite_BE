@@ -4,6 +4,7 @@ import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.user.application.service.UserService;
 import com.delivery.justonebite.user.presentation.dto.request.UpdatePasswordRequest;
 import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileRequest;
+import com.delivery.justonebite.user.presentation.dto.request.WithdrawRequest;
 import com.delivery.justonebite.user.presentation.dto.response.GetProfileResponse;
 import com.delivery.justonebite.user.presentation.dto.response.UpdateProfileResponse;
 import jakarta.validation.Valid;
@@ -44,5 +45,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    // Todo: 회원 탈퇴
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMyProfile(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody @Valid WithdrawRequest request
+    ) {
+        userService.deleteUser(userDetails, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

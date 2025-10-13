@@ -1,5 +1,7 @@
 package com.delivery.justonebite.global.common.security;
 
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +18,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Not Found " + email));
+        User user = userRepository.findByEmailIncludeDeleted(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        if (user.isDeleted()) {
+            throw new CustomException(ErrorCode.DELETED_ACCOUNT);
+        }
 
         return new UserDetailsImpl(user);
     }
