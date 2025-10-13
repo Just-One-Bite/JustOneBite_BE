@@ -181,6 +181,24 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+        summary = "주문 취소 요청 API",
+        description = "사용자(CUSTOMER)가 주문 취소를 요청합니다. 해당 API 요청 권한은 CUSTOMER만 가능합니다.",
+        security = @SecurityRequirement(name = "Authorization"),
+        parameters = {
+            // @PathVariable을 @Parameter 배열 내에 포함
+            @Parameter(name = "order-id", description = "취소할 주문의 고유 ID", required = true, example = "예시: a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890"),
+        },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "주문 취소에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (CUSTOMER 아님)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "취소 요청 상태는 ORDER_CANCELLED 여야 하고, 주문 시점으로부터 5분 이내에만 취소가 가능합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "주문 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "주문 상의 주문자와 동일한 회원이 아닙니다.", content = @Content(mediaType = "application/json"))
+        }
+    )
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PatchMapping("/{order-id}")
     public ResponseEntity<OrderCancelResponse> cancelOrder(@Valid @RequestBody CancelOrderRequest request,
         @PathVariable(name = "order-id") UUID orderId,
