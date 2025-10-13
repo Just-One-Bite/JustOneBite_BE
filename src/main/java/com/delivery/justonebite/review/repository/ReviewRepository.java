@@ -23,5 +23,4 @@ public interface ReviewRepository extends SoftDeleteRepository<Review, UUID>{
 
     @Query(value = "SELECT * FROM h_review WHERE review_id = :id", nativeQuery = true)
     Optional<Review> findByIdIncludingDeleted(@Param("id") UUID id);
- 
 }
