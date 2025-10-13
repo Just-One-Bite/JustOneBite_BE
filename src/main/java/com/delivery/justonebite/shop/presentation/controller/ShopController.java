@@ -1,11 +1,9 @@
 package com.delivery.justonebite.shop.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
-import com.delivery.justonebite.global.exception.custom.CustomException;
-import com.delivery.justonebite.global.exception.response.ErrorCode;
-import com.delivery.justonebite.shop.application.service.ShopOrderService;
-import com.delivery.justonebite.shop.application.service.ShopService;
 import com.delivery.justonebite.shop.application.service.ShopQueryService;
+import com.delivery.justonebite.shop.application.service.ShopReviewService;
+import com.delivery.justonebite.shop.application.service.ShopService;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.presentation.dto.request.ShopCreateRequest;
 import com.delivery.justonebite.shop.presentation.dto.request.ShopSearchRequest;
@@ -16,7 +14,10 @@ import com.delivery.justonebite.user.domain.entity.UserRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,7 @@ public class ShopController {
 
     private final ShopService shopService;
     private final ShopQueryService shopQueryService;
-    private final ShopOrderService shopOrderService;
+    private final ShopReviewService shopReviewService;
 
     // 테스트용으로 userId = 1L로 임시 지정
     private User getSafeUser(UserDetailsImpl userDetails) {
@@ -75,9 +76,9 @@ public class ShopController {
 
 
     //가게 상세 조회
-    @GetMapping("/{shop-id}")
+    @GetMapping("/{shopId}")
     public ResponseEntity<ShopDetailResponse> getShopDetail(
-            @PathVariable("shop-id") UUID shopId
+            @PathVariable("shopId") UUID shopId
     ) {
         ShopDetailResponse response = shopQueryService.getShopDetail(shopId);
         return ResponseEntity.ok(response);
@@ -85,9 +86,9 @@ public class ShopController {
 
 
     //가게 정보 수정 -> 필드 일부 수정 가능(주소 등은 x)
-    @PatchMapping("/{shop-id}")
+    @PatchMapping("/{shopId}")
     public ResponseEntity<Shop> updateShop(
-            @PathVariable("shop-id") UUID shopId,
+            @PathVariable("shopId") UUID shopId,
             @Valid @RequestBody ShopUpdateRequest request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
@@ -97,9 +98,9 @@ public class ShopController {
     }
 
     //가게 삭제
-    @DeleteMapping("/{shop-id}")
+    @DeleteMapping("/{shopId}")
     public ResponseEntity<ShopDeleteResponse> deleteShop(
-            @PathVariable("shop-id") UUID shopId,
+            @PathVariable("shopId") UUID shopId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         User user = getSafeUser(userDetails);
@@ -108,18 +109,38 @@ public class ShopController {
     }
 
 
+
     //가게별 주문 목록 조회
     @GetMapping("/{shopId}/orders")
     public ResponseEntity<ShopOrderResponse> getShopOrders(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PathVariable UUID shopId,
+            @PathVariable("shopId") UUID shopId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy
     ) {
         User user = getSafeUser(userDetails);
-        ShopOrderResponse response = shopOrderService.getOrdersByShop(shopId, user, page, size, sortBy);
+        ShopOrderResponse response = shopService.getOrdersByShop(shopId, user, page, size, sortBy);
         return ResponseEntity.ok(response);
     }
+
+
+
+    @GetMapping("/{shopId}/reviews")
+    public ResponseEntity<ShopReviewResponse> getShopReviews(
+            @PathVariable("shopId") UUID shopId,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "DESC") String direction
+    ) {
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        PageRequest pageable = PageRequest.of(page - 1, size, Sort.by(sortDirection, sortBy));
+
+        ShopReviewResponse body = shopReviewService.getReviewsByShop(shopId, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+
 
 }

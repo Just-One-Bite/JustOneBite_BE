@@ -39,6 +39,7 @@ public enum ErrorCode {
     UNAUTHORIZED_SHOP_ACCESS("본인의 가게만 삭제할 수 있습니다", HttpStatus.FORBIDDEN),
     ALREADY_PENDING_DELETE("이미 승인 대기중인 삭제 요청입니다.",HttpStatus.CONFLICT),
     CATEGORY_NOT_FOUND("존재하지 않는 카테고리입니다.",HttpStatus.NOT_FOUND),
+    NOT_COMPLETED_ORDER_EXISTS("완료되지 않은 주문이 존재합니다. 가게를 삭제할 수 없습니다.",HttpStatus.BAD_REQUEST),
 
     //리뷰
     INVALID_RATING_RANGE("평점은 1~5 범위여야 합니다.", HttpStatus.BAD_REQUEST),
