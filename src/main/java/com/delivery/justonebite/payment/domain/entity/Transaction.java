@@ -20,8 +20,9 @@ public class Transaction {
     @Column(name = "transaction_id", nullable = false)
     private UUID transactionId;
 
-    @Column(name = "payment_id", nullable = false)
-    private UUID paymentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id", nullable = false)
+    private Payment payment;
 
     @Column(name = "amount", nullable = false)
     private Integer amount;
@@ -44,7 +45,7 @@ public class Transaction {
 
     public static Transaction createTransaction(Payment payment) {
         return Transaction.builder()
-                .paymentId(payment.getPaymentId())
+                .payment(payment)
                 .amount(payment.getBalanceAmount())
                 .status(PaymentStatus.DONE)
                 .transactionAt(LocalDateTime.now())
