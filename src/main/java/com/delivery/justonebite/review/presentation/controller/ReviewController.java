@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -117,7 +118,7 @@ public class ReviewController {
                     @ApiResponse(responseCode = "200", description = "리뷰 수정 성공"),
                     @ApiResponse(responseCode = "400", description = "평점 범위 오류 또는 유효하지 않은 요청 본문", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "401", description = "인증 실패(JWT 누락/만료)", content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "403", description = "접근 권한 없음(작성자 아님/CUSTOMER 아님)", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "403", description = "접근 권한 없음(작성자 아님)", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "리뷰를 찾을 수 없음", content = @Content(mediaType = "application/json"))
             }
     )
@@ -128,7 +129,6 @@ public class ReviewController {
         ReviewResponse body = reviewService.update(
                 id,
                 principal.getUserId(),
-                principal.getUserRole(),
                 request
         );
         return ResponseEntity.status(HttpStatus.OK).body(body);
