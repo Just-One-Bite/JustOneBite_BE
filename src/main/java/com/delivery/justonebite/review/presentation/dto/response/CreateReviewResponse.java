@@ -1,9 +1,10 @@
 package com.delivery.justonebite.review.presentation.dto.response;
 
 import com.delivery.justonebite.review.entity.Review;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
-
 public record CreateReviewResponse(
         UUID reviewId,
         UUID orderId,
