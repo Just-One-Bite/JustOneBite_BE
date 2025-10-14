@@ -34,6 +34,6 @@ public class AiRequestHistoryController {
                                                                        @RequestParam(name = "sort-by", defaultValue = "createdAt") String sortBy,
                                                                        @AuthenticationPrincipal UserDetailsImpl user) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return ResponseEntity.ok(aiRequestHistoryService.getHistories(user.getUserId(), pageable));
+        return ResponseEntity.ok(aiRequestHistoryService.getHistories(user.getUser(), pageable));
     }
 }

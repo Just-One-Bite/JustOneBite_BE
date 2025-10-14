@@ -1,5 +1,6 @@
 package com.delivery.justonebite.ai_history.domain.entity;
 
+import com.delivery.justonebite.user.domain.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,12 +18,9 @@ public class AiRequestHistory {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
-    private Long userId; // fix
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String model;
@@ -38,8 +36,8 @@ public class AiRequestHistory {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public AiRequestHistory(Long userId, String model, String request, String response) {
-        this.userId = userId;
+    public AiRequestHistory(User user, String model, String request, String response) {
+        this.user = user;
         this.model = model;
         this.request = request;
         this.response = response;
