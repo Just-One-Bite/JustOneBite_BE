@@ -20,6 +20,7 @@ import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderRes
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
+import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.ShopInfoDto;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
@@ -109,7 +110,9 @@ public class OrderService {
             .stream()
             .map(OrderItemDto::from)
             .toList();
-        return OrderDetailsResponse.toDto(order, orderItems);
+
+        ShopInfoDto dto = ShopInfoDto.toDto(order.getShop().getId(), order.getShop().getName());
+        return OrderDetailsResponse.toDto(order, dto, orderItems);
     }
 
     private void authorizeCustomer(User user) {
