@@ -22,9 +22,11 @@ import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.application.service.OrderService;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.order.stub.OrderStubData;
 import com.delivery.justonebite.user.domain.entity.User;
@@ -285,5 +287,43 @@ class OrderControllerTest {
             .andExpect(jsonPath("$.errorCode").value("FORBIDDEN_ACCESS"))
             .andExpect(jsonPath("$.description").value("접근 권한이 없습니다."))
             .andExpect(jsonPath("$.status").value(403));
+    }
+
+    /**
+     * 고객 주문 상태 이력 조회
+     */
+    @Test
+    @DisplayName("GET /v1/orders/{order-id}/status - 200 OK : 주문 상세정보 정상 조회되면 200 상태값 표시")
+    void getOrderStatusHistories_Success_Returns_Ok() throws Exception {
+        GetOrderStatusResponse content = OrderStubData.getOrderStatusResponse(ORDER_ID, USER_ID, SHOP_ID);
+
+        given(orderService.getOrderStatusHistories(eq(ORDER_ID), any(User.class)))
+            .willReturn(content);
+
+        mockMvc.perform(get("/v1/orders/{order-id}/status", ORDER_ID)
+                .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.orderId").value(ORDER_ID.toString()))
+            .andExpect(jsonPath("$.history.length()").value(3))
+            .andExpect(jsonPath("$.currentStatus").value(OrderStatus.DELIVERING.toString()))
+            .andExpect(jsonPath("$.history[1].status").value(OrderStatus.PREPARING.toString()));
+    }
+
+    @Test
+    @DisplayName("GET /v1/orders/{order-id}/status - 404 NOT_FOUND : 주문 내역을 찾을 수 없는 경우")
+    void getOrderStatusHistories_Fails_Returns_Not_Found() throws Exception {
+        doThrow(new CustomException(ErrorCode.ORDER_STATUS_NOT_FOUND))
+            .when(orderService).getOrderStatusHistories(eq(ORDER_ID), any(User.class));
+
+        mockMvc.perform(get("/v1/orders/{order-id}/status", ORDER_ID)
+                .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.errorCode").value("ORDER_STATUS_NOT_FOUND"))
+            .andExpect(jsonPath("$.description").value("주문상태를 확인할수 없습니다"))
+            .andExpect(jsonPath("$.status").value(404));
     }
 }

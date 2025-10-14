@@ -3,9 +3,11 @@ package com.delivery.justonebite.order.stub;
 import static org.mockito.BDDMockito.given;
 
 import com.delivery.justonebite.order.domain.entity.Order;
+import com.delivery.justonebite.order.domain.entity.OrderHistory;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.presentation.dto.OrderItemDto;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.OrderInfoDto;
 import com.delivery.justonebite.shop.domain.entity.Shop;
@@ -16,7 +18,6 @@ import java.util.UUID;
 import org.mockito.Mockito;
 
 public class OrderStubData {
-
     public static class MockData {
         private static User mockUser(Long userId) {
             User user = Mockito.mock(User.class);
@@ -64,6 +65,25 @@ public class OrderStubData {
                     UUID.randomUUID(),
                     1,
                     15000
+                )
+            );
+        }
+
+        public static List<OrderHistory> getOrderHistoryList(UUID orderId, Long userId, UUID shopId) {
+            Order mockOrder = MockData.getMockOrder(orderId, userId, shopId);
+
+            return List.of(
+                OrderHistory.create(
+                    mockOrder,
+                    OrderStatus.DELIVERING
+                ),
+                OrderHistory.create(
+                    mockOrder,
+                    OrderStatus.PREPARING
+                ),
+                OrderHistory.create(
+                    mockOrder,
+                    OrderStatus.ORDER_ACCEPTED
                 )
             );
         }
@@ -132,5 +152,10 @@ public class OrderStubData {
             	"newStatus" : "ORDER_ACCEPTED"
             }
             """;
+    }
+
+    public static GetOrderStatusResponse getOrderStatusResponse(UUID orderId, Long userId, UUID shopId) {
+        List<OrderHistory> list = MockData.getOrderHistoryList(orderId, userId, shopId);
+        return GetOrderStatusResponse.toDto(orderId, list);
     }
 }
