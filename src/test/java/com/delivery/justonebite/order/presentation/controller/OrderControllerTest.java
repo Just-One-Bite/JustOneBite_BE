@@ -2,6 +2,8 @@ package com.delivery.justonebite.order.presentation.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.doNothing;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,10 +22,13 @@ import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.application.service.OrderService;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
+import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import com.delivery.justonebite.order.stub.StubData;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +38,12 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -81,13 +92,17 @@ class OrderControllerTest {
         given(principal.getUser().getUserRole()).willReturn(userRole);
 
         String role = userRole.getRole();
-        if (!role.startsWith("ROLE_")) role = "ROLE_" + role;
+        if (!role.startsWith("ROLE_"))
+            role = "ROLE_" + role;
 
         return new UsernamePasswordAuthenticationToken(
             principal, "N/A", List.of(new SimpleGrantedAuthority(role))
         );
     }
 
+    /**
+     * 주문 생성
+     */
     @Test
     @DisplayName("POST /v1/orders - 201 Created : 주문 완료되면 201 상태값 표시")
     void createOrder_Success_Returns_Created() throws Exception {
@@ -123,9 +138,9 @@ class OrderControllerTest {
                 .content(requestBody))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.errorCode").value("FORBIDDEN_ACCESS"))
-            .andExpect(jsonPath("$.description").value("접근 권한이 없습니다."));
+            .andExpect(jsonPath("$.description").value("접근 권한이 없습니다."))
+            .andExpect(jsonPath("$.status").value(403));
 
-        // 권한 실패로 인해 서비스 메서드가 호출되지 않았는지 검증
         verify(orderService, times(1)).createOrder(any(CreateOrderRequest.class), any(User.class));
     }
 
@@ -148,6 +163,54 @@ class OrderControllerTest {
 
         // 서비스 메서드가 실제로 호출되었는지 확인
         verify(orderService, times(1)).createOrder(any(CreateOrderRequest.class), any(User.class));
+    }
+
+    /**
+     * 주문 목록 조회
+     */
+    @Test
+    @DisplayName("GET /v1/orders - 200 OK : CUSTOMER의 주문 목록 정상 조회되면 200 상태값 표시")
+    void getCustomerOrders_Success_Returns_Ok() throws Exception {
+        List<CustomerOrderResponse> content = StubData.getCustomerOrderResponse(ORDER_ID);
+
+        // 페이지 mock
+        Page<CustomerOrderResponse> mockPage = new PageImpl<>(content,
+            PageRequest.of(0, 10, Sort.by("createdAt")), 100);
+
+        // getCustomerOrders가 호출될 때 mockPage를 반환하도록 설정
+        given(orderService.getCustomerOrders(anyInt(), anyInt(), anyString(), any(User.class)))
+            .willReturn(mockPage);
+
+        mockMvc.perform(get("/v1/orders")
+                .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort-by", "createdAt"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(content.size()))
+            .andExpect(jsonPath("$.totalPages").value(10))
+            .andExpect(jsonPath("$.totalElements").value(100))
+            .andExpect(jsonPath("$.content[0].orderId").value(ORDER_ID.toString()))
+            .andExpect(jsonPath("$.content[0].shopName").value("마라탕웨이"));
+    }
+
+    @Test
+    @DisplayName("GET /v1/orders - 403 FORBIDDEN : 유저 권한이 CUSTOMER가 아닐 경우")
+    void getCustomerOrders_Fails_Returns_Forbidden() throws Exception {
+        doThrow(new CustomException(ErrorCode.FORBIDDEN_ACCESS))
+            .when(orderService).getCustomerOrders(anyInt(), anyInt(), anyString(), any(User.class));
+
+        mockMvc.perform(get("/v1/orders")
+                .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort-by", "createdAt"))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.errorCode").value("FORBIDDEN_ACCESS"))
+            .andExpect(jsonPath("$.description").value("접근 권한이 없습니다."))
+            .andExpect(jsonPath("$.status").value(403));
     }
 }
 
