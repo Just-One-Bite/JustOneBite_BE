@@ -62,6 +62,8 @@ public enum ErrorCode {
     ORDER_USER_NOT_MATCH("주문 상의 주문자와 동일한 회원이 아닙니다.", HttpStatus.FORBIDDEN),
     INVALID_CANCEL_STATUS_VALUE("취소 요청 상태는 ORDER_CANCELLED 여야 합니다.", HttpStatus.BAD_REQUEST),
 
+    //결제
+    PAYMENT_NOT_FOUND("결제정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
     ;
 
     private final String description;
