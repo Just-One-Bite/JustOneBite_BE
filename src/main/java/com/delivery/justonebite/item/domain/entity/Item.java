@@ -1,7 +1,7 @@
 package com.delivery.justonebite.item.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
-import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
+import com.delivery.justonebite.item.presentation.dto.request.ItemUpdateRequest;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import jakarta.persistence.*;
 import lombok.Getter;
