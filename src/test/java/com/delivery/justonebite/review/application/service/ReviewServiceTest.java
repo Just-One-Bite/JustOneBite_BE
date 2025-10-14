@@ -314,7 +314,7 @@ class ReviewServiceTest {
 
         UpdateReviewRequest req = new UpdateReviewRequest("수정", 4);
 
-        assertThatThrownBy(() -> sut.update(rid, 1L, UserRole.CUSTOMER, req))
+        assertThatThrownBy(() -> sut.update(rid, 1L, req))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
     }
@@ -345,7 +345,7 @@ class ReviewServiceTest {
 
         UpdateReviewRequest req = new UpdateReviewRequest(null, null);
 
-        ReviewResponse res = sut.update(rid, author, UserRole.CUSTOMER, req);
+        ReviewResponse res = sut.update(rid, author, req);
 
         assertThat(res).isNotNull();
         then(review).should(never()).updateContent(anyString());
@@ -377,7 +377,7 @@ class ReviewServiceTest {
 
         UpdateReviewRequest req = new UpdateReviewRequest("맛 최고", 5);
 
-        ReviewResponse res = sut.update(rid, author, UserRole.CUSTOMER, req);
+        ReviewResponse res = sut.update(rid, author, req);
 
         assertThat(res).isNotNull();
         then(review).should().updateContent("맛 최고");
