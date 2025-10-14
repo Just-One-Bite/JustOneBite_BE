@@ -11,7 +11,7 @@ public enum ErrorCode {
 
     // 예외가 생길때마다 이런식으로 추가
     // 인증/인가
-    INVALID_MEMBER("유효하지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_MEMBER("유효하지 않은 사용자입니다.", HttpStatus.FORBIDDEN),
     NOT_VALID_TOKEN("토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
     EXPIRED_TOKEN("토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     FORBIDDEN_ACCESS("접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
@@ -40,6 +40,7 @@ public enum ErrorCode {
     UNAUTHORIZED_SHOP_ACCESS("본인의 가게만 삭제할 수 있습니다", HttpStatus.FORBIDDEN),
     ALREADY_PENDING_DELETE("이미 승인 대기중인 삭제 요청입니다.",HttpStatus.CONFLICT),
     CATEGORY_NOT_FOUND("존재하지 않는 카테고리입니다.",HttpStatus.NOT_FOUND),
+    NOT_COMPLETED_ORDER_EXISTS("완료되지 않은 주문이 존재합니다. 가게를 삭제할 수 없습니다.",HttpStatus.BAD_REQUEST),
 
     //리뷰
     INVALID_RATING_RANGE("평점은 1~5 범위여야 합니다.", HttpStatus.BAD_REQUEST),
@@ -62,6 +63,8 @@ public enum ErrorCode {
     ORDER_USER_NOT_MATCH("주문 상의 주문자와 동일한 회원이 아닙니다.", HttpStatus.FORBIDDEN),
     INVALID_CANCEL_STATUS_VALUE("취소 요청 상태는 ORDER_CANCELLED 여야 합니다.", HttpStatus.BAD_REQUEST),
 
+    //결제
+    PAYMENT_NOT_FOUND("결제정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
     ;
 
     private final String description;

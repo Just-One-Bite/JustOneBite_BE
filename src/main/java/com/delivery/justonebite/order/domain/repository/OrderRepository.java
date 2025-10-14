@@ -1,6 +1,7 @@
 package com.delivery.justonebite.order.domain.repository;
 
 import com.delivery.justonebite.order.domain.entity.Order;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,7 +17,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     boolean existsByIdAndCustomer_Id(UUID id, Long userId);
 
     boolean existsByIdAndShop_OwnerId(UUID id, Long userId);
-
 
     //가게별 리뷰 목록 조회
     Page<Order> findAllByShop_Id(UUID shopId, Pageable pageable);
