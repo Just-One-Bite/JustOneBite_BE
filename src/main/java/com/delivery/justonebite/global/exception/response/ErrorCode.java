@@ -15,12 +15,13 @@ public enum ErrorCode {
     NOT_VALID_TOKEN("토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
     EXPIRED_TOKEN("토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     FORBIDDEN_ACCESS("접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    DELETED_ACCOUNT("탈퇴 처리된 유저입니다.", HttpStatus.FORBIDDEN),
 
     // 유저
     ROLE_NOT_FOUND("권한을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     EMAIL_ALREADY_EXISTS("사용중인 이메일입니다.", HttpStatus.CONFLICT),
     NOT_FOUND_USER("유저를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    INVALID_PASSWORD("이메일이 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_PASSWORD("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     // 공통
     INVALID_INPUT_DATA("잘못된 입력 데이터입니다.", HttpStatus.BAD_REQUEST),
