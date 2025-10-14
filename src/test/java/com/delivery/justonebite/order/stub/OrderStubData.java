@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import org.mockito.Mockito;
 
-public class StubData {
+public class OrderStubData {
 
     public static class MockData {
         private static User mockUser(Long userId) {
@@ -124,5 +124,13 @@ public class StubData {
             MockData.getMockOrderItemsDto(),
             null // TODO: 추후 수정 예정
         );
+    }
+
+    public static String getUpdateOrderStatusRequest() {
+        return """
+            {
+            	"newStatus" : "ORDER_ACCEPTED"
+            }
+            """;
     }
 }

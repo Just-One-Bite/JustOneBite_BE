@@ -183,7 +183,7 @@ public class OrderService {
     private void authorizeOwner(User user) {
         authorizeUser(user);
         if (!(user.getUserRole().equals(UserRole.OWNER))) {
-            throw new CustomException(ErrorCode.INVALID_USER_ROLE);
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 

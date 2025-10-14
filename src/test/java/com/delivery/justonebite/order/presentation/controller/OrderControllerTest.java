@@ -1,13 +1,11 @@
 package com.delivery.justonebite.order.presentation.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +13,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,17 +22,15 @@ import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.application.service.OrderService;
-import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
+import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
-import com.delivery.justonebite.order.stub.StubData;
+import com.delivery.justonebite.order.stub.OrderStubData;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -45,14 +42,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(controllers = OrderController.class)
@@ -111,7 +105,7 @@ class OrderControllerTest {
 
         willDoNothing().given(orderService).createOrder(any(CreateOrderRequest.class), any(User.class));
 
-        String requestBody = StubData.getCreateOrderRequest().formatted(SHOP_ID, ITEM_ID, ITEM_ID);
+        String requestBody = OrderStubData.getCreateOrderRequest().formatted(SHOP_ID, ITEM_ID, ITEM_ID);
 
         mockMvc.perform(post("/v1/orders")
                 .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
@@ -132,7 +126,7 @@ class OrderControllerTest {
         doThrow(new CustomException(ErrorCode.FORBIDDEN_ACCESS))
             .when(orderService).createOrder(any(CreateOrderRequest.class), any(User.class));
 
-        String requestBody = StubData.getCreateOrderRequest().formatted(SHOP_ID, ITEM_ID, ITEM_ID);
+        String requestBody = OrderStubData.getCreateOrderRequest().formatted(SHOP_ID, ITEM_ID, ITEM_ID);
         mockMvc.perform(post("/v1/orders")
                 .with(authentication(auth(USER_ID, UserRole.OWNER)))
                 .with(csrf())
@@ -152,7 +146,7 @@ class OrderControllerTest {
         doThrow(new CustomException(ErrorCode.TOTAL_PRICE_NOT_MATCH))
             .when(orderService).createOrder(any(CreateOrderRequest.class), any(User.class));
 
-        String requestBody = StubData.getCreateOrderRequest().formatted(SHOP_ID, ITEM_ID, ITEM_ID);
+        String requestBody = OrderStubData.getCreateOrderRequest().formatted(SHOP_ID, ITEM_ID, ITEM_ID);
 
         mockMvc.perform(post("/v1/orders")
                 .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
@@ -173,7 +167,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("GET /v1/orders - 200 OK : CUSTOMER의 주문 목록 정상 조회되면 200 상태값 표시")
     void getCustomerOrders_Success_Returns_Ok() throws Exception {
-        List<CustomerOrderResponse> content = StubData.getCustomerOrderResponse(ORDER_ID);
+        List<CustomerOrderResponse> content = OrderStubData.getCustomerOrderResponse(ORDER_ID);
 
         // 페이지 mock
         Page<CustomerOrderResponse> mockPage = new PageImpl<>(content,
@@ -185,6 +179,7 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/v1/orders")
                 .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("page", "1")
                 .param("size", "10")
@@ -205,6 +200,7 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/v1/orders")
                 .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("page", "1")
                 .param("size", "10")
@@ -221,13 +217,14 @@ class OrderControllerTest {
     @Test
     @DisplayName("GET /v1/orders/{order-id} - 200 OK : 주문 상세정보 정상 조회되면 200 상태값 표시")
     void getOrderDetails_Success_Returns_Ok() throws Exception {
-        OrderDetailsResponse content = StubData.getOrderDetailsResponse(ORDER_ID, USER_ID, SHOP_ID);
+        OrderDetailsResponse content = OrderStubData.getOrderDetailsResponse(ORDER_ID, USER_ID, SHOP_ID);
 
         given(orderService.getOrderDetails(eq(ORDER_ID), any(User.class)))
             .willReturn(content);
 
         mockMvc.perform(get("/v1/orders/{order-id}", ORDER_ID)
                 .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.orderId").value(ORDER_ID.toString()))
@@ -245,10 +242,48 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/v1/orders/{order-id}", ORDER_ID)
                 .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.errorCode").value("ORDER_NOT_FOUND"))
             .andExpect(jsonPath("$.description").value("주문을 찾을 수 없습니다."))
             .andExpect(jsonPath("$.status").value(404));
+    }
+
+    /**
+     * 주문 상태 변경
+     */
+    @Test
+    @DisplayName("PATCH /v1/orders/{order-id}/status - 200 OK : 주문 상태 변경 성공하면 200 상태값 표시")
+    void updateOrderStatus_Success_Returns_Ok() throws Exception {
+        String requestBody = OrderStubData.getUpdateOrderStatusRequest();
+
+        willDoNothing().given(orderService).updateOrderStatus(eq(ORDER_ID), any(UpdateOrderStatusRequest.class), any(User.class));
+
+        mockMvc.perform(patch("/v1/orders/{order-id}/status", ORDER_ID)
+                .with(authentication(auth(USER_ID, UserRole.OWNER)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("GET /v1/orders/{order-id}/status - 403 FORBIDDEN : 유저 권한이 OWNER가 아닐 경우")
+    void updateOrderStatus_Fails_Returns_Forbidden() throws Exception {
+        doThrow(new CustomException(ErrorCode.FORBIDDEN_ACCESS))
+            .when(orderService).updateOrderStatus(eq(ORDER_ID), any(UpdateOrderStatusRequest.class), any(User.class));
+
+        String requestBody = OrderStubData.getUpdateOrderStatusRequest();
+
+        mockMvc.perform(patch("/v1/orders/{order-id}/status", ORDER_ID)
+                .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.errorCode").value("FORBIDDEN_ACCESS"))
+            .andExpect(jsonPath("$.description").value("접근 권한이 없습니다."))
+            .andExpect(jsonPath("$.status").value(403));
     }
 }
