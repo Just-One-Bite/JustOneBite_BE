@@ -42,13 +42,12 @@ public class PaymentService {
     // TODO: ORDER 연결
     @Transactional
     public PaymentResponse requestPayment(PaymentRequest request) {
-        boolean isValid = validatePayment(request);
-        Payment payment = Payment.createPayment(request.orderId(), request.orderName(), request.amount());
+//        boolean isValid = validatePayment(request);
 
+        Payment payment = Payment.createPayment(request.orderId(), request.orderName(), request.amount());
         paymentRepository.save(payment);
 
-        // TODO: 결제 실패 로그, 주문 취소 처리 등
-        if (!isValid) {
+        if (!request.status()) {
             payment.updateStatus(PaymentStatus.FAIL);
             return new PaymentFailResponse(request.orderId(), "PAY_PROCESS_CANCELED","사용자에 의해 결제가 취소되었습니다.");
         }
@@ -56,9 +55,7 @@ public class PaymentService {
         return new PaymentSuccessResponse(request.orderId(), payment.getPaymentId(), request.amount());
     }
 
-    /*
-        결제 승인 (서버)
-     */
+
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentId())
@@ -88,13 +85,6 @@ public class PaymentService {
 
     }
 
-    //TODO: 거래 취소 api
-
-
-    // 결제 유효 검증
-    // TODO: 상황별 오류 코드 출력
-    private boolean validatePayment(PaymentRequest request) {
-        return request.amount() > 0 || request.orderName() != null;
-    }
+    //TODO: 부분 거래 취소 api
 
 }
