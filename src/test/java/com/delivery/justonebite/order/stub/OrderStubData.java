@@ -8,6 +8,7 @@ import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.presentation.dto.OrderItemDto;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
+import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.OrderInfoDto;
 import com.delivery.justonebite.shop.domain.entity.Shop;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import org.mockito.Mockito;
 
 public class OrderStubData {
+
     public static class MockData {
         private static User mockUser(Long userId) {
             User user = Mockito.mock(User.class);
@@ -32,7 +34,7 @@ public class OrderStubData {
             return shop;
         }
 
-        public static Order getMockOrder(UUID orderId, Long userId, UUID shopId) {
+        public static Order getMockOrder(Long userId, UUID shopId) {
             // 의존성
             User mockUser = mockUser(userId);
             Shop mockShop = mockShop(shopId, "Stub Shop Name");
@@ -51,7 +53,7 @@ public class OrderStubData {
         }
 
         public static OrderInfoDto getMockOrderInfoDto(Order order) {
-            return OrderInfoDto.toDto(getMockOrder(order.getId(), order.getCustomer().getId(), order.getShop().getId()));
+            return OrderInfoDto.toDto(getMockOrder(order.getCustomer().getId(), order.getShop().getId()));
         }
 
         public static List<OrderItemDto> getMockOrderItemsDto() {
@@ -69,8 +71,8 @@ public class OrderStubData {
             );
         }
 
-        public static List<OrderHistory> getOrderHistoryList(UUID orderId, Long userId, UUID shopId) {
-            Order mockOrder = MockData.getMockOrder(orderId, userId, shopId);
+        public static List<OrderHistory> getOrderHistoryList(Long userId, UUID shopId) {
+            Order mockOrder = MockData.getMockOrder(userId, shopId);
 
             return List.of(
                 OrderHistory.create(
@@ -135,7 +137,7 @@ public class OrderStubData {
 
     public static OrderDetailsResponse getOrderDetailsResponse(UUID orderId, Long userId, UUID shopId) {
 
-        Order mockOrder = MockData.getMockOrder(orderId, userId, shopId);
+        Order mockOrder = MockData.getMockOrder(userId, shopId);
 
         return new OrderDetailsResponse(
             orderId,
@@ -155,7 +157,20 @@ public class OrderStubData {
     }
 
     public static GetOrderStatusResponse getOrderStatusResponse(UUID orderId, Long userId, UUID shopId) {
-        List<OrderHistory> list = MockData.getOrderHistoryList(orderId, userId, shopId);
+        List<OrderHistory> list = MockData.getOrderHistoryList(userId, shopId);
         return GetOrderStatusResponse.toDto(orderId, list);
+    }
+
+    public static String getCancelOrderRequest() {
+        return """
+            {
+            	"status" : "ORDER_CANCELLED"
+            }
+            """;
+    }
+
+    public static OrderCancelResponse getCancelOrderResponse(Long userId, UUID shopId) {
+        Order mockOrder = MockData.getMockOrder(userId, shopId);
+        return OrderCancelResponse.toDto(mockOrder, LocalDateTime.now());
     }
 }
