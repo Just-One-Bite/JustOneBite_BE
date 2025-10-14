@@ -11,12 +11,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+ 
+import java.util.Optional;
+ 
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface ShopRepository extends JpaRepository<Shop, UUID> {
 
+ 
+    //이름, 설명으로 검색
     @Query("select s.id as id, s.averageRating as averageRating from Shop s where s.id in :ids")
     List<ShopAvgProjection> findAvgByIds(@Param("ids") List<UUID> ids);
 
@@ -50,4 +55,8 @@ UPDATE h_shop s
     Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
             String name, String description, Pageable pageable
     );
+
+    Optional<Shop> findByIdAndDeletedAtIsNull(UUID id);
+
+
 }
