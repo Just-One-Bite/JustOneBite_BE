@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.doNothing;
@@ -25,6 +26,7 @@ import com.delivery.justonebite.order.application.service.OrderService;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.order.stub.StubData;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
@@ -212,6 +214,41 @@ class OrderControllerTest {
             .andExpect(jsonPath("$.description").value("접근 권한이 없습니다."))
             .andExpect(jsonPath("$.status").value(403));
     }
+
+    /**
+     * 주문 상세정보 조회
+     */
+    @Test
+    @DisplayName("GET /v1/orders/{order-id} - 200 OK : 주문 상세정보 정상 조회되면 200 상태값 표시")
+    void getOrderDetails_Success_Returns_Ok() throws Exception {
+        OrderDetailsResponse content = StubData.getOrderDetailsResponse(ORDER_ID, USER_ID, SHOP_ID);
+
+        given(orderService.getOrderDetails(eq(ORDER_ID), any(User.class)))
+            .willReturn(content);
+
+        mockMvc.perform(get("/v1/orders/{order-id}", ORDER_ID)
+                .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.orderId").value(ORDER_ID.toString()))
+            .andExpect(jsonPath("$.orderItems.length()").value(2))
+            .andExpect(jsonPath("$.orderInfo.address").value("서울시 종로구 사직로 125길 00빌딩"))
+            .andExpect(jsonPath("$.orderInfo.orderRequest").value("단무지 빼주세요"))
+            .andExpect(jsonPath("$.orderItems[0].price").value(20000));
+    }
+
+    @Test
+    @DisplayName("POST /v1/orders/{order-id} - 404 NOT_FOUND : 주문을 찾을 수 없는 경우")
+    void getOrderDetails_Fails_Returns_Not_Found() throws Exception {
+        doThrow(new CustomException(ErrorCode.ORDER_NOT_FOUND))
+            .when(orderService).getOrderDetails(eq(ORDER_ID), any(User.class));
+
+        mockMvc.perform(get("/v1/orders/{order-id}", ORDER_ID)
+                .with(authentication(auth(USER_ID, UserRole.CUSTOMER)))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.errorCode").value("ORDER_NOT_FOUND"))
+            .andExpect(jsonPath("$.description").value("주문을 찾을 수 없습니다."))
+            .andExpect(jsonPath("$.status").value(404));
+    }
 }
-
-

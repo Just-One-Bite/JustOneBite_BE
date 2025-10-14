@@ -107,7 +107,7 @@ public class OrderService {
         authorizeUser(user);
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         List<OrderItemDto> orderItems = orderItemRepository
             .findAllByOrder(order)
