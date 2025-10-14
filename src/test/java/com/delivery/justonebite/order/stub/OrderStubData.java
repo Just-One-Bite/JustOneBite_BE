@@ -11,6 +11,7 @@ import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusRe
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.OrderInfoDto;
+import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.ShopInfoDto;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.user.domain.entity.User;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class OrderStubData {
             return user;
         }
 
-        private static Shop mockShop(UUID shopId, String shopName) {
+        public static Shop mockShop(UUID shopId, String shopName) {
             Shop shop = Mockito.mock(Shop.class);
             given(shop.getId()).willReturn(shopId);
             given(shop.getName()).willReturn(shopName);
@@ -54,6 +55,10 @@ public class OrderStubData {
 
         public static OrderInfoDto getMockOrderInfoDto(Order order) {
             return OrderInfoDto.toDto(getMockOrder(order.getCustomer().getId(), order.getShop().getId()));
+        }
+
+        public static ShopInfoDto getShopInfoDto(Shop shop) {
+            return ShopInfoDto.toDto(shop.getId(), shop.getName());
         }
 
         public static List<OrderItemDto> getMockOrderItemsDto() {
@@ -138,10 +143,12 @@ public class OrderStubData {
     public static OrderDetailsResponse getOrderDetailsResponse(UUID orderId, Long userId, UUID shopId) {
 
         Order mockOrder = MockData.getMockOrder(userId, shopId);
+        Shop shop = MockData.mockShop(shopId, "춘리마라탕");
 
         return new OrderDetailsResponse(
             orderId,
             LocalDateTime.now().minusMinutes(30),
+            MockData.getShopInfoDto(shop),
             MockData.getMockOrderInfoDto(mockOrder),
             MockData.getMockOrderItemsDto(),
             null // TODO: 추후 수정 예정
