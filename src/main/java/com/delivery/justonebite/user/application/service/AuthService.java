@@ -20,7 +20,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public SignupResponse signup(SignupRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
+        if (userRepository.existsByEmailIncludeDeleted(request.email())) {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         User user = request.toUser(passwordEncoder.encode(request.password()));

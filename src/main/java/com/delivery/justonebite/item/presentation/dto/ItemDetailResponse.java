@@ -11,8 +11,7 @@ public record ItemDetailResponse(
     String name,
     int price,
     String image,
-    String description,
-    boolean isHidden
+    String description
 ) {
     public static ItemDetailResponse from(Item item) {
         return ItemDetailResponse.builder()
@@ -21,7 +20,6 @@ public record ItemDetailResponse(
             .price(item.getPrice())
             .image(item.getImage())
             .description(item.getDescription())
-            .isHidden(item.isHidden())
             .build();
     }
 }
