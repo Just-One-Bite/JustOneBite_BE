@@ -1,6 +1,7 @@
 package com.delivery.justonebite.order.domain.repository;
 
 import com.delivery.justonebite.order.domain.entity.Order;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

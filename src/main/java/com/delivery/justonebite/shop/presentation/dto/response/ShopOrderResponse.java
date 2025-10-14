@@ -1,7 +1,6 @@
 package com.delivery.justonebite.shop.presentation.dto.response;
 
 import java.util.List;
-
 public record ShopOrderResponse(
         long totalElements,
         int totalPages,
@@ -22,6 +21,7 @@ public record ShopOrderResponse(
     }
 
     // 내부 static record: 주문 하나하나의 정보 --> 응답 api 구조 편의성
+
     public static record OrderSummary(
             String orderId,
             String shopName,

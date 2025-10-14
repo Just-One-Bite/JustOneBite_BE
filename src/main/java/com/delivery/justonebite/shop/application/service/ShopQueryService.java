@@ -44,7 +44,7 @@ public class ShopQueryService {
         List<UUID> shopIds = shops.stream().map(Shop::getId).toList();
 
         //리뷰 집계 결과 조회 (평균, 리뷰수)
-        Map<UUID, RatingAggResponse> aggMap = reviewAggregationService.getAggByShopIds(shopIds);
+        Map<UUID, RatingAggResponse> aggMap = (Map<UUID, RatingAggResponse>) shopRepository.findAvgByIds(shopIds);
 
         //각 가게에 평균 평점 주입 후 DTO 변환
         return shops.map(shop -> {
@@ -60,7 +60,7 @@ public class ShopQueryService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
 
         Map<UUID, RatingAggResponse> aggMap =
-                reviewAggregationService.getAggByShopIds(List.of(shop.getId()));
+                (Map<UUID, RatingAggResponse>) shopRepository.findAvgByIds(List.of(shop.getId()));
 
         RatingAggResponse agg = aggMap.get(shop.getId());
         double avgRating = (agg != null) ? agg.avgRating() : 0.0;
