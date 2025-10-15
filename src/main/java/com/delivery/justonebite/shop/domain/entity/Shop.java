@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -107,5 +108,6 @@ public class Shop extends BaseEntity {
         this.deleteAcceptStatus = RejectStatus.PENDING;
         this.deleteRejectReason = null;  // 관리자가 승인 후 작성됨
     }
+
 
 }

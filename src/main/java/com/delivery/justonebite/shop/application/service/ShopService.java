@@ -19,6 +19,7 @@ import com.delivery.justonebite.shop.presentation.dto.request.ShopCreateRequest;
 import com.delivery.justonebite.shop.presentation.dto.request.ShopUpdateRequest;
 import com.delivery.justonebite.shop.presentation.dto.response.ShopDeleteResponse;
 import com.delivery.justonebite.shop.presentation.dto.response.ShopOrderResponse;
+import com.delivery.justonebite.shop.presentation.dto.response.ShopUpdateResponse;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -85,14 +86,14 @@ public class ShopService {
 
     //가게 수정
     @Transactional
-    public Shop updateShop(ShopUpdateRequest request, UUID shopId, Long userId, UserRole role) {
+    public ShopUpdateResponse updateShop(ShopUpdateRequest request, UUID shopId, Long userId, UserRole role) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SHOP_NOT_FOUND));
-
+        // 권한 체크
         if (!(role == UserRole.OWNER || role == UserRole.MASTER || role == UserRole.MANAGER)) {
             throw new CustomException(ErrorCode.INVALID_USER_ROLE);
         }
-
+        // OWNER 본인 가게 여부 확인
         if (role == UserRole.OWNER && !shop.getOwnerId().equals(userId)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_SHOP_ACCESS);
         }
@@ -115,7 +116,7 @@ public class ShopService {
                 shop.getCategories().add(sc);
             }
         }
-        return shop;
+        return new ShopUpdateResponse(shop.getUpdatedAt(),shop.getUpdatedBy());
     }
 
     //가게 삭제
@@ -139,7 +140,7 @@ public class ShopService {
         if (shop.getDeleteAcceptStatus() == RejectStatus.PENDING) {
             throw new CustomException(ErrorCode.ALREADY_PENDING_DELETE);
         }
-//        주문 상태가 COMPLETED가 아니면 삭제 불가
+        //  주문 상태가 COMPLETED가 아니면 삭제 불가
         boolean notCompletedOrder = orderHistoryRepository.existsByOrder_Shop_IdAndStatusNot(shopId, OrderStatus.COMPLETED);
         if(notCompletedOrder) {
             throw new CustomException(ErrorCode.NOT_COMPLETED_ORDER_EXISTS);
@@ -158,12 +159,12 @@ public class ShopService {
     // 가게별 주문 목록 조회
     @Transactional(readOnly = true)
     public ShopOrderResponse getOrdersByShop(UUID shopId, User user, int page, int size, String sortBy) {
-        validateOwner(user);
 
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        if (!shop.getOwnerId().equals(user.getId())) {
+        //Role이 Owner인 경우 본인 가게만 접근 가능하도록 추가 검증
+        if (user.getUserRole().equals(UserRole.OWNER) && !shop.getOwnerId().equals(user.getId())) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
@@ -186,14 +187,6 @@ public class ShopService {
         return ShopOrderResponse.from(orderSummaries);
     }
 
-    //권한 검사
-    private void validateOwner(User user) {
-        if (user == null) {
-            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-        if (!user.getUserRole().equals(UserRole.OWNER)) {
-            throw new CustomException(ErrorCode.INVALID_USER_ROLE);
-        }
-    }
+
 
 }
