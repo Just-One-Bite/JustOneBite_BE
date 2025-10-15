@@ -53,16 +53,7 @@ public class ShopQueryService {
         //조회된 모든 shopId 추출
         List<UUID> shopIds = shops.stream().map(Shop::getId).toList();
 
-//        //리뷰 집계 결과 조회 (평균, 리뷰수)
-//        Map<UUID, RatingAggResponse> aggMap = (Map<UUID, RatingAggResponse>) shopRepository.findAvgByIds(shopIds);
 
-
-//        //각 가게에 평균 평점 주입 후 DTO 변환
-//        return shops.map(shop -> {
-//            RatingAggResponse agg = aggMap.get(shop.getId());
-//            double avgRating = (agg != null) ? agg.avgRating() : 0.0;  // null 방지
-//            return ShopSearchResponse.from(shop, avgRating);
-//        });
         // ShopAvgProjection 조회
         List<ShopAvgProjection> avgList = shopRepository.findAvgByIds(shopIds);
 
