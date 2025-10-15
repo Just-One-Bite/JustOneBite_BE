@@ -19,10 +19,10 @@ import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.order.application.stub.OrderStubData;
+import com.delivery.justonebite.order.application.stub.OrderTestMocks;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.entity.OrderHistory;
 import com.delivery.justonebite.order.domain.entity.OrderItem;
-import com.delivery.justonebite.order.domain.entity.OrderItemId;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.domain.factory.OrderFactory;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
@@ -128,56 +128,6 @@ class OrderServiceTest {
         );
     }
 
-    private Shop mockShop(UUID shopId) {
-        Shop shop = mock(Shop.class);
-        lenient().doReturn(shopId).when(shop).getId();
-        lenient().doReturn("테스트샵").when(shop).getName();
-        return shop;
-    }
-
-    private Item mockItem(UUID itemId, int price) {
-        Item item = mock(Item.class);
-        lenient().doReturn(itemId).when(item).getItemId();
-        lenient().doReturn(price).when(item).getPrice();
-        lenient().doReturn("테스트상품").when(item).getName();
-        return item;
-    }
-
-    private Order mockOrder(UUID orderId, Long customerId, UUID shopId, int totalPrice) {
-        Shop shop = mock(Shop.class);
-        Order order = mock(Order.class);
-        lenient().doReturn(orderId).when(order).getId();
-        lenient().doReturn(shop).when(order).getShop();
-        lenient().doReturn(mockCustomer).when(order).getCustomer();
-        lenient().doReturn(totalPrice).when(order).getTotalPrice();
-        lenient().doReturn(OrderStatus.PENDING).when(order).getCurrentStatus();
-        return order;
-    }
-
-    private OrderItemId mockOrderItemId(Item item) {
-        OrderItemId orderItemId = mock(OrderItemId.class);
-        lenient().doReturn(item.getItemId()).when(orderItemId).getItem();
-        return orderItemId;
-    }
-
-    private OrderItem mockOrderItem(UUID itemId, int price) {
-        Item item = mockItem(itemId, price);
-        OrderItemId orderItemId = mockOrderItemId(item);
-        OrderItem orderItem = mock(OrderItem.class);
-        lenient().doReturn(orderItemId).when(orderItem).getId();
-        lenient().doReturn(1).when(orderItem).getCount();
-        lenient().doReturn(price).when(orderItem).getPrice();
-        return orderItem;
-    }
-
-    private OrderHistory mockOrderHistory(Order order, OrderStatus status) {
-        OrderHistory history = mock(OrderHistory.class);
-        lenient().doReturn(UUID.randomUUID()).when(history).getId();
-        lenient().doReturn(order).when(history).getOrder();
-        lenient().doReturn(status).when(history).getStatus();
-        lenient().doReturn(LocalDateTime.now()).when(history).getCreatedAt();
-        return history;
-    }
 
     @Test
     @DisplayName("createOrder: 주문 생성 성공")
@@ -186,13 +136,11 @@ class OrderServiceTest {
         UUID shopId = UUID.randomUUID();
 
         final int expectedTotalPrice = 35000;
-        Order mockOrder = mockOrder(orderId, USER_ID, shopId, expectedTotalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, expectedTotalPrice);
 
-        Item mockItem1 = mockItem(UUID.randomUUID(), 15000);
-        Item mockItem2 = mockItem(UUID.randomUUID(), 20000);
-        List<Item> expectedFoundItems = List.of(mockItem1, mockItem2);
+        List<Item> expectedFoundItems = List.of(OrderTestMocks.mockItem(UUID.randomUUID(), 15000), OrderTestMocks.mockItem(UUID.randomUUID(), 20000));
 
-        Shop mockShop = mockShop(shopId);
+        Shop mockShop = OrderTestMocks.mockShop(shopId);
 
         CreateOrderRequest request = new CreateOrderRequest(
             shopId,
@@ -264,8 +212,8 @@ class OrderServiceTest {
         final int clientRequestTotalPrice = 35000;
         final int calculatedTotalPrice = 40000;
 
-        List<Item> expectedFoundItems = List.of(mockItem(UUID.randomUUID(), 15000),
-            mockItem(UUID.randomUUID(), 20000));
+        List<Item> expectedFoundItems = List.of(OrderTestMocks.mockItem(UUID.randomUUID(), 15000),
+            OrderTestMocks.mockItem(UUID.randomUUID(), 20000));
 
         CreateOrderRequest request = new CreateOrderRequest(
             shopId,
@@ -278,8 +226,8 @@ class OrderServiceTest {
         );
 
         // OrderFactory가 반환하는 객체 : getTotalPrice() 호출 시 서버 계산 금액 반환해야 함!
-        Order mockOrder = mockOrder(UUID.randomUUID(), USER_ID, shopId, calculatedTotalPrice);
-        Shop mockShop = mockShop(shopId);
+        Order mockOrder = OrderTestMocks.mockOrder(UUID.randomUUID(), mockCustomer, calculatedTotalPrice);
+        Shop mockShop = OrderTestMocks.mockShop(shopId);
 
         given(itemRepository.findAllByItemIdIn(any(List.class)))
             .willReturn(expectedFoundItems);
@@ -317,7 +265,7 @@ class OrderServiceTest {
         final int size = 10;
         final String sortBy = "createdAt";
 
-        Order mockOrder = mockOrder(UUID.randomUUID(), USER_ID, shopId, 25000);
+        Order mockOrder = OrderTestMocks.mockOrder(UUID.randomUUID(), mockCustomer, 25000);
         List<Order> orderList = List.of(mockOrder);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortBy));
@@ -364,11 +312,11 @@ class OrderServiceTest {
         UUID shopId = UUID.randomUUID();
 
         final int totalPrice = 50000;
-        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
         List<OrderItem> mockOrderItems = List.of(
-            mockOrderItem(UUID.randomUUID(), 10000),
-            mockOrderItem(UUID.randomUUID(), 20000)
+            OrderTestMocks.mockOrderItem(UUID.randomUUID(), 10000),
+            OrderTestMocks.mockOrderItem(UUID.randomUUID(), 20000)
         );
 
         // 레포지토리 스터빙 (주문 조회 & 주문 아이템 목록 조회)
@@ -411,7 +359,6 @@ class OrderServiceTest {
     @DisplayName("updateOrderStatus : 주문 상태 변경 성공")
     void updateOrderStatus() {
         UUID orderId = UUID.randomUUID();
-        UUID shopId = UUID.randomUUID();
         final OrderStatus NEW_STATUS = OrderStatus.DELIVERING;
 
         UpdateOrderStatusRequest request = new UpdateOrderStatusRequest(
@@ -419,7 +366,7 @@ class OrderServiceTest {
         );
 
         final int totalPrice = 50000;
-        Order mockOrder = mockOrder(orderId, 2L, shopId, totalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockOwner, totalPrice);
 
         // 주문 조회
         given(orderRepository.findById(orderId)).willReturn(Optional.of(mockOrder));
@@ -442,7 +389,7 @@ class OrderServiceTest {
         final OrderStatus NEW_STATUS = OrderStatus.DELIVERING;
 
         final int totalPrice = 50000;
-        Order mockOrder = mockOrder(orderId, 2L, shopId, totalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
         UpdateOrderStatusRequest request = new UpdateOrderStatusRequest(
             NEW_STATUS.name()
@@ -470,12 +417,12 @@ class OrderServiceTest {
         UUID shopId = UUID.randomUUID();
         final int totalPrice = 50000;
 
-        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
         List<OrderHistory> mockOrderHistories = List.of(
-            mockOrderHistory(mockOrder, OrderStatus.PENDING),
-            mockOrderHistory(mockOrder, OrderStatus.DELIVERING),
-            mockOrderHistory(mockOrder, OrderStatus.COMPLETED)
+            OrderTestMocks.mockOrderHistory(mockOrder, OrderStatus.PENDING),
+            OrderTestMocks.mockOrderHistory(mockOrder, OrderStatus.DELIVERING),
+            OrderTestMocks.mockOrderHistory(mockOrder, OrderStatus.COMPLETED)
         );
 
         given(orderHistoryRepository.findAllByOrder_IdOrderByCreatedAtDesc(orderId)).willReturn(
@@ -528,7 +475,7 @@ class OrderServiceTest {
 
         CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
 
-        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
         given(orderRepository.findByIdWithCustomer(eq(orderId)))
             .willReturn(Optional.of(mockOrder));
@@ -557,7 +504,7 @@ class OrderServiceTest {
 
         CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
 
-        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
         given(orderRepository.findByIdWithCustomer(eq(orderId)))
             .willReturn(Optional.of(mockOrder));
@@ -585,7 +532,7 @@ class OrderServiceTest {
 
         CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
 
-        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+        Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
         // Order 엔티티가 5분 이상 지난 시각을 반환하도록 설정
         // Order.updateCurrentStatus 내부 시간 검증 로직에 사용됨
