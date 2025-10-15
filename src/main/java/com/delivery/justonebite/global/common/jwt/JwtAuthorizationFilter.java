@@ -13,8 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -38,46 +36,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String token = jwtUtil.substringToken(bearerJwt);
 
-        if (StringUtils.hasText(token)) {
+        if (token != null && jwtUtil.validateToken(token)) {
+            Claims claims = jwtUtil.extractClaims(token);
+            String email = claims.getSubject();
 
-            log.info(token);
-
-            if (!jwtUtil.validateToken(token)) {
-                log.error("Token Validation Failed: 유효하지 않거나 만료된 토큰입니다.");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다.");
-                return;
-            }
-
-            Claims info = jwtUtil.extractClaims(token);
-            log.info("JWT Claims : {}", info);
-
-            try {
-                setAuthentication(info.getSubject());
-                log.info("Subject : {}", info.getSubject());
-            } catch (UsernameNotFoundException e) {
-                log.error("Authentication Setup Failed - User Not Found: 사용자 인증 정보를 찾을 수 없습니다.}");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "사용자 인증 정보를 찾을 수 없습니다.");
-                return;
-            } catch (Exception e) {
-                log.error("Error: {}", e.getMessage());
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                return;
-            }
-//            if (!jwtUtil.validateToken(token)) {
-//                log.error("Token Error");
-//                return;
-//            }
-//
-//            Claims info = jwtUtil.extractClaims(token);
-//            log.info("JWT Claims : {}", info);
-//
-//            try {
-//                setAuthentication(info.getSubject());
-//                log.info("Subject: {}", info.getSubject());
-//            } catch (Exception e) {
-//                log.error("Error: {}", e.getMessage());
-//                return;
-//            }
+            setAuthentication(email);
         }
 
         chain.doFilter(request, response);
