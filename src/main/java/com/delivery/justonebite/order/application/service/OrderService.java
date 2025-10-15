@@ -107,7 +107,7 @@ public class OrderService {
         authorizeUser(user);
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         List<OrderItemDto> orderItems = orderItemRepository
             .findAllByOrder(order)
@@ -121,7 +121,7 @@ public class OrderService {
 
     private void authorizeCustomer(User user) {
         if (!(user.getUserRole().equals(UserRole.CUSTOMER))) {
-            throw new CustomException(ErrorCode.INVALID_MEMBER);
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 
@@ -183,7 +183,7 @@ public class OrderService {
     private void authorizeOwner(User user) {
         authorizeUser(user);
         if (!(user.getUserRole().equals(UserRole.OWNER))) {
-            throw new CustomException(ErrorCode.INVALID_USER_ROLE);
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 

@@ -3,6 +3,7 @@ package com.delivery.justonebite.shop.presentation.dto.response;
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import org.springframework.data.domain.Page;
 import java.util.List;
 
@@ -38,4 +39,6 @@ public record ShopReviewResponse(
                 page.getContent()
         );
     }
+}
+
 }

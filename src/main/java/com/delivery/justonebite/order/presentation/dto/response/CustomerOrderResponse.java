@@ -14,8 +14,6 @@ public record CustomerOrderResponse(
     UUID orderId,
     @Schema(description = "주문한 가게 이름", example = "마라탕 천국")
     String shopName,
-    @Schema(description = "가게 대표 이미지 URL", example = "https://api.domain.com/images/shop_123.jpg", nullable = true)
-    String shopImage,
     @Schema(description = "현재 주문 상태", example = "DELIVERING")
     String orderStatus,
     @Schema(description = "주문이 접수된 시각", example = "2025-10-13T16:00:00")
