@@ -2,17 +2,18 @@ package com.delivery.justonebite.user.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.user.application.service.AddressService;
+import com.delivery.justonebite.user.presentation.dto.request.DefaultAddressRequest;
 import com.delivery.justonebite.user.presentation.dto.request.RegistAddressRequest;
+import com.delivery.justonebite.user.presentation.dto.response.DefaultAddressResponse;
 import com.delivery.justonebite.user.presentation.dto.response.RegistAddressResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/address")
@@ -28,5 +29,15 @@ public class AddressController {
     ) {
         RegistAddressResponse registedAddress = addressService.registAddress(userDetails, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(registedAddress);
+    }
+
+    // 대표 주소 설정
+    @PatchMapping("/{addressId}")
+    public ResponseEntity<DefaultAddressResponse> updateDefaultAddress(
+            @PathVariable UUID addressId,
+            @RequestBody @Valid DefaultAddressRequest request
+    ) {
+        DefaultAddressResponse updatedDefaultAddress = addressService.updateDefaultAddress(addressId, request);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedDefaultAddress);
     }
 }
