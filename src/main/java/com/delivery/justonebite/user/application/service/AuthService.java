@@ -1,6 +1,7 @@
 package com.delivery.justonebite.user.application.service;
 
 import com.delivery.justonebite.global.common.jwt.JwtUtil;
+import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
@@ -50,6 +51,25 @@ public class AuthService {
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         User user = ((UserDetailsImpl) authentication.getPrincipal()).getUser();
+
+        return issueTokensAndSaveRefreshToken(user);
+    }
+
+    @Transactional
+    public TokenResponse reissue(ReissueRequest request) {
+        if (!jwtUtil.validateToken(request.refreshToken())) {
+            throw new CustomException(ErrorCode.NOT_VALID_TOKEN);
+        }
+
+        String email = jwtUtil.getSubjectFromRefreshToken(request.refreshToken());
+
+        String redisRefreshToken = redisTemplate.opsForValue().get("Refresh Token: " + email);
+        if (redisRefreshToken == null || !redisRefreshToken.equals(request.refreshToken())) {
+            throw new CustomException(ErrorCode.RE_LOGIN_REQUIRED);
+        }
+
+        User user = userRepository.findByEmailIncludeDeleted(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.DELETED_ACCOUNT));
 
         return issueTokensAndSaveRefreshToken(user);
     }
