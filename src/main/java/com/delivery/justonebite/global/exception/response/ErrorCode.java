@@ -21,6 +21,7 @@ public enum ErrorCode {
     ROLE_NOT_FOUND("권한을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     EMAIL_ALREADY_EXISTS("사용중인 이메일입니다.", HttpStatus.CONFLICT),
     NOT_FOUND_USER("유저를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ADDRESS_NOT_FOUND("주소를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_PASSWORD("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     // 공통
