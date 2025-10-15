@@ -1,6 +1,8 @@
 package com.delivery.justonebite.payment.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -55,7 +57,7 @@ public class Payment extends BaseEntity {
 
     public void decreaseBalanceAmount(int amount) {
         if (amount > this.balanceAmount) {
-            throw new IllegalArgumentException("요청 금액이 취소 가능 금액보다 큽니다.");
+            throw new CustomException(ErrorCode.CANCEL_AMOUNT_EXCEEDED);
         }
         this.balanceAmount -= amount;
     }

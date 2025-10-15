@@ -28,7 +28,7 @@ public class PaymentService {
     private final TransactionRepository transactionRepository;
 
     public Payment getPaymentById(UUID paymentId) {
-        return paymentRepository.findById(paymentId)
+        return paymentRepository.findByPaymentId(paymentId)
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
@@ -52,15 +52,14 @@ public class PaymentService {
     }
 
 
+    //TODO: 이미 결제가 완료된 주문을 다시 요청할때
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentId())
-                .orElseThrow(() -> new IllegalArgumentException("결제 요청 내역을 찾을 수 없습니다.")); //TODO: 오류 처리
-
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
         try {
-            // 금액 검증
             if (!payment.getTotalAmount().equals(request.amount())) {
-                throw new IllegalArgumentException("결제 금액이 일치하지 않습니다."); //TODO: 오류 처리
+                throw new CustomException(ErrorCode.PAYMENT_AMOUNT_NOT_MATCH);
             }
 
             Transaction transaction = Transaction.createTransaction(payment, request.amount());
@@ -84,11 +83,10 @@ public class PaymentService {
     @Transactional
     public PaymentCancelResponse cancelPayment(PaymentCancelRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentKey())
-                .orElseThrow(() -> new IllegalArgumentException("해당 결제를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 
-        //TODO: 오류 리턴 방식
         if (PaymentStatus.CANCELED.equals(payment.getStatus())) {
-            throw new IllegalStateException("이미 취소된 결제 내역입니다.");
+            throw new CustomException(ErrorCode.PAYMENT_ALREADY_CANCELED);
         }
 
         payment.decreaseBalanceAmount(request.cancelAmount());
