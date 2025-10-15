@@ -1,27 +1,30 @@
 package com.delivery.justonebite.user.application.service;
 
 import com.delivery.justonebite.global.common.jwt.JwtUtil;
-import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
-import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
+import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
+import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -29,7 +32,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final AuthenticationManager authenticationManager;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
@@ -49,7 +52,7 @@ public class AuthService {
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
         User user = ((UserDetailsImpl) authentication.getPrincipal()).getUser();
 
         return issueTokensAndSaveRefreshToken(user);
@@ -61,12 +64,14 @@ public class AuthService {
             throw new CustomException(ErrorCode.NOT_VALID_TOKEN);
         }
 
-        String email = jwtUtil.getSubjectFromRefreshToken(request.refreshToken());
+        String email = jwtUtil.getSubjectFromToken(request.refreshToken());
 
-        String redisRefreshToken = redisTemplate.opsForValue().get("Refresh Token: " + email);
+        String redisRefreshToken = redisTemplate.opsForValue().get("RT: " + email);
         if (redisRefreshToken == null || !redisRefreshToken.equals(request.refreshToken())) {
             throw new CustomException(ErrorCode.RE_LOGIN_REQUIRED);
         }
+
+        invalidateAccessToken(request.accessToken());
 
         User user = userRepository.findByEmailIncludeDeleted(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.DELETED_ACCOUNT));
@@ -74,11 +79,56 @@ public class AuthService {
         return issueTokensAndSaveRefreshToken(user);
     }
 
+    public void logout(Authentication authentication) {
+        if (authentication == null) {
+            return;
+        }
+        String email = authentication.getName();
+        String accessToken = (String) authentication.getCredentials();
+
+        invalidateTokens(email, accessToken);
+    }
+
+    public void invalidateTokensForCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new CustomException(ErrorCode.NOT_AUTHENTICATED);
+        }
+        String email = authentication.getName();
+        String accessToken = (String) authentication.getCredentials();
+
+        invalidateTokens(email, accessToken);
+    }
+
+    private void invalidateAccessToken(String accessToken) {
+        Long remainingExpiration = jwtUtil.getRemainingExpiration(accessToken);
+        redisTemplate.opsForValue().set(
+                "ATD:" + accessToken,
+                "logout", remainingExpiration,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    private void invalidateTokens(String email, String accessToken) {
+        String refreshTokenKey = "RT: " + email;
+        if (redisTemplate.hasKey(refreshTokenKey)) {
+            redisTemplate.delete(refreshTokenKey);
+        }
+
+        Long remainingExpiration = jwtUtil.getRemainingExpiration(accessToken);
+        redisTemplate.opsForValue().set(
+                "ATD:" + accessToken,
+                "logout",
+                remainingExpiration,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
     private TokenResponse issueTokensAndSaveRefreshToken(User user) {
         TokenResponse tokenResponse = jwtUtil.generateToken(user);
 
         redisTemplate.opsForValue().set(
-                "Refresh Token: " + user.getEmail(),
+                "RT: " + user.getEmail(),
                 tokenResponse.refreshToken(),
                 JwtUtil.REFRESH_TOKEN_EXPIRATION,
                 TimeUnit.MINUTES);

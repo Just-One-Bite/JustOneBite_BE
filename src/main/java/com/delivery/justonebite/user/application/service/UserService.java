@@ -21,6 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
     @Transactional(readOnly = true)
     public GetProfileResponse findMyProfile(UserDetailsImpl userDetails) {
@@ -52,6 +53,7 @@ public class UserService {
         User foundUser = findUser(userDetails.getUserId());
         verifyPassword(request.password(), foundUser);
         foundUser.softDelete(userDetails.getUserId());
+        authService.invalidateTokensForCurrentUser();
     }
 
     private User findUser(Long userId) {

@@ -17,6 +17,7 @@ public enum ErrorCode {
     FORBIDDEN_ACCESS("접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
     DELETED_ACCOUNT("탈퇴 처리된 유저입니다.", HttpStatus.FORBIDDEN),
     RE_LOGIN_REQUIRED("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.", HttpStatus.UNAUTHORIZED),
+    NOT_AUTHENTICATED("유효한 인증 정보가 없습니다.", HttpStatus.UNAUTHORIZED),
 
     // 유저
     ROLE_NOT_FOUND("권한을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
