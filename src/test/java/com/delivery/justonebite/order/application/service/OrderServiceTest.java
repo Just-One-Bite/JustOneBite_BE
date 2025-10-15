@@ -2,16 +2,15 @@ package com.delivery.justonebite.order.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.awaitility.Awaitility.given;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
@@ -29,8 +28,12 @@ import com.delivery.justonebite.order.domain.factory.OrderFactory;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
 import com.delivery.justonebite.order.domain.repository.OrderItemRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
+import com.delivery.justonebite.order.presentation.dto.request.CancelOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
+import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
+import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
@@ -38,6 +41,7 @@ import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.AddressRepository;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -47,14 +51,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -70,14 +71,22 @@ class OrderServiceTest {
 
     private final Long USER_ID = 1L;
 
-    @Mock private UserRepository userRepository;
-    @Mock private OrderRepository orderRepository;
-    @Mock private ShopRepository shopRepository;
-    @Mock private ItemRepository itemRepository;
-    @Mock private OrderHistoryRepository orderHistoryRepository;
-    @Mock private OrderItemRepository orderItemRepository;
-    @Mock private AddressRepository addressRepository;
-    @Mock private OrderFactory orderFactory;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private ShopRepository shopRepository;
+    @Mock
+    private ItemRepository itemRepository;
+    @Mock
+    private OrderHistoryRepository orderHistoryRepository;
+    @Mock
+    private OrderItemRepository orderItemRepository;
+    @Mock
+    private AddressRepository addressRepository;
+    @Mock
+    private OrderFactory orderFactory;
 
     @InjectMocks
     private OrderService orderService;
@@ -111,7 +120,8 @@ class OrderServiceTest {
 
     private UsernamePasswordAuthenticationToken auth(Long userId, UserRole userRole) {
         String role = userRole.getRole();
-        if (!role.startsWith("ROLE_")) role = "ROLE_" + role;
+        if (!role.startsWith("ROLE_"))
+            role = "ROLE_" + role;
 
         return new UsernamePasswordAuthenticationToken(
             userId, "N/A", List.of(new SimpleGrantedAuthority(role))
@@ -160,6 +170,15 @@ class OrderServiceTest {
         return orderItem;
     }
 
+    private OrderHistory mockOrderHistory(Order order, OrderStatus status) {
+        OrderHistory history = mock(OrderHistory.class);
+        lenient().doReturn(UUID.randomUUID()).when(history).getId();
+        lenient().doReturn(order).when(history).getOrder();
+        lenient().doReturn(status).when(history).getStatus();
+        lenient().doReturn(LocalDateTime.now()).when(history).getCreatedAt();
+        return history;
+    }
+
     @Test
     @DisplayName("createOrder: 주문 생성 성공")
     void createOrder() {
@@ -190,7 +209,9 @@ class OrderServiceTest {
         given(shopRepository.findById(shopId)).willReturn(Optional.of(mockShop));
 
         // OrderFactory 반환 설정
-        given(orderFactory.create(any(User.class), any(Shop.class), anyString(), any(CreateOrderRequest.class), anyMap()))
+        given(
+            orderFactory.create(any(User.class), any(Shop.class), anyString(), any(CreateOrderRequest.class),
+                anyMap()))
             .willReturn(mockOrder);
         given(orderFactory.getOrderItems(any(Order.class), anyList(), anyMap()))
             .willReturn(Collections.emptyList()); // OrderItem 저장 생략
@@ -225,7 +246,7 @@ class OrderServiceTest {
         // 예외 코드 검증
         assertThatThrownBy(() -> orderService.createOrder(request, mockOwner))
             .isInstanceOf(CustomException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_MEMBER);
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
 
         // 저장 로직 실행 여부 검증
         then(orderRepository).should(times(0)).save(any(Order.class));
@@ -265,7 +286,9 @@ class OrderServiceTest {
         given(shopRepository.findById(shopId)).willReturn(Optional.of(mockShop));
 
         // OrderFactory에서 금액 불일치가 발생할 Order 객체를 반환하도록 설정
-        given(orderFactory.create(any(User.class), any(Shop.class), anyString(), any(CreateOrderRequest.class), anyMap()))
+        given(
+            orderFactory.create(any(User.class), any(Shop.class), anyString(), any(CreateOrderRequest.class),
+                anyMap()))
             .willReturn(mockOrder);
 
         // then
@@ -316,7 +339,7 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("getCustomerOrders : 고객 주문 목록 조회 실패 (유저 권한이 CUSTOMER가 아닐 경우 - INVALID_MEMBER)")
+    @DisplayName("getCustomerOrders : 고객 주문 목록 조회 실패 (유저 권한이 CUSTOMER가 아닐 경우 - FORBIDDEN_ACCESS)")
     void getCustomerOrdersFromOwner() {
         final int page = 0;
         final int size = 10;
@@ -325,7 +348,7 @@ class OrderServiceTest {
         // 예외 코드 검증
         assertThatThrownBy(() -> orderService.getCustomerOrders(page, size, sortBy, mockOwner))
             .isInstanceOf(CustomException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_MEMBER);
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
 
         // 호출 검증
         then(orderRepository).should(times(0)).findAll(any(Pageable.class));
@@ -364,10 +387,9 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("getOrderDetails : 주문을 찾을 수 없는 경우 - NOT_FOUND)")
+    @DisplayName("getOrderDetails : 주문을 찾을 수 없는 경우 - NOT_FOUND")
     void getOrderDetailsOrderNotFound() {
         UUID orderId = UUID.randomUUID();
-        UUID shopId = UUID.randomUUID();
 
         // findById 호출 시 빈 값 반환하도록 설정
         given(orderRepository.findById(eq(orderId))).willReturn(Optional.empty());
@@ -380,5 +402,209 @@ class OrderServiceTest {
         // 호출 검증
         then(orderRepository).should(times(1)).findById(eq(orderId));
         then(orderItemRepository).should(times(0)).findAllByOrder(any(Order.class));
+    }
+
+    /**
+     * 주문 상태 변경
+     */
+    @Test
+    @DisplayName("updateOrderStatus : 주문 상태 변경 성공")
+    void updateOrderStatus() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+        final OrderStatus NEW_STATUS = OrderStatus.DELIVERING;
+
+        UpdateOrderStatusRequest request = new UpdateOrderStatusRequest(
+            NEW_STATUS.name()
+        );
+
+        final int totalPrice = 50000;
+        Order mockOrder = mockOrder(orderId, 2L, shopId, totalPrice);
+
+        // 주문 조회
+        given(orderRepository.findById(orderId)).willReturn(Optional.of(mockOrder));
+
+        orderService.updateOrderStatus(orderId, request, mockOwner);
+
+        // 호출 검증
+        then(mockOrder).should(times(1)).updateCurrentStatus(NEW_STATUS);
+        then(orderRepository).should(times(1)).findById(orderId);
+
+        // 저장 검증
+        then(orderHistoryRepository).should(times(1)).save(any(OrderHistory.class));
+    }
+
+    @Test
+    @DisplayName("updateOrderStatus : 주문 상태 변경 실패 (OWNER 권한이 아닐 경우 - FORBIDDEN_ACCESS)")
+    void updateOrderStatusFromCustomer() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+        final OrderStatus NEW_STATUS = OrderStatus.DELIVERING;
+
+        final int totalPrice = 50000;
+        Order mockOrder = mockOrder(orderId, 2L, shopId, totalPrice);
+
+        UpdateOrderStatusRequest request = new UpdateOrderStatusRequest(
+            NEW_STATUS.name()
+        );
+
+        // 예외 코드 검증
+        assertThatThrownBy(() -> orderService.updateOrderStatus(orderId, request, mockCustomer))
+            .isInstanceOf(CustomException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
+
+        // 호출 검증
+        then(mockOrder).should(times(0)).updateCurrentStatus(any(OrderStatus.class));
+        then(orderRepository).should(times(0)).findById(any(UUID.class));
+        then(orderHistoryRepository).should(times(0)).save(any());
+    }
+
+
+    /**
+     * 주문 상태 이력 조회
+     */
+    @Test
+    @DisplayName("getOrderStatusHistories : 주문 상태 이력 조회 (성공)")
+    void getOrderStatusHistories() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+        final int totalPrice = 50000;
+
+        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+
+        List<OrderHistory> mockOrderHistories = List.of(
+            mockOrderHistory(mockOrder, OrderStatus.PENDING),
+            mockOrderHistory(mockOrder, OrderStatus.DELIVERING),
+            mockOrderHistory(mockOrder, OrderStatus.COMPLETED)
+        );
+
+        given(orderHistoryRepository.findAllByOrder_IdOrderByCreatedAtDesc(orderId)).willReturn(
+            mockOrderHistories);
+        given(orderRepository.existsByIdAndCustomer_Id(eq(orderId), eq(USER_ID)))
+            .willReturn(true);
+
+        GetOrderStatusResponse response = orderService.getOrderStatusHistories(orderId, mockCustomer);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.history().getFirst().status()).isEqualTo(OrderStatus.PENDING.name());
+
+        // 호출 검증
+        then(orderRepository).should(times(1)).existsByIdAndCustomer_Id(eq(orderId), eq(USER_ID));
+        then(orderHistoryRepository).should(times(1)).findAllByOrder_IdOrderByCreatedAtDesc(orderId);
+    }
+
+    @Test
+    @DisplayName("getOrderStatusHistories : 주문을 찾을 수 없는 경우 - NOT_FOUND")
+    void getOrderStatusHistoriesOrderNotFound() {
+        UUID orderId = UUID.randomUUID();
+
+        // 권한 확인
+        given(orderRepository.existsByIdAndCustomer_Id(eq(orderId), eq(USER_ID)))
+            .willReturn(true);
+        // 비어있는 리스트를 반환 설정
+        given(orderHistoryRepository.findAllByOrder_IdOrderByCreatedAtDesc(orderId))
+            .willReturn(Collections.emptyList());
+
+        // 예외 코드 검증
+        assertThatThrownBy(() -> orderService.getOrderStatusHistories(orderId, mockCustomer))
+            .isInstanceOf(CustomException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ORDER_STATUS_NOT_FOUND);
+
+        // 호출 검증
+        then(orderRepository).should(times(1)).existsByIdAndCustomer_Id(eq(orderId), eq(USER_ID));
+        then(orderHistoryRepository).should(times(1)).findAllByOrder_IdOrderByCreatedAtDesc(orderId);
+    }
+
+    /**
+     * 주문 취소
+     */
+    @Test
+    @DisplayName("cancelOrder : 주문 취소 (성공)")
+    void cancelOrder() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+        final int totalPrice = 50000;
+
+        CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
+
+        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+
+        given(orderRepository.findByIdWithCustomer(eq(orderId)))
+            .willReturn(Optional.of(mockOrder));
+        given(mockOrder.getCurrentStatus()).willReturn(OrderStatus.ORDER_CANCELLED);
+
+        OrderCancelResponse response = orderService.cancelOrder(request, orderId, mockCustomer);
+
+        // 반환 검증
+        assertThat(response).isNotNull();
+        assertThat(response.orderId()).isEqualTo(orderId);
+        assertEquals(response.orderStatus(), OrderStatus.ORDER_CANCELLED.name());
+
+        // 호출 검증
+        then(mockOrder).should(times(1)).updateCurrentStatus(OrderStatus.ORDER_CANCELLED);
+        then(orderHistoryRepository).should(times(1)).save(any(OrderHistory.class));
+        then(orderRepository).should(times(1)).findByIdWithCustomer(orderId);
+        then(orderHistoryRepository).should(times(1)).save(any(OrderHistory.class));
+    }
+
+    @Test
+    @DisplayName("cancelOrder : 주문 취소 실패 (현재 주문 상태가 PENDING이 아닐 경우 - BAD REQUEST)")
+    void cancelOrderOrderStatusIsNotPending() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+        final int totalPrice = 50000;
+
+        CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
+
+        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+
+        given(orderRepository.findByIdWithCustomer(eq(orderId)))
+            .willReturn(Optional.of(mockOrder));
+
+        // Order 엔티티의 상태 변경 메서드가 예외를 던지도록 설정
+        doThrow(new CustomException(ErrorCode.ORDER_STATUS_CANCEL_NOT_ALLOWED))
+            .when(mockOrder).updateCurrentStatus(OrderStatus.ORDER_CANCELLED);
+
+        // 예외 코드 검증
+        assertThatThrownBy(() -> orderService.cancelOrder(request, orderId, mockCustomer))
+            .isInstanceOf(CustomException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ORDER_STATUS_CANCEL_NOT_ALLOWED);
+
+        // 호출 검증
+        then(orderHistoryRepository).should(times(0)).save(any(OrderHistory.class));
+        then(mockOrder).should(times(1)).updateCurrentStatus(OrderStatus.ORDER_CANCELLED);
+    }
+
+    @Test
+    @DisplayName("cancelOrder : 주문 취소 실패 (주문 시점으로부터 5분이 초과하였을 경우 - BAD REQUEST)")
+    void cancelOrderTimeExceed() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+        final int totalPrice = 50000;
+
+        CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
+
+        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+
+        // Order 엔티티가 5분 이상 지난 시각을 반환하도록 설정
+        // Order.updateCurrentStatus 내부 시간 검증 로직에 사용됨
+        LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
+        lenient().doReturn(pastTime).when(mockOrder).getCreatedAt();
+
+        given(orderRepository.findByIdWithCustomer(eq(orderId)))
+            .willReturn(Optional.of(mockOrder));
+
+        doThrow(new CustomException(ErrorCode.ORDER_CANCEL_TIME_EXCEEDED))
+            .when(mockOrder).updateCurrentStatus(OrderStatus.ORDER_CANCELLED);
+
+        // 예외 코드 검증
+        assertThatThrownBy(() -> orderService.cancelOrder(request, orderId, mockCustomer))
+            .isInstanceOf(CustomException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ORDER_CANCEL_TIME_EXCEEDED);
+
+        // 호출 검증
+        then(orderHistoryRepository).should(times(0)).save(any(OrderHistory.class));
+        then(mockOrder).should(times(1)).updateCurrentStatus(OrderStatus.ORDER_CANCELLED);
     }
 }
