@@ -124,7 +124,6 @@ public class OrderStubData {
             new CustomerOrderResponse(
                 orderId,
                 "마라탕웨이",
-                "",
                 OrderStatus.ORDER_ACCEPTED.name(),
                 LocalDateTime.now(),
                 50000,
@@ -133,7 +132,6 @@ public class OrderStubData {
             new CustomerOrderResponse(
                 orderId,
                 "가마솥순대국밥",
-                "",
                 OrderStatus.ORDER_ACCEPTED.name(),
                 LocalDateTime.now(),
                 30000,

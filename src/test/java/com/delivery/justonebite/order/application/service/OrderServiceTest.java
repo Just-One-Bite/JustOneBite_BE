@@ -345,7 +345,7 @@ class OrderServiceTest {
         // 예외 코드 검증
         assertThatThrownBy(() -> orderService.getOrderDetails(orderId, mockCustomer))
             .isInstanceOf(CustomException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_NOT_FOUND);
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ORDER_NOT_FOUND);
 
         // 호출 검증
         then(orderRepository).should(times(1)).findById(eq(orderId));
