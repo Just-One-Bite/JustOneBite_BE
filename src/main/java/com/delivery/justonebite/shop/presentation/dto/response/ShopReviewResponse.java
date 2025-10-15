@@ -1,6 +1,7 @@
 package com.delivery.justonebite.shop.presentation.dto.response;
 
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
+
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -25,4 +26,5 @@ public record ShopReviewResponse(
                 page.getContent()
         );
     }
+
 }
