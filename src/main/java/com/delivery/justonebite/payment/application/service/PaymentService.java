@@ -7,12 +7,10 @@ import com.delivery.justonebite.payment.domain.entity.PaymentStatus;
 import com.delivery.justonebite.payment.domain.entity.Transaction;
 import com.delivery.justonebite.payment.domain.repository.PaymentRepository;
 import com.delivery.justonebite.payment.domain.repository.TransactionRepository;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentCancelRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentConfirmResponse;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentFailResponse;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
+import com.delivery.justonebite.payment.presentation.dto.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,10 +37,8 @@ public class PaymentService {
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
-    // TODO: ORDER 연결
     @Transactional
     public PaymentResponse requestPayment(PaymentRequest request) {
-//        boolean isValid = validatePayment(request);
 
         Payment payment = Payment.createPayment(request.orderId(), request.orderName(), request.amount());
         paymentRepository.save(payment);
@@ -67,7 +63,7 @@ public class PaymentService {
                 throw new IllegalArgumentException("결제 금액이 일치하지 않습니다."); //TODO: 오류 처리
             }
 
-            Transaction transaction = Transaction.createTransaction(payment);
+            Transaction transaction = Transaction.createTransaction(payment, request.amount());
             transactionRepository.save(transaction);
 
             payment.updateStatus(PaymentStatus.DONE);
@@ -85,6 +81,30 @@ public class PaymentService {
 
     }
 
-    //TODO: 부분 거래 취소 api
+    @Transactional
+    public PaymentCancelResponse cancelPayment(PaymentCancelRequest request) {
+        Payment payment = paymentRepository.findByPaymentId(request.paymentKey())
+                .orElseThrow(() -> new IllegalArgumentException("해당 결제를 찾을 수 없습니다."));
+
+        //TODO: 오류 리턴 방식
+        if (PaymentStatus.CANCELED.equals(payment.getStatus())) {
+            throw new IllegalStateException("이미 취소된 결제 내역입니다.");
+        }
+
+        payment.decreaseBalanceAmount(request.cancelAmount());
+        if (payment.getBalanceAmount() == 0) {
+            payment.updateStatus(PaymentStatus.CANCELED);
+        } else {
+            payment.updateStatus(PaymentStatus.PARTIAL_CANCELED);
+        }
+
+        Transaction transaction = Transaction.createCancelTransaction(payment, request.cancelAmount(), request.cancelReason(), payment.getStatus());
+        transactionRepository.save(transaction);
+
+        payment.updateLastTransactionId(transaction.getTransactionId());
+        paymentRepository.save(payment);
+
+        return PaymentCancelResponse.from(payment, request.cancelReason());
+    }
 
 }

@@ -43,12 +43,24 @@ public class Transaction {
     @Column(name = "canceled_at")
     private LocalDateTime canceledAt;
 
-    public static Transaction createTransaction(Payment payment) {
+    public static Transaction createTransaction(Payment payment, Integer amount) {
         return Transaction.builder()
                 .payment(payment)
-                .amount(payment.getBalanceAmount())
+                .amount(amount)
                 .status(PaymentStatus.DONE)
                 .transactionAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static Transaction createCancelTransaction(Payment payment, Integer amount, String reason, PaymentStatus cancelStatus) {
+        return Transaction.builder()
+                .payment(payment)
+                .amount(amount)
+                .status(PaymentStatus.DONE)
+                .cancelReason(reason)
+                .cancelStatus(cancelStatus)
+                .transactionAt(LocalDateTime.now())
+                .canceledAt(LocalDateTime.now())
                 .build();
     }
 }
