@@ -1,5 +1,6 @@
 package com.delivery.justonebite.order.application.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.given;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +22,8 @@ import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.order.application.stub.OrderStubData;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.entity.OrderHistory;
+import com.delivery.justonebite.order.domain.entity.OrderItem;
+import com.delivery.justonebite.order.domain.entity.OrderItemId;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.domain.factory.OrderFactory;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
@@ -28,6 +31,7 @@ import com.delivery.justonebite.order.domain.repository.OrderItemRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderResponse;
+import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.User;
@@ -138,6 +142,22 @@ class OrderServiceTest {
         lenient().doReturn(totalPrice).when(order).getTotalPrice();
         lenient().doReturn(OrderStatus.PENDING).when(order).getCurrentStatus();
         return order;
+    }
+
+    private OrderItemId mockOrderItemId(Item item) {
+        OrderItemId orderItemId = mock(OrderItemId.class);
+        lenient().doReturn(item.getItemId()).when(orderItemId).getItem();
+        return orderItemId;
+    }
+
+    private OrderItem mockOrderItem(UUID itemId, int price) {
+        Item item = mockItem(itemId, price);
+        OrderItemId orderItemId = mockOrderItemId(item);
+        OrderItem orderItem = mock(OrderItem.class);
+        lenient().doReturn(orderItemId).when(orderItem).getId();
+        lenient().doReturn(1).when(orderItem).getCount();
+        lenient().doReturn(price).when(orderItem).getPrice();
+        return orderItem;
     }
 
     @Test
@@ -296,14 +316,12 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("getCustomerOrders : 고객 주문 목록 조회 실패 (유저 권한이 CUSTOMER가 아닐 경우 - FORBIDDEN_ACCESS)")
+    @DisplayName("getCustomerOrders : 고객 주문 목록 조회 실패 (유저 권한이 CUSTOMER가 아닐 경우 - INVALID_MEMBER)")
     void getCustomerOrdersFromOwner() {
-        UUID shopId = UUID.randomUUID();
         final int page = 0;
         final int size = 10;
         final String sortBy = "createdAt";
 
-        // then
         // 예외 코드 검증
         assertThatThrownBy(() -> orderService.getCustomerOrders(page, size, sortBy, mockOwner))
             .isInstanceOf(CustomException.class)
@@ -311,5 +329,56 @@ class OrderServiceTest {
 
         // 호출 검증
         then(orderRepository).should(times(0)).findAll(any(Pageable.class));
+    }
+
+    /**
+     * 주문 상세정보 조회
+     */
+    @Test
+    @DisplayName("getOrderDetails : 주문 상세정보 조회 성공")
+    void getOrderDetails() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+
+        final int totalPrice = 50000;
+        Order mockOrder = mockOrder(orderId, USER_ID, shopId, totalPrice);
+
+        List<OrderItem> mockOrderItems = List.of(
+            mockOrderItem(UUID.randomUUID(), 10000),
+            mockOrderItem(UUID.randomUUID(), 20000)
+        );
+
+        // 레포지토리 스터빙 (주문 조회 & 주문 아이템 목록 조회)
+        given(orderRepository.findById(orderId)).willReturn(Optional.of(mockOrder));
+        given(orderItemRepository.findAllByOrder(mockOrder)).willReturn(mockOrderItems);
+
+        OrderDetailsResponse response = orderService.getOrderDetails(orderId, mockCustomer);
+
+        // 반환 검증
+        assertThat(response).isNotNull();
+        assertEquals(orderId, response.orderId(), "주문 ID가 일치해야 합니다.");
+
+        // 호출 검증
+        then(orderRepository).should(times(1)).findById(orderId);
+        then(orderItemRepository).should(times(1)).findAllByOrder(mockOrder);
+    }
+
+    @Test
+    @DisplayName("getOrderDetails : 주문을 찾을 수 없는 경우 - NOT_FOUND)")
+    void getOrderDetailsOrderNotFound() {
+        UUID orderId = UUID.randomUUID();
+        UUID shopId = UUID.randomUUID();
+
+        // findById 호출 시 빈 값 반환하도록 설정
+        given(orderRepository.findById(eq(orderId))).willReturn(Optional.empty());
+
+        // 예외 코드 검증
+        assertThatThrownBy(() -> orderService.getOrderDetails(orderId, mockCustomer))
+            .isInstanceOf(CustomException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_NOT_FOUND);
+
+        // 호출 검증
+        then(orderRepository).should(times(1)).findById(eq(orderId));
+        then(orderItemRepository).should(times(0)).findAllByOrder(any(Order.class));
     }
 }
