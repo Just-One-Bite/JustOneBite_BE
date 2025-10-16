@@ -14,7 +14,9 @@ import com.delivery.justonebite.item.presentation.dto.response.ItemOwnerDetailRe
 import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
+import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import com.delivery.justonebite.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,7 @@ public class ItemService {
     private final GeminiClient geminiClient;
 
     private final AiRequestHistoryRepository aiRequestHistoryRepository;
+    private final UserRepository userRepository;
 
     // 상품 CREATE
     @Transactional
@@ -131,7 +134,11 @@ public class ItemService {
     }
 
     private void saveAiRequestHistory(Long userId, String request, String response) {
-        AiRequestHistory requestHistory = new AiRequestHistory(userId, "gemini-2.5-flash", request, response);
+        User user = userRepository.findById(userId).orElseThrow(
+            () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        AiRequestHistory requestHistory = new AiRequestHistory(user, "gemini-2.5-flash", request, response);
         aiRequestHistoryRepository.save(requestHistory);
     }
 
