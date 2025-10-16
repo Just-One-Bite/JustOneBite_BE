@@ -24,7 +24,9 @@ public class WebSecurityConfig {
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final AuthService authService;
 
-    public WebSecurityConfig(JwtAuthorizationFilter jwtAuthorizationFilter, @Lazy AuthService authService) {
+    public WebSecurityConfig(
+            JwtAuthorizationFilter jwtAuthorizationFilter,
+            @Lazy AuthService authService) {
         this.jwtAuthorizationFilter = jwtAuthorizationFilter;
         this.authService = authService;
     }
@@ -49,11 +51,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/api-docs/**").permitAll()        // SpringDoc v1/v2 호환 경로
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
-//                        .requestMatchers("v1/**").permitAll()
-//                        .anyRequest().permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/v1/auth/logout") // 로그아웃을 처리할 URL
+                        .logoutUrl("/v1/auth/logout")
                         .addLogoutHandler((request, response, authentication) -> {
                             authService.logout(authentication);
                         })
@@ -61,7 +61,6 @@ public class WebSecurityConfig {
                                 response.setStatus(HttpServletResponse.SC_OK))
                 )
                 .addFilterBefore(jwtAuthorizationFilter, LogoutFilter.class)
-//                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             log.error("접근 거부: {}", accessDeniedException.getMessage());
