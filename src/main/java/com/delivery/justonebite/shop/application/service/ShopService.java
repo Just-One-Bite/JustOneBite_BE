@@ -51,7 +51,7 @@ public class ShopService {
     @Transactional
     public Shop createShop(ShopCreateRequest request, Long userId, UserRole role) {
         //권한 체크
-        if (role != UserRole.CUSTOMER) {
+        if (role != UserRole.OWNER) {
             throw new CustomException(ErrorCode.INVALID_USER_ROLE);
         }
 
