@@ -20,6 +20,11 @@ import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderRes
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
+import com.delivery.justonebite.payment.application.service.PaymentService;
+import com.delivery.justonebite.payment.domain.entity.Payment;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
 import com.delivery.justonebite.user.domain.entity.Address;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.ShopInfoDto;
 import com.delivery.justonebite.user.domain.entity.User;
@@ -47,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OrderService {
 
+    private final PaymentService paymentService;
     private final OrderRepository orderRepository;
     private final ShopRepository shopRepository;
     private final OrderHistoryRepository orderHistoryRepository;
@@ -57,7 +63,7 @@ public class OrderService {
     private final OrderFactory orderFactory;
 
     @Transactional
-    public void createOrder(CreateOrderRequest request, User user) {
+    public PaymentResponse createOrder(CreateOrderRequest request, User user) {
         // 유저 Role 권한 검증
         authorizeCustomer(user);
 
@@ -80,13 +86,37 @@ public class OrderService {
         // 총 금액 검증
         validateOrderTotalPrice(request, order.getTotalPrice());
 
+        // 주문 저장
         orderRepository.save(order);
-
         // OrderFactory가 생성한 OrderItem 리스트를 가져와 저장
         orderItemRepository.saveAll(orderFactory.getOrderItems(order, request.orderItems(), itemMap));
 
-        // 주문 내역 저장
-        orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.PENDING));
+        // 결제 요청
+        PaymentResponse paymentResponse = requestPayment(order);
+
+        if (paymentResponse instanceof PaymentSuccessResponse) {
+            // 결제 요청 성공 시, 주문 상태는 PENDING 유지
+            orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.PENDING));
+        } else {
+            // 결제 요청 실패 시 (카드 거절, 취소)
+            orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
+            throw new CustomException(ErrorCode.PAYMENT_REQUEST_FAIL);
+        }
+
+//        // 주문 내역 저장
+//        orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.PENDING));
+
+        return paymentResponse;
+    }
+
+    private PaymentResponse requestPayment(Order order) {
+        PaymentRequest request = PaymentRequest.builder()
+            .orderId(order.getId())
+            .orderName(order.getOrderName())
+            .amount(order.getTotalPrice())
+            .status(true)
+            .build();
+        return paymentService.requestPayment(request);
     }
 
     @Transactional(readOnly = true)

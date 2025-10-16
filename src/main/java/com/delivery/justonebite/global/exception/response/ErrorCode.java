@@ -77,6 +77,7 @@ public enum ErrorCode {
     INVALID_CANCEL_STATUS_VALUE("취소 요청 상태는 ORDER_CANCELLED 여야 합니다.", HttpStatus.BAD_REQUEST),
 
     //결제
+    PAYMENT_REQUEST_FAIL("결제 요청에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     PAYMENT_NOT_FOUND("결제 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_PAYMENT_STATUS("승인이 불가한 결제 상태입니다.",HttpStatus.CONFLICT),
     PAYMENT_ALREADY_EXISTS("이미 결제가 완료된 주문입니다.", HttpStatus.CONFLICT),

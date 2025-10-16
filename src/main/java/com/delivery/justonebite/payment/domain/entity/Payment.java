@@ -8,12 +8,15 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "h_payment")
 public class Payment {
 
@@ -39,7 +42,7 @@ public class Payment {
     @Column(name = "balance_amount", nullable = false)
     private Integer balanceAmount;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "last_status", nullable = false)
     private PaymentStatus status;
 
     @CreatedDate

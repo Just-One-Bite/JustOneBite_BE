@@ -12,6 +12,7 @@ import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderRes
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,10 +73,10 @@ public class OrderController {
     )
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
-    public ResponseEntity<Void> createOrder(@Valid  @RequestBody CreateOrderRequest request,
+    public ResponseEntity<PaymentResponse> createOrder(@Valid  @RequestBody CreateOrderRequest request,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        orderService.createOrder(request, userDetails.getUser());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        PaymentResponse response = orderService.createOrder(request, userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(
