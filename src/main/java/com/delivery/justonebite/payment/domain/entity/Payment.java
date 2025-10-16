@@ -59,6 +59,7 @@ public class Payment {
                 .totalAmount(amount)
                 .balanceAmount(amount)
                 .status(PaymentStatus.READY)
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

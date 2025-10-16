@@ -51,17 +51,19 @@ public class PaymentService {
         return new PaymentSuccessResponse(request.orderId(), payment.getPaymentId(), request.amount());
     }
 
-    // TODO: 요청 후 일정 시간 후 승인불가(만료) - 스케줄러 이용해서
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 
+        // 만료 상태 확인
+        if (PaymentStatus.EXPIRED.equals(payment.getStatus())) {
+            throw new CustomException(ErrorCode.PAYMENT_EXPIRED);
+        }
         // 결제 상태 검증
         if (!PaymentStatus.SUCCESS.equals(payment.getStatus())) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_STATUS);
         }
-
         // 금액 검증
         if (!payment.getTotalAmount().equals(request.amount())) {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_NOT_MATCH);
