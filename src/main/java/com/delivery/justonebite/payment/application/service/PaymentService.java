@@ -51,17 +51,22 @@ public class PaymentService {
         return new PaymentSuccessResponse(request.orderId(), payment.getPaymentId(), request.amount());
     }
 
-
-    //TODO: 이미 결제가 완료된 주문을 다시 요청할때
+    // TODO: 요청 후 일정 시간 후 승인불가(만료)
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
-        try {
-            if (!payment.getTotalAmount().equals(request.amount())) {
-                throw new CustomException(ErrorCode.PAYMENT_AMOUNT_NOT_MATCH);
-            }
 
+        // 결제 상태 검증
+        if (!PaymentStatus.SUCCESS.equals(payment.getStatus())) {
+            throw new CustomException(ErrorCode.INVALID_PAYMENT_STATUS);
+        }
+
+        // 금액 검증
+        if (!payment.getTotalAmount().equals(request.amount())) {
+            throw new CustomException(ErrorCode.PAYMENT_AMOUNT_NOT_MATCH);
+        }
+        try {
             Transaction transaction = Transaction.createTransaction(payment, request.amount());
             transactionRepository.save(transaction);
 
@@ -71,13 +76,11 @@ public class PaymentService {
             paymentRepository.save(payment);
 
             return PaymentConfirmResponse.from(payment);
-
         } catch (Exception e) {
             payment.updateStatus(PaymentStatus.ABORTED);
             paymentRepository.save(payment);
-            throw new RuntimeException("결제 승인 실패: " + e.getMessage()); //TODO: 실패 방식 변경
+            throw new CustomException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
-
     }
 
     @Transactional
@@ -85,6 +88,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findByPaymentId(request.paymentKey())
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 
+        // 취소 상태 검증
         if (PaymentStatus.CANCELED.equals(payment.getStatus())) {
             throw new CustomException(ErrorCode.PAYMENT_ALREADY_CANCELED);
         }
