@@ -1,4 +1,4 @@
-package com.delivery.justonebite.global.config;
+package com.delivery.justonebite.global.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

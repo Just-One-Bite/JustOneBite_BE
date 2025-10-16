@@ -1,6 +1,6 @@
 package com.delivery.justonebite.user.presentation.controller;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.user.application.service.UserService;
 import com.delivery.justonebite.user.presentation.dto.request.UpdatePasswordRequest;
 import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileRequest;

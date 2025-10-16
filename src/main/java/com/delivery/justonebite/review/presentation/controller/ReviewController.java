@@ -1,6 +1,6 @@
 package com.delivery.justonebite.review.presentation.controller;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.review.application.service.ReviewService;
 import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;

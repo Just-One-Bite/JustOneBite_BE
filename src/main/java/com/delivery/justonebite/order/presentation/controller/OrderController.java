@@ -1,10 +1,7 @@
 package com.delivery.justonebite.order.presentation.controller;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
-import com.delivery.justonebite.global.exception.custom.CustomException;
-import com.delivery.justonebite.global.exception.response.ErrorCode;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.order.application.service.OrderService;
-import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.presentation.dto.request.CancelOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.order.presentation.dto.request.UpdateOrderStatusRequest;
@@ -15,24 +12,18 @@ import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResp
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
+
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
