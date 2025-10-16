@@ -10,7 +10,6 @@ import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderHistoryRepository extends JpaRepository<OrderHistory, UUID> {
-    Optional<OrderHistory> findByOrderId(UUID orderId);
     // 최신 상태 하나를 반환
     Optional<OrderHistory> findTopByOrder_IdOrderByCreatedAtDesc(UUID orderId);
     // 전체 목록을 최신순으로 반환
