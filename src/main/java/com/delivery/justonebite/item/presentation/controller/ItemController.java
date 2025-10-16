@@ -47,7 +47,7 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "가게 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
         }
     )
-    @PreAuthorize("hasRole('OWNER') and hasRole('MANAGER') and hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PostMapping
     public ResponseEntity<ItemResponse> createItem(@RequestBody @Valid ItemRequest request,
                                                    @AuthenticationPrincipal UserDetailsImpl user) {
@@ -70,7 +70,7 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "상품 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
         }
     )
-    @PreAuthorize("hasRole('OWNER') and hasRole('MANAGER') and hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @GetMapping("/owner/{item-id}")
     public ResponseEntity<ItemOwnerDetailResponse> getItemFromOwner(@PathVariable("item-id") UUID itemId,
                                                                     @AuthenticationPrincipal UserDetailsImpl user) {
@@ -116,7 +116,7 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "가게 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
         }
     )
-    @PreAuthorize("hasRole('OWNER') and hasRole('MANAGER') and hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @GetMapping("/owner/shop/{shop-id}") // owner 용, fix : 추후 권한에 따라서 다른 service를 쓰도록 할 것 같음
     public ResponseEntity<Page<ItemResponse>> getItemsByShopFromOwner(@PathVariable("shop-id") String shopId,
                                                                       @RequestParam(name = "page", defaultValue = "0") int page,
@@ -170,7 +170,7 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "상품 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
         }
     )
-    @PreAuthorize("hasRole('OWNER') and hasRole('MANAGER') and hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PutMapping("/{item-id}")
     public ResponseEntity<ItemResponse> updateItem(@PathVariable("item-id") UUID itemId, @RequestBody @Valid ItemUpdateRequest request,
                                                    @AuthenticationPrincipal UserDetailsImpl user) {
@@ -193,7 +193,7 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "상품 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
         }
     )
-    @PreAuthorize("hasRole('OWNER') and hasRole('MANAGER') and hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @DeleteMapping("/{item-id}")
     public ResponseEntity<Void> softDelete(@PathVariable("item-id") String itemId,
                                            @AuthenticationPrincipal UserDetailsImpl user) {
@@ -215,7 +215,7 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "상품 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
         }
     )
-    @PreAuthorize("hasRole('OWNER') and hasRole('MANAGER') and hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PatchMapping("/{item-id}/restore")
     public ResponseEntity<Void> restoreItem(@PathVariable("item-id") String itemId,
                                             @AuthenticationPrincipal UserDetailsImpl user) {
@@ -237,7 +237,7 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "상품 정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
         }
     )
-    @PreAuthorize("hasRole('OWNER') and hasRole('MANAGER') and hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PatchMapping("/{item-id}/hide")
     public ResponseEntity<Void> toggleHidden(@PathVariable("item-id") String itemId,
                                              @AuthenticationPrincipal UserDetailsImpl user) {
