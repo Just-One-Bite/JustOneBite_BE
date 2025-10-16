@@ -94,7 +94,7 @@ class ItemControllerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-            .andExpect(status().isOk())
+            .andExpect(status().isCreated())
             .andExpect(jsonPath("$.itemId").value(ITEM_ID.toString()))
             .andExpect(jsonPath("$.name").value("김치찜"))
             .andExpect(jsonPath("$.price").value(15000))
