@@ -74,7 +74,7 @@ public enum ErrorCode {
 
     //결제
     PAYMENT_NOT_FOUND("결제 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    INVALID_PAYMENT_STATUS("승인이 불가한 결제 상태입니다.",HttpStatus.BAD_REQUEST),
+    INVALID_PAYMENT_STATUS("승인이 불가한 결제 상태입니다.",HttpStatus.CONFLICT),
     PAYMENT_ALREADY_EXISTS("이미 결제가 완료된 주문입니다.", HttpStatus.CONFLICT),
     PAYMENT_AMOUNT_NOT_MATCH("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     CANCEL_AMOUNT_EXCEEDED("요청 금액이 취소 가능 금액보다 큽니다.",HttpStatus.BAD_REQUEST),

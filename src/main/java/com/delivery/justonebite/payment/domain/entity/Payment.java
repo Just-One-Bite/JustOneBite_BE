@@ -1,10 +1,10 @@
 package com.delivery.justonebite.payment.domain.entity;
 
-import com.delivery.justonebite.global.common.entity.BaseEntity;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @Getter
 @Builder
 @Table(name = "h_payment")
-public class Payment extends BaseEntity {
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -41,6 +41,10 @@ public class Payment extends BaseEntity {
 
     @Column(name = "status", nullable = false)
     private PaymentStatus status;
+
+    @CreatedDate
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
