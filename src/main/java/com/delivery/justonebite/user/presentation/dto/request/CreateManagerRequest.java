@@ -24,10 +24,9 @@ public record CreateManagerRequest(
                 regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$",
                 message = "비밀번호는 알파벳 대소문자, 숫자, 특수문자(@$!%*?&)를 포함해야 합니다."
         )
-        String password,
-        UserRole userRole
+        String password
 ) {
-    public User toUser(String encodedPassword) {
+    public User toUser(UserRole userRole, String encodedPassword) {
         return User.builder()
                 .email(email)
                 .name(name)

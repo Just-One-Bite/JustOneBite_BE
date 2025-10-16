@@ -2,7 +2,6 @@ package com.delivery.justonebite.user.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.user.application.service.AddressService;
-import com.delivery.justonebite.user.presentation.dto.request.DefaultAddressRequest;
 import com.delivery.justonebite.user.presentation.dto.request.RegistAddressRequest;
 import com.delivery.justonebite.user.presentation.dto.response.DefaultAddressResponse;
 import com.delivery.justonebite.user.presentation.dto.response.RegistAddressResponse;
@@ -34,10 +33,10 @@ public class AddressController {
     // 대표 주소 설정
     @PatchMapping("/{addressId}")
     public ResponseEntity<DefaultAddressResponse> updateDefaultAddress(
-            @PathVariable UUID addressId,
-            @RequestBody @Valid DefaultAddressRequest request
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable UUID addressId
     ) {
-        DefaultAddressResponse updatedDefaultAddress = addressService.updateDefaultAddress(addressId, request);
+        DefaultAddressResponse updatedDefaultAddress = addressService.updateDefaultAddress(userDetails, addressId);
         return ResponseEntity.status(HttpStatus.OK).body(updatedDefaultAddress);
     }
 }

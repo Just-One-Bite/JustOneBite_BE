@@ -1,7 +1,7 @@
 package com.delivery.justonebite.user.application.service;
 
-import com.delivery.justonebite.global.common.jwt.JwtUtil;
 import com.delivery.justonebite.user.domain.entity.User;
+import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.user.presentation.dto.request.CreateManagerRequest;
 import com.delivery.justonebite.user.presentation.dto.response.CreateManagerResponse;
@@ -18,7 +18,7 @@ public class AdminService {
 
     @Transactional
     public CreateManagerResponse createManager(CreateManagerRequest request) {
-        User user = request.toUser(passwordEncoder.encode(request.password()));
+        User user = request.toUser(UserRole.MANAGER, passwordEncoder.encode(request.password()));
         userRepository.save(user);
         return CreateManagerResponse.toDto(user);
     }
