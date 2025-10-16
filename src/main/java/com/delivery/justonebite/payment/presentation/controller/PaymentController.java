@@ -49,8 +49,9 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    // 결제 취소
     @PostMapping("/cancel")
-    public ResponseEntity<PaymentCancelResponse> cancelPayment(@RequestBody PaymentCancelRequest request) {
+    public ResponseEntity<PaymentCancelResponse> cancelPayment(@Valid @RequestBody PaymentCancelRequest request) {
         PaymentCancelResponse response = paymentService.cancelPayment(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
