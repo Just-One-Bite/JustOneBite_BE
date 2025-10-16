@@ -42,6 +42,14 @@ public enum ErrorCode {
     ALREADY_PENDING_DELETE("이미 승인 대기중인 삭제 요청입니다.",HttpStatus.CONFLICT),
     CATEGORY_NOT_FOUND("존재하지 않는 카테고리입니다.",HttpStatus.NOT_FOUND),
     NOT_COMPLETED_ORDER_EXISTS("완료되지 않은 주문이 존재합니다. 가게를 삭제할 수 없습니다.",HttpStatus.BAD_REQUEST),
+    DUPLICATE_REGISTRATION_NUMBER("이미 등록된 사업자등록번호입니다.", HttpStatus.CONFLICT),
+    SHOP_ALREADY_EXISTS_FOR_OWNER("이미 등록된 가게가 있습니다.", HttpStatus.CONFLICT),
+    UNAUTHORIZED_SHOP_ACCESS_VIEW("본인의 가게가 아니므로 조회 할 수 없습니다.", HttpStatus.FORBIDDEN),
+    EMPTY_CATEGORY_LIST("최소 한 개 이상의 카테고리를 선택해야 합니다.", HttpStatus.BAD_REQUEST),
+    INVALID_SORT_PARAMETER("정렬 기준이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    SHOP_DELETION_NOT_ALLOWED("현재 상태에서는 가게 삭제가 불가능합니다.", HttpStatus.BAD_REQUEST),
+
+
 
     //리뷰
     INVALID_RATING_RANGE("평점은 1~5 범위여야 합니다.", HttpStatus.BAD_REQUEST),
