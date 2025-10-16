@@ -1,6 +1,8 @@
 package com.delivery.justonebite.payment.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,9 +31,11 @@ public class Payment extends BaseEntity {
     @Column(name = "order_name", nullable = false)
     private String orderName;
 
+    // 초기 결제 금액
     @Column(name = "total_amount", nullable = false)
     private Integer totalAmount;
 
+    // 취소 가능 금액
     @Column(name = "balance_amount", nullable = false)
     private Integer balanceAmount;
 
@@ -49,6 +53,13 @@ public class Payment extends BaseEntity {
                 .balanceAmount(amount)
                 .status(PaymentStatus.READY)
                 .build();
+    }
+
+    public void decreaseBalanceAmount(int amount) {
+        if (amount > this.balanceAmount) {
+            throw new CustomException(ErrorCode.CANCEL_AMOUNT_EXCEEDED);
+        }
+        this.balanceAmount -= amount;
     }
 
     public void updateStatus(PaymentStatus status) {

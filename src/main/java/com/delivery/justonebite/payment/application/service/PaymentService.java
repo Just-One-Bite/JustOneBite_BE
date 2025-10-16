@@ -7,12 +7,10 @@ import com.delivery.justonebite.payment.domain.entity.PaymentStatus;
 import com.delivery.justonebite.payment.domain.entity.Transaction;
 import com.delivery.justonebite.payment.domain.repository.PaymentRepository;
 import com.delivery.justonebite.payment.domain.repository.TransactionRepository;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentCancelRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentConfirmResponse;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentFailResponse;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
-import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
+import com.delivery.justonebite.payment.presentation.dto.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +28,7 @@ public class PaymentService {
     private final TransactionRepository transactionRepository;
 
     public Payment getPaymentById(UUID paymentId) {
-        return paymentRepository.findById(paymentId)
+        return paymentRepository.findByPaymentId(paymentId)
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
@@ -39,10 +37,8 @@ public class PaymentService {
             .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
-    // TODO: ORDER 연결
     @Transactional
     public PaymentResponse requestPayment(PaymentRequest request) {
-//        boolean isValid = validatePayment(request);
 
         Payment payment = Payment.createPayment(request.orderId(), request.orderName(), request.amount());
         paymentRepository.save(payment);
@@ -55,36 +51,55 @@ public class PaymentService {
         return new PaymentSuccessResponse(request.orderId(), payment.getPaymentId(), request.amount());
     }
 
-
+    // TODO: 요청 후 일정 시간 후 승인불가(만료)
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentId())
-                .orElseThrow(() -> new IllegalArgumentException("결제 요청 내역을 찾을 수 없습니다.")); //TODO: 오류 처리
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 
+        // 결제 상태 검증
+        if (!PaymentStatus.SUCCESS.equals(payment.getStatus())) {
+            throw new CustomException(ErrorCode.INVALID_PAYMENT_STATUS);
+        }
+
+        // 금액 검증
+        if (!payment.getTotalAmount().equals(request.amount())) {
+            throw new CustomException(ErrorCode.PAYMENT_AMOUNT_NOT_MATCH);
+        }
         try {
-            // 금액 검증
-            if (!payment.getTotalAmount().equals(request.amount())) {
-                throw new IllegalArgumentException("결제 금액이 일치하지 않습니다."); //TODO: 오류 처리
-            }
-
-            Transaction transaction = Transaction.createTransaction(payment);
+            Transaction transaction = Transaction.createTransaction(payment, request.amount());
             transactionRepository.save(transaction);
 
             payment.updateStatus(PaymentStatus.DONE);
             payment.updateApprovedAt(LocalDateTime.now());
             payment.updateLastTransactionId(transaction.getTransactionId());
-            paymentRepository.save(payment);
 
             return PaymentConfirmResponse.from(payment);
-
         } catch (Exception e) {
             payment.updateStatus(PaymentStatus.ABORTED);
-            paymentRepository.save(payment);
-            throw new RuntimeException("결제 승인 실패: " + e.getMessage()); //TODO: 실패 방식 변경
+            throw new CustomException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
-
     }
 
-    //TODO: 부분 거래 취소 api
+    @Transactional
+    public PaymentCancelResponse cancelPayment(PaymentCancelRequest request) {
+        Payment payment = paymentRepository.findByPaymentId(request.paymentKey())
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 
+        // 취소 상태 검증
+        if (PaymentStatus.CANCELED.equals(payment.getStatus())) {
+            throw new CustomException(ErrorCode.PAYMENT_ALREADY_CANCELED);
+        }
+
+        payment.decreaseBalanceAmount(request.cancelAmount());
+        if (payment.getBalanceAmount() == 0) {
+            payment.updateStatus(PaymentStatus.CANCELED);
+        } else {
+            payment.updateStatus(PaymentStatus.PARTIAL_CANCELED);
+        }
+        Transaction transaction = Transaction.createCancelTransaction(payment, request.cancelAmount(), request.cancelReason(), payment.getStatus());
+
+        payment.updateLastTransactionId(transaction.getTransactionId()); // save 안해도 자동 commit
+        return PaymentCancelResponse.from(payment, request.cancelReason());
+    }
 }
