@@ -29,8 +29,9 @@ public interface ShopRepository extends JpaRepository<Shop, UUID> {
     //리뷰 평점 관련 코드 --
 
 
-    @Query("select s.id as id, s.averageRating as averageRating from Shop s where s.id in :ids")
+    @Query("select s.id as shopId, s.averageRating as averageRating from Shop s where s.id in :ids")
     List<ShopAvgProjection> findAvgByIds(@Param("ids") List<UUID> ids);
+
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
@@ -45,6 +46,27 @@ UPDATE h_shop s
  WHERE s.shop_id = sub.shop_id
 """, nativeQuery = true)
     int bulkUpdateAllAvg();
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = """
+        UPDATE h_shop s
+           SET average_rating = COALESCE((
+                SELECT AVG(r.rating)
+                  FROM h_review r
+                 WHERE r.deleted_at IS NULL
+                   AND r.shop_id = :shopId
+           ), 0)
+         WHERE s.shop_id = :shopId
+    """, nativeQuery = true)
+    int updateShopAvgById(@Param("shopId") UUID shopId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = """
+        UPDATE h_shop
+           SET average_rating = 0
+         WHERE shop_id = :shopId
+    """, nativeQuery = true)
+    int resetShopAvgToZero(@Param("shopId") UUID shopId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
