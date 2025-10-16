@@ -51,7 +51,7 @@ public class PaymentService {
         return new PaymentSuccessResponse(request.orderId(), payment.getPaymentId(), request.amount());
     }
 
-    // TODO: 요청 후 일정 시간 후 승인불가(만료)
+    // TODO: 요청 후 일정 시간 후 승인불가(만료) - 스케줄러 이용해서
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentId())
@@ -76,6 +76,7 @@ public class PaymentService {
 
             return PaymentConfirmResponse.from(payment);
         } catch (Exception e) {
+            // TODO: order history cancel 업데이트 쳐야됨
             payment.updateStatus(PaymentStatus.ABORTED);
             throw new CustomException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
