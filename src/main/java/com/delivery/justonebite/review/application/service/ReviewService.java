@@ -64,11 +64,10 @@ public class ReviewService {
     @Transactional
     public ReviewResponse update(UUID reviewId,
                                  Long currentUserId,
-                                 UserRole currentUserRole,
                                  UpdateReviewRequest req) {
 
         Review review = loadReviewOrThrow(reviewId);
-        assertCanEdit(review, currentUserId, currentUserRole);
+        assertAuthor(review, currentUserId);
 
         if (isNoop(req)) return ReviewResponse.from(review);
 
@@ -94,9 +93,7 @@ public class ReviewService {
         Review review = reviewRepository.findByIdIncludingDeleted(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
-        if (!review.getUserId().equals(currentUserId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
-        }
+        assertAuthor(review, currentUserId);
 
         if (!review.isDeleted()) {
             throw new CustomException(ErrorCode.ALREADY_ACTIVE_REVIEW);
@@ -105,8 +102,9 @@ public class ReviewService {
     }
 
     private void validateCanWrite(UserRole role) {
-        boolean canWrite = role == UserRole.CUSTOMER || role == UserRole.MANAGER || role == UserRole.MASTER;
-        if (!canWrite) throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        if (role != UserRole.CUSTOMER) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
     }
 
     private Order getOrderOrThrow(UUID orderId) {
@@ -147,9 +145,8 @@ public class ReviewService {
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
     }
 
-    private void assertCanEdit(Review review, Long userId, UserRole role) {
-        boolean isAuthor = review.getUserId().equals(userId);
-        if (!isAuthor) {
+    private void assertAuthor(Review review, Long userId) {
+        if (!review.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
@@ -167,10 +164,5 @@ public class ReviewService {
         if (!review.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
-    }
-
-    private void assertAdmin(UserRole role) {
-        boolean isAdmin = (role == UserRole.MANAGER || role == UserRole.MASTER);
-        if (!isAdmin) throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
     }
 }
