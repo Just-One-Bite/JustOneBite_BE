@@ -11,7 +11,6 @@ import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -108,6 +107,29 @@ class OrderRepositoryTest {
     }
 
     @Test
+    @DisplayName("saveOrder")
+    void saveOrder() {
+        // testOrder 테스트
+        assertThat(testOrder).isNotNull();
+        assertThat(testOrder.getId()).isNotNull();
+        assertThat(testOrder.getShop()).isNotNull();
+        assertThat(testOrder.getCurrentStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(testOrder.getOrderRequest()).contains("단무지 빼주세요");
+    }
+
+    @Test
+    @DisplayName("updateOrder")
+    void updateOrder() {
+        // 주문 상태 변경
+        testOrder.updateCurrentStatus(OrderStatus.ORDER_ACCEPTED);
+
+        assertThat(testOrder).isNotNull();
+        assertThat(testOrder.getId()).isNotNull();
+        assertThat(testOrder.getShop().getOwnerId()).isEqualTo(OWNER_ID);
+        assertThat(testOrder.getCurrentStatus()).isEqualTo(OrderStatus.ORDER_ACCEPTED);
+    }
+
+    @Test
     @DisplayName("existsByIdAndCustomer_Id : 주문 ID와 고객 ID가 일치할 때 True 반환")
     void existsByIdAndCustomer_Id_Returns_True() {
         boolean exists = orderRepository.existsByIdAndCustomer_Id(TEST_ORDER_ID, customer.getId());
@@ -181,6 +203,4 @@ class OrderRepositoryTest {
         // Fetch Join 확인 (레이지 로딩 exception 없이 Customer에 접근 가능한지)
         assertEquals(customer.getId(), found.getCustomer().getId());
     }
-
-
 }
