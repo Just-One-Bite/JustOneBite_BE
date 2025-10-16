@@ -73,12 +73,10 @@ public class PaymentService {
             payment.updateStatus(PaymentStatus.DONE);
             payment.updateApprovedAt(LocalDateTime.now());
             payment.updateLastTransactionId(transaction.getTransactionId());
-            paymentRepository.save(payment);
 
             return PaymentConfirmResponse.from(payment);
         } catch (Exception e) {
             payment.updateStatus(PaymentStatus.ABORTED);
-            paymentRepository.save(payment);
             throw new CustomException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
     }
@@ -99,14 +97,9 @@ public class PaymentService {
         } else {
             payment.updateStatus(PaymentStatus.PARTIAL_CANCELED);
         }
-
         Transaction transaction = Transaction.createCancelTransaction(payment, request.cancelAmount(), request.cancelReason(), payment.getStatus());
-        transactionRepository.save(transaction);
 
-        payment.updateLastTransactionId(transaction.getTransactionId());
-        paymentRepository.save(payment);
-
+        payment.updateLastTransactionId(transaction.getTransactionId()); // save 안해도 자동 commit
         return PaymentCancelResponse.from(payment, request.cancelReason());
     }
-
 }
