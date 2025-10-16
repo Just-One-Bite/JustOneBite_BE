@@ -23,6 +23,7 @@ public enum ErrorCode {
     NOT_FOUND_USER("유저를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ADDRESS_NOT_FOUND("주소를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_PASSWORD("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    MASTER_ALREADY_EXISTS("최종관리자가 이미 존재합니다.", HttpStatus.CONFLICT),
 
     // 공통
     INVALID_INPUT_DATA("잘못된 입력 데이터입니다.", HttpStatus.BAD_REQUEST),
