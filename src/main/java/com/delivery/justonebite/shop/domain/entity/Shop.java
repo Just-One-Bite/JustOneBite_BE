@@ -1,8 +1,6 @@
 package com.delivery.justonebite.shop.domain.entity;
 
 import com.delivery.justonebite.global.common.entity.BaseEntity;
-import com.delivery.justonebite.shop.presentation.dto.request.ShopUpdateRequest;
-import com.delivery.justonebite.user.domain.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
@@ -10,11 +8,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,6 +64,7 @@ public class Shop extends BaseEntity {
     private BigDecimal averageRating = BigDecimal.valueOf(0.0);
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "create_accept_status", nullable = false)
     @Builder.Default
     private AcceptStatus createAcceptStatus = AcceptStatus.PENDING;
@@ -74,6 +73,7 @@ public class Shop extends BaseEntity {
     private String createRejectReason;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "delete_accept_status", nullable = false)
     @Builder.Default
     private RejectStatus deleteAcceptStatus = RejectStatus.NONE;
@@ -89,11 +89,13 @@ public class Shop extends BaseEntity {
 
     //가게 등록
     public void addCategory(Category category) {
-        ShopCategory shopCategory = ShopCategory.create(this, category);
-        if (!this.categories.contains(shopCategory)) {
-            this.categories.add(shopCategory);
+        boolean exists = this.categories.stream()
+                .anyMatch(sc -> sc.getCategory().equals(category));
+        if (!exists) {
+            this.categories.add(ShopCategory.create(this, category));
         }
     }
+
 
     //가게 수정
     public void updateInfo(String name, String phone, String operatingHour, String description) {
