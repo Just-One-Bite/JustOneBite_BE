@@ -45,17 +45,17 @@ public class ShopController {
     //가게 등록
     @Operation(
             summary = "가게 등록 요청 API",
-            description = "CUSTOMER 권한 사용자가 신규 가게 등록을 요청합니다. 동일한 사업자등록번호로는 중복 등록이 불가합니다.",
+            description = "OWNER 권한 사용자가 신규 가게 등록을 요청합니다. 동일한 사업자등록번호로는 중복 등록이 불가합니다.",
             security = @SecurityRequirement(name = "Authorization")
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "가게 등록 요청이 성공적으로 처리되었습니다."),
             @ApiResponse(responseCode = "400", description = "요청 본문에 유효하지 않은 값이 포함되었거나 카테고리 목록이 비어있습니다."),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)"),
-            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (CUSTOMER만 등록 가능)"),
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (OWNER만 등록 가능)"),
             @ApiResponse(responseCode = "409", description = "이미 동일한 사업자등록번호 또는 가게가 존재합니다.")
     })
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('OWNER')")
     @PostMapping
     public ResponseEntity<ShopCreateResponse> createShop(
             @Valid @RequestBody ShopCreateRequest request,
