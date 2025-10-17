@@ -14,6 +14,7 @@ import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import com.delivery.justonebite.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,6 +42,7 @@ class ItemServiceOwnerTest {
     private final Long OWNER_ID = 1L;
     private final Long ANOTHER_OWNER_ID = 2L;
 
+    private UserRepository userRepository;
     private ItemRepository itemRepository;
     private ShopRepository shopRepository;
     private AiRequestHistoryRepository aiRequestHistoryRepository;
@@ -50,11 +52,12 @@ class ItemServiceOwnerTest {
 
     @BeforeEach
     void setUp() {
+        userRepository = mock(UserRepository.class);
         itemRepository = mock(ItemRepository.class);
         shopRepository = mock(ShopRepository.class);
         aiRequestHistoryRepository = mock(AiRequestHistoryRepository.class);
         geminiClient = mock(GeminiClient.class);
-        itemService = new ItemService(itemRepository, shopRepository, geminiClient, aiRequestHistoryRepository);
+        itemService = new ItemService(userRepository, itemRepository, shopRepository, geminiClient, aiRequestHistoryRepository);
 
         SecurityContextHolder.getContext().setAuthentication(auth(OWNER_ID, UserRole.OWNER));
     }
