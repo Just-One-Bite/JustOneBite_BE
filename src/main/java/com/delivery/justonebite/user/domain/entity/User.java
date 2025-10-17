@@ -65,4 +65,8 @@ public class User extends BaseEntity {
     public void softDelete(Long deleterId) {
         super.markDeleted(deleterId);
     }
+
+    public void updateUserRoleToOwner() {
+        this.userRole =  UserRole.OWNER;
+    }
 }

@@ -10,6 +10,7 @@ import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileReque
 import com.delivery.justonebite.user.presentation.dto.request.WithdrawRequest;
 import com.delivery.justonebite.user.presentation.dto.response.GetProfileResponse;
 import com.delivery.justonebite.user.presentation.dto.response.UpdateProfileResponse;
+import com.delivery.justonebite.user.presentation.dto.response.UpdateUserRoleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,13 @@ public class UserService {
         User foundUser = findUser(userDetails.getUserId());
         verifyPassword(request.password(), foundUser);
         foundUser.softDelete(userDetails.getUserId());
+    }
+
+    @Transactional
+    public UpdateUserRoleResponse updateUserRole(Long userId) {
+        User foundUser = findUser(userId);
+        foundUser.updateUserRoleToOwner();
+        return UpdateUserRoleResponse.toDto(foundUser);
     }
 
     private User findUser(Long userId) {

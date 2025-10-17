@@ -4,7 +4,6 @@ import com.delivery.justonebite.global.common.entity.BaseEntity;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.domain.entity.Order;
-import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -56,6 +55,7 @@ public class Review extends BaseEntity {
 
     public static Review create(Order order,
                                 Long userId,
+                                UUID shopId,
                                 String content,
                                 int rating) {
         validateRating(rating);
@@ -91,10 +91,4 @@ public class Review extends BaseEntity {
         super.restoreDeletion();
     }
 
-    public boolean applyUpdate(UpdateReviewRequest req) {
-        boolean ratingChanged = req.rating() != null && !req.rating().equals(this.rating);
-        if (req.content() != null) this.updateContent(req.content());
-        if (req.rating()  != null) this.updateRating(req.rating());
-        return ratingChanged;
-    }
 }

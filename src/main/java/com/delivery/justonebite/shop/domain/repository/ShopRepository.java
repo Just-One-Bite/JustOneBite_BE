@@ -1,4 +1,4 @@
-package com.delivery.justonebite.shop.domain.repository;
+  package com.delivery.justonebite.shop.domain.repository;
 
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.projection.ShopAvgProjection;
@@ -32,7 +32,6 @@ public interface ShopRepository extends JpaRepository<Shop, UUID> {
     @Query("select s.id as shopId, s.averageRating as averageRating from Shop s where s.id in :ids")
     List<ShopAvgProjection> findAvgByIds(@Param("ids") List<UUID> ids);
 
-
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
         UPDATE h_shop AS s
@@ -65,5 +64,6 @@ public interface ShopRepository extends JpaRepository<Shop, UUID> {
            AND s.average_rating IS DISTINCT FROM COALESCE(sub.avg_rating, 0)
         """, nativeQuery = true)
     int updateAvgForShop(@Param("shopId") UUID shopId);
+ 
 
 }

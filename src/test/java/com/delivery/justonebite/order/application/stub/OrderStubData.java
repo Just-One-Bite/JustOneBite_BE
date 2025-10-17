@@ -1,4 +1,4 @@
-package com.delivery.justonebite.order.stub;
+package com.delivery.justonebite.order.application.stub;
 
 import static org.mockito.BDDMockito.given;
 

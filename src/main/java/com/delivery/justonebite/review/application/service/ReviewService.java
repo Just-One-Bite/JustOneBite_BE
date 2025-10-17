@@ -29,7 +29,6 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
-    private final ReviewAggregationService reviewAggregationService;
 
 
     @Transactional
@@ -46,6 +45,7 @@ public class ReviewService {
         Review review = buildReview(order, currentUserId, request);
         Review saved = reviewRepository.save(review);
         reviewAggregationService.updateShopAvgByShopId(order.getShop().getId());
+ 
         return CreateReviewResponse.from(saved);
     }
 
@@ -71,13 +71,15 @@ public class ReviewService {
         assertAuthor(review, currentUserId);
 
         if (isNoop(req)) return ReviewResponse.from(review);
-
         boolean ratingChanged = review.applyUpdate(req);
         if (ratingChanged){
             UUID shopId = review.getOrder().getShop().getId();
             reviewAggregationService.updateShopAvgByShopId(shopId);
         }
 
+ 
+        applyUpdates(review, req);
+ 
         return ReviewResponse.from(review);
     }
 
@@ -91,10 +93,10 @@ public class ReviewService {
         if (review.isDeleted()) {
             throw new CustomException(ErrorCode.ALREADY_DELETED_REVIEW);
         }
-
         review.softDelete(currentUserId);
         UUID shopId = review.getOrder().getShop().getId();
         reviewAggregationService.updateShopAvgByShopId(shopId);
+ 
     }
 
     @Transactional
@@ -108,9 +110,9 @@ public class ReviewService {
             throw new CustomException(ErrorCode.ALREADY_ACTIVE_REVIEW);
         }
         review.restore();
-
         UUID shopId = review.getOrder().getShop().getId();
         reviewAggregationService.updateShopAvgByShopId(shopId);
+ 
     }
 
     private void validateCanWrite(UserRole role) {
@@ -148,7 +150,8 @@ public class ReviewService {
     }
 
     private Review buildReview(Order order, Long currentUserId, CreateReviewRequest req) {
-        return create(order, currentUserId, req.content(), req.rating());
+        UUID shopId = order.getShop().getId();
+        return create(order, currentUserId, shopId, req.content(), req.rating());
     }
 
     private Review loadReviewOrThrow(UUID reviewId) {
@@ -164,6 +167,11 @@ public class ReviewService {
 
     private boolean isNoop(UpdateReviewRequest req) {
         return req.content() == null && req.rating() == null;
+    }
+
+    private void applyUpdates(Review review, UpdateReviewRequest req) {
+        if (req.content() != null) review.updateContent(req.content());
+        if (req.rating() != null)  review.updateRating(req.rating());
     }
 
     private void assertDeletable(Review review, Long userId) {
