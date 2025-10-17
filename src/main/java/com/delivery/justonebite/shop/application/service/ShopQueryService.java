@@ -59,11 +59,12 @@ public class ShopQueryService {
 
         // Projection -> Map 변환
         Map<UUID, BigDecimal> avgMap = avgList.stream()
+                .filter(a -> a.getShopId() != null)
                 .collect(Collectors.toMap(
                         ShopAvgProjection::getShopId,
-                        ShopAvgProjection::getAverageRating
+                        ShopAvgProjection::getAverageRating,
+                        (existing, duplicate) -> existing // 중복 발생 시 기존 값 유지
                 ));
-
 
         // DTO 변환
         return shops.map(shop -> {
