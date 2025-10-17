@@ -13,6 +13,7 @@ import com.delivery.justonebite.item.presentation.dto.response.ItemDetailRespons
 import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import com.delivery.justonebite.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.mock;
 class ItemServiceCustomerTest {
     private final Long CUSTOMER_ID = 2L;
 
+    private UserRepository userRepository;
     private ItemRepository itemRepository;
     private ShopRepository shopRepository;
     private AiRequestHistoryRepository aiRequestHistoryRepository;
@@ -46,11 +48,12 @@ class ItemServiceCustomerTest {
 
     @BeforeEach
     void setUp() {
+        userRepository = mock(UserRepository.class);
         itemRepository = mock(ItemRepository.class);
         shopRepository = mock(ShopRepository.class);
         aiRequestHistoryRepository = mock(AiRequestHistoryRepository.class);
         geminiClient = mock(GeminiClient.class);
-        itemService = new ItemService(itemRepository, shopRepository, geminiClient, aiRequestHistoryRepository);
+        itemService = new ItemService(userRepository, itemRepository, shopRepository, geminiClient, aiRequestHistoryRepository);
 
         SecurityContextHolder.getContext().setAuthentication(auth(CUSTOMER_ID, UserRole.CUSTOMER));
     }
