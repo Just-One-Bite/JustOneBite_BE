@@ -46,6 +46,14 @@ public enum ErrorCode {
     ALREADY_PENDING_DELETE("이미 승인 대기중인 삭제 요청입니다.",HttpStatus.CONFLICT),
     CATEGORY_NOT_FOUND("존재하지 않는 카테고리입니다.",HttpStatus.NOT_FOUND),
     NOT_COMPLETED_ORDER_EXISTS("완료되지 않은 주문이 존재합니다. 가게를 삭제할 수 없습니다.",HttpStatus.BAD_REQUEST),
+    DUPLICATE_REGISTRATION_NUMBER("이미 등록된 사업자등록번호입니다.", HttpStatus.CONFLICT),
+    SHOP_ALREADY_EXISTS_FOR_OWNER("이미 등록된 가게가 있습니다.", HttpStatus.CONFLICT),
+    UNAUTHORIZED_SHOP_ACCESS_VIEW("본인의 가게가 아니므로 조회 할 수 없습니다.", HttpStatus.FORBIDDEN),
+    EMPTY_CATEGORY_LIST("최소 한 개 이상의 카테고리를 선택해야 합니다.", HttpStatus.BAD_REQUEST),
+    INVALID_SORT_PARAMETER("정렬 기준이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    SHOP_DELETION_NOT_ALLOWED("현재 상태에서는 가게 삭제가 불가능합니다.", HttpStatus.BAD_REQUEST),
+
+
 
     //리뷰
     INVALID_RATING_RANGE("평점은 1~5 범위여야 합니다.", HttpStatus.BAD_REQUEST),
@@ -69,8 +77,14 @@ public enum ErrorCode {
     INVALID_CANCEL_STATUS_VALUE("취소 요청 상태는 ORDER_CANCELLED 여야 합니다.", HttpStatus.BAD_REQUEST),
 
     //결제
-    PAYMENT_NOT_FOUND("결제정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
-    ;
+    PAYMENT_NOT_FOUND("결제 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_PAYMENT_STATUS("승인이 불가한 결제 상태입니다.",HttpStatus.CONFLICT),
+    PAYMENT_ALREADY_EXISTS("이미 결제가 완료된 주문입니다.", HttpStatus.CONFLICT),
+    PAYMENT_AMOUNT_NOT_MATCH("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    CANCEL_AMOUNT_EXCEEDED("요청 금액이 취소 가능 금액보다 큽니다.",HttpStatus.BAD_REQUEST),
+    PAYMENT_ALREADY_CANCELED("이미 취소된 결제 내역입니다.", HttpStatus.CONFLICT),
+    PAYMENT_CONFIRM_FAILED("결제 승인에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR);
+
 
     private final String description;
     private final HttpStatus status;

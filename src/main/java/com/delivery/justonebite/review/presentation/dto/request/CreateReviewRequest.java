@@ -1,11 +1,12 @@
 package com.delivery.justonebite.review.presentation.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
 import java.util.UUID;
 
-
+@Schema(description = "리뷰 생성 요청 DTO")
 public record CreateReviewRequest(
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         @NotNull(message = "주문 ID는 필수입니다.")
