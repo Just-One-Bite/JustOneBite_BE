@@ -30,6 +30,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
+    private final ReviewAggregationService reviewAggregationService;
 
 
     @Transactional
@@ -45,6 +46,7 @@ public class ReviewService {
 
         Review review = buildReview(order, currentUserId, request);
         Review saved = reviewRepository.save(review);
+        reviewAggregationService.updateShopAvg(order.getId());
         return CreateReviewResponse.from(saved);
     }
 
@@ -71,7 +73,9 @@ public class ReviewService {
 
         if (isNoop(req)) return ReviewResponse.from(review);
 
-        applyUpdates(review, req);
+        boolean ratingChanged = review.applyUpdate(req);
+        if (ratingChanged) reviewAggregationService.updateShopAvg(review.getOrder().getId());
+
         return ReviewResponse.from(review);
     }
 
@@ -85,7 +89,10 @@ public class ReviewService {
         if (review.isDeleted()) {
             throw new CustomException(ErrorCode.ALREADY_DELETED_REVIEW);
         }
+
         review.softDelete(currentUserId);
+
+        reviewAggregationService.updateShopAvg(review.getOrder().getId());
     }
 
     @Transactional
@@ -99,6 +106,8 @@ public class ReviewService {
             throw new CustomException(ErrorCode.ALREADY_ACTIVE_REVIEW);
         }
         review.restore();
+
+        reviewAggregationService.updateShopAvg(review.getOrder().getId());
     }
 
     private void validateCanWrite(UserRole role) {
@@ -136,8 +145,7 @@ public class ReviewService {
     }
 
     private Review buildReview(Order order, Long currentUserId, CreateReviewRequest req) {
-        UUID shopId = order.getShop().getId();
-        return create(order, currentUserId, shopId, req.content(), req.rating());
+        return create(order, currentUserId, req.content(), req.rating());
     }
 
     private Review loadReviewOrThrow(UUID reviewId) {
@@ -153,11 +161,6 @@ public class ReviewService {
 
     private boolean isNoop(UpdateReviewRequest req) {
         return req.content() == null && req.rating() == null;
-    }
-
-    private void applyUpdates(Review review, UpdateReviewRequest req) {
-        if (req.content() != null) review.updateContent(req.content());
-        if (req.rating() != null)  review.updateRating(req.rating());
     }
 
     private void assertDeletable(Review review, Long userId) {

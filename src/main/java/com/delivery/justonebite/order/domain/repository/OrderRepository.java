@@ -28,6 +28,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query("SELECT o FROM Order o JOIN FETCH o.customer WHERE o.id = :orderId")
     Optional<Order> findByIdWithCustomer(@Param("orderId") UUID orderId);
 
+    @Query("select o.shop.id from Order o where o.id = :orderId")
+    Optional<UUID> findShopIdByOrderId(@Param("orderId") UUID orderId);
+
 }
 /**
  * // OrderRepository.java
