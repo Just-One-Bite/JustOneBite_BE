@@ -114,7 +114,7 @@ class ShopServiceTest {
         given(categoryRepository.findAllByCategoryNameIn(categories)).willReturn(List.of(chicken, pizza));
         given(shopRepository.save(any(Shop.class))).willReturn(shop);
 
-        Shop created = shopService.createShop(req, customer.getId(), UserRole.CUSTOMER);
+        Shop created = shopService.createShop(req, owner.getId(), UserRole.OWNER);
 
         assertThat(created).isNotNull();
         assertThat(created.getName()).isEqualTo("테스트 치킨집");
@@ -122,7 +122,7 @@ class ShopServiceTest {
     }
 
     @Test
-    @DisplayName("OWNER는 가게 등록이 불가능")
+    @DisplayName("CUSTOMER는 가게 등록이 불가능")
     void createShop_invalidRole() {
         ShopCreateRequest req = ShopCreateRequest.builder()
                 .name("가짜 가게")
@@ -137,7 +137,7 @@ class ShopServiceTest {
                 .categories(List.of("분식"))
                 .build();
 
-        assertThatThrownBy(() -> shopService.createShop(req, owner.getId(), UserRole.OWNER))
+        assertThatThrownBy(() -> shopService.createShop(req, customer.getId(), UserRole.CUSTOMER))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_USER_ROLE);
     }

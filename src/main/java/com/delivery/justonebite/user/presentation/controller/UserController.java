@@ -7,10 +7,12 @@ import com.delivery.justonebite.user.presentation.dto.request.UpdateProfileReque
 import com.delivery.justonebite.user.presentation.dto.request.WithdrawRequest;
 import com.delivery.justonebite.user.presentation.dto.response.GetProfileResponse;
 import com.delivery.justonebite.user.presentation.dto.response.UpdateProfileResponse;
+import com.delivery.justonebite.user.presentation.dto.response.UpdateUserRoleResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +23,14 @@ public class UserController {
 
     private final UserService userService;
 
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
     @GetMapping("/me")
     public ResponseEntity<GetProfileResponse> getMyProfile(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         GetProfileResponse myProfile = userService.findMyProfile(userDetails);
         return ResponseEntity.status(HttpStatus.OK).body(myProfile);
     }
 
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
     @PatchMapping("/me")
     public ResponseEntity<UpdateProfileResponse> updateMyProfile(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -36,6 +40,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(myProfile);
     }
 
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
     @PatchMapping("/me/password")
     public ResponseEntity<Void> updatePassword(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -45,6 +50,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteMyProfile(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -52,5 +58,12 @@ public class UserController {
     ) {
         userService.deleteUser(userDetails, request);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UpdateUserRoleResponse> updateUserRole(@PathVariable Long userId) {
+        UpdateUserRoleResponse updatedUser = userService.updateUserRole(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 }

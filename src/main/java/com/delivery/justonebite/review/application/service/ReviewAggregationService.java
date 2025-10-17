@@ -16,7 +16,6 @@ public class ReviewAggregationService {
     @Transactional
     public void recomputeAllShopAvg() {
         int updated = shopRepository.bulkUpdateAllAvg();
-        int reset = shopRepository.bulkResetAvgForZeroReview();
     }
 
 }

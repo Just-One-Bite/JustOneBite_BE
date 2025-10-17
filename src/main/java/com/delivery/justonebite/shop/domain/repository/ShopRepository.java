@@ -1,4 +1,4 @@
-package com.delivery.justonebite.shop.domain.repository;
+  package com.delivery.justonebite.shop.domain.repository;
 
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.projection.ShopAvgProjection;
@@ -29,35 +29,25 @@ public interface ShopRepository extends JpaRepository<Shop, UUID> {
     //리뷰 평점 관련 코드 --
 
 
-    @Query("select s.id as id, s.averageRating as averageRating from Shop s where s.id in :ids")
+    @Query("select s.id as shopId, s.averageRating as averageRating from Shop s where s.id in :ids")
     List<ShopAvgProjection> findAvgByIds(@Param("ids") List<UUID> ids);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
-UPDATE h_shop s
-   SET average_rating = COALESCE(sub.avg_rating, 0)
-  FROM (
-        SELECT r.shop_id, AVG(r.rating) AS avg_rating
-          FROM h_review r
-         WHERE r.deleted_at IS NULL
-      GROUP BY r.shop_id
-  ) sub
- WHERE s.shop_id = sub.shop_id
-""", nativeQuery = true)
+        UPDATE h_shop AS s
+        SET average_rating = COALESCE(sub.avg_rating, 0)
+        FROM (
+          SELECT s2.shop_id,
+                 ROUND(AVG(r.rating)::numeric, 1) AS avg_rating
+          FROM h_shop AS s2
+          LEFT JOIN h_review AS r
+            ON r.shop_id = s2.shop_id
+           AND r.deleted_at IS NULL
+          GROUP BY s2.shop_id
+        ) AS sub
+        WHERE s.shop_id = sub.shop_id
+        """, nativeQuery = true)
     int bulkUpdateAllAvg();
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = """
-UPDATE h_shop s
-   SET average_rating = 0
- WHERE NOT EXISTS (
-        SELECT 1
-          FROM h_review r
-         WHERE r.deleted_at IS NULL
-           AND r.shop_id = s.shop_id
-  )
-""", nativeQuery = true)
-    int bulkResetAvgForZeroReview();
 
 
 }
