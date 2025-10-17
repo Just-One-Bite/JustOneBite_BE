@@ -26,7 +26,6 @@ import static com.delivery.justonebite.review.entity.Review.create;
 @RequiredArgsConstructor
 public class ReviewService {
 
-
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
@@ -46,7 +45,7 @@ public class ReviewService {
 
         Review review = buildReview(order, currentUserId, request);
         Review saved = reviewRepository.save(review);
-        reviewAggregationService.updateShopAvg(order.getId());
+        reviewAggregationService.updateShopAvgByShopId(order.getShop().getId());
         return CreateReviewResponse.from(saved);
     }
 
@@ -74,7 +73,10 @@ public class ReviewService {
         if (isNoop(req)) return ReviewResponse.from(review);
 
         boolean ratingChanged = review.applyUpdate(req);
-        if (ratingChanged) reviewAggregationService.updateShopAvg(review.getOrder().getId());
+        if (ratingChanged){
+            UUID shopId = review.getOrder().getShop().getId();
+            reviewAggregationService.updateShopAvgByShopId(shopId);
+        }
 
         return ReviewResponse.from(review);
     }
@@ -91,8 +93,8 @@ public class ReviewService {
         }
 
         review.softDelete(currentUserId);
-
-        reviewAggregationService.updateShopAvg(review.getOrder().getId());
+        UUID shopId = review.getOrder().getShop().getId();
+        reviewAggregationService.updateShopAvgByShopId(shopId);
     }
 
     @Transactional
@@ -107,7 +109,8 @@ public class ReviewService {
         }
         review.restore();
 
-        reviewAggregationService.updateShopAvg(review.getOrder().getId());
+        UUID shopId = review.getOrder().getShop().getId();
+        reviewAggregationService.updateShopAvgByShopId(shopId);
     }
 
     private void validateCanWrite(UserRole role) {

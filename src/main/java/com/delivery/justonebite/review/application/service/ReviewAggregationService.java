@@ -16,24 +16,16 @@ import java.util.UUID;
 public class ReviewAggregationService {
 
     private final ShopRepository shopRepository;
-    private final OrderRepository orderRepository;
-
 
     @Transactional
     public void recomputeAllShopAvg() {
         int updated = shopRepository.bulkUpdateAllAvg();
-        int reset = shopRepository.bulkResetAvgForZeroReview();
     }
 
-    @Transactional
-    public void updateShopAvg(UUID orderId) {
-        UUID shopId = orderRepository.findShopIdByOrderId(orderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        int updated = shopRepository.updateShopAvgById(shopId);
-        if (updated == 0) {
-            shopRepository.resetShopAvgToZero(shopId);
-        }
+    @Transactional
+    public void updateShopAvgByShopId(UUID shopId) {
+        shopRepository.updateAvgForShop(shopId);
     }
 
 }
