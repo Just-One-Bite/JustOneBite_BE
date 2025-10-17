@@ -32,7 +32,7 @@ public class AddressController {
             description = "로그인한 유저가 주소를 등록할 수 있습니다. 주소는 5개까지 등록할 수 있습니다.",
             security = @SecurityRequirement(name = "Authorization"),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "유저 정보 조회에 성공하였습니다."),
+                    @ApiResponse(responseCode = "201", description = "유저 정보 조회에 성공하였습니다."),
                     @ApiResponse(responseCode = "400", description = "주소는 5개를 초과해서 등록할 수 없습니다.", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "주소를 찾을 수 없습니다.", content = @Content(mediaType = "application/json"))

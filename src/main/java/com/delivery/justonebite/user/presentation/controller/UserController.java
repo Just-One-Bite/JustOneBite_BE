@@ -31,7 +31,7 @@ public class UserController {
 
     @Operation(
             summary = "유저 조회 요청 API",
-            description = "로그인한 유저(CUSTOMER, OWNER) 자신의 정보를 조회합니다. 해당 API 요청 권한은 CUSTOMER, OWNER, MASTER만 가능합니다.",
+            description = "로그인한 유저 자신의 정보를 조회합니다. 해당 API 요청 권한은 CUSTOMER, OWNER, MASTER만 가능합니다.",
             security = @SecurityRequirement(name = "Authorization"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "유저 정보 조회에 성공하였습니다."),
@@ -49,7 +49,7 @@ public class UserController {
 
     @Operation(
             summary = "유저 수정 요청 API",
-            description = "로그인한 유저(CUSTOMER, OWNER) 자신의 정보를 수정합니다. 해당 API 요청 권한은 CUSTOMER, OWNER, MASTER만 가능합니다.",
+            description = "로그인한 유저 자신의 정보를 수정합니다. 해당 API 요청 권한은 CUSTOMER, OWNER, MASTER만 가능합니다.",
             security = @SecurityRequirement(name = "Authorization"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "유저 정보 수정에 성공하였습니다."),
@@ -71,7 +71,7 @@ public class UserController {
 
     @Operation(
             summary = "비밀번호 수정 요청 API",
-            description = "로그인한 유저(CUSTOMER, OWNER) 자신의 비밀번호를 수정합니다. 해당 API 요청 권한은 CUSTOMER, OWNER, MASTER만 가능합니다.",
+            description = "로그인한 유저 자신의 비밀번호를 수정합니다. 해당 API 요청 권한은 CUSTOMER, OWNER, MASTER만 가능합니다.",
             security = @SecurityRequirement(name = "Authorization"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "유저 정보 수정에 성공하였습니다."),

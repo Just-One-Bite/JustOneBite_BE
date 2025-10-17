@@ -80,7 +80,7 @@ public class AuthController {
             summary = "최종 관리자 생성 요청 API",
             description = "MASTER권한의 최종 관리자를 생성합니다. 최종 관리자 계정은 1개만 존재 가능합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "유저 정보 조회에 성공하였습니다."),
+                    @ApiResponse(responseCode = "201", description = "유저 정보 조회에 성공하였습니다."),
                     @ApiResponse(responseCode = "409", description = "최종관리자가 이미 존재합니다.", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "409", description = "사용중인 이메일입니다.", content = @Content(mediaType = "application/json"))
 
