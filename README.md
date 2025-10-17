@@ -52,14 +52,14 @@
 
 
 ## ERD
-<img width="2151" height="1232" alt="배달" src="https://github.com/user-attachments/assets/672ca809-e9d7-45a0-ae4c-0ec731a5e12c" />
+<img width="2151" height="1232" alt="배달2" src="https://github.com/user-attachments/assets/0a27416d-a5b4-4f11-8576-48d10ca835dc" />
+
 
 
 
 
 > - User ↔ Order ↔ Payment ↔ Review ↔ Shop ↔ Item 간 다대일 관계로 구성  
 > - Soft Delete 및 Auditing 기반으로 데이터 이력 추적 가능  
-> - Review 도메인은 Shop과 직접 연결되어 평균 평점 자동 반영
 
 
 
