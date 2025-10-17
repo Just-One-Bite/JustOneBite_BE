@@ -1,7 +1,10 @@
 package com.delivery.justonebite.user.presentation.controller;
 
+import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import com.delivery.justonebite.user.application.service.AuthService;
+import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
+import com.delivery.justonebite.user.presentation.dto.response.LoginResponse;
 import com.delivery.justonebite.user.presentation.dto.response.SignupResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,15 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@RequestBody @Valid SignupRequest request) {
-        SignupResponse token = authService.signup(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(token);
+        AuthService.AuthResult authResult = authService.signup(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(SignupResponse.toDto(authResult.user(), authResult.tokenResponse()));
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+        TokenResponse token = authService.login(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(LoginResponse.toDto(token.accessToken(), token.refreshToken()));
     }
 }
