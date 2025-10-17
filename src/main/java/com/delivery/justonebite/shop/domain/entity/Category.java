@@ -8,11 +8,17 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.util.UUID;
+
+import java.util.*;
 
 
 @Entity
-@Table(name = "h_category")
+@Table(
+        name = "h_category",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_category_name", columnNames = {"category_name"})
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category {
@@ -24,6 +30,9 @@ public class Category {
 
     @Column(name = "category_name", nullable = false, length = 50, unique = true)
     private String categoryName;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ShopCategory> shopCategories = new HashSet<>();
 
     @Builder
     public Category(String categoryName) {

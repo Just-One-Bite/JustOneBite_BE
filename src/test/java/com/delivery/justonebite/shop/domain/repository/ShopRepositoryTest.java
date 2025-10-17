@@ -95,15 +95,16 @@ class ShopRepositoryTest {
     @Test
     @DisplayName("리뷰 없는 가게를 0점으로 업데이트")
     void bulkResetAvgForZeroReview() {
-        int updated = shopRepository.bulkResetAvgForZeroReview();
+        int updated = shopRepository.bulkUpdateAllAvg();
         assertThat(updated).isGreaterThanOrEqualTo(0);
     }
 
     @Test
     @DisplayName("이름, 설명으로 가게 검색")
     void findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase() {
-        Page<Shop> page = shopRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                "치킨", "바삭", PageRequest.of(0, 10)
+        Page<Shop> page = shopRepository.searchByNameOrDescription(
+                "치킨",
+                PageRequest.of(0, 10)
         );
 
         assertThat(page.getContent()).isNotEmpty();

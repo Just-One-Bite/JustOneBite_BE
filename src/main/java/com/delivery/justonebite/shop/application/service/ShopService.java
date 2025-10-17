@@ -48,7 +48,6 @@ public class ShopService {
     // 가게 등록
     @Transactional
     public Shop createShop(ShopCreateRequest request, Long userId, UserRole role) {
-        // 권한 체크
         if (role != UserRole.OWNER) {
             throw new CustomException(ErrorCode.INVALID_USER_ROLE);
         }
@@ -58,30 +57,34 @@ public class ShopService {
         List<String> categoryNames = request.categories();
         if (categoryNames != null && !categoryNames.isEmpty()) {
 
-            // DB에 존재하는 카테고리만 조회 (없는 건 예외)
-            List<Category> foundCategories = categoryRepository.findAllByCategoryNameIn(categoryNames);
-
-            // 요청 중 실제 존재하지 않는 카테고리명 필터링
-            Set<String> foundNames = foundCategories.stream()
-                    .map(Category::getCategoryName)
-                    .collect(Collectors.toSet());
-
-            List<String> notFound = categoryNames.stream()
-                    .filter(name -> !foundNames.contains(name))
+            // 공백/중복 제거
+            List<String> normalized = categoryNames.stream()
+                    .filter(name -> name != null && !name.isBlank())
+                    .map(String::trim)
+                    .distinct()
                     .toList();
 
-            if (!notFound.isEmpty()) {
-                throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
-            }
+            // DB에 존재하는 카테고리 조회
+            Map<String, Category> existing = categoryRepository
+                    .findAllByCategoryNameIn(normalized).stream()
+                    .collect(Collectors.toMap(Category::getCategoryName, c -> c));
 
-            // ShopCategory 관계 추가
-            for (Category category : foundCategories) {
-                shop.addCategory(category); // 중복 방지 로직 포함
+            // 없는 카테고리는 새로 생성
+            for (String name : normalized) {
+                Category category = existing.get(name);
+                if (category == null) {
+                    category = categoryRepository.save(Category.builder()
+                            .categoryName(name)
+                            .build());
+                    existing.put(name, category);
+                }
+                shop.addCategory(category);
             }
         }
 
         return shopRepository.save(shop);
     }
+
 
     //가게 수정
     @Transactional
