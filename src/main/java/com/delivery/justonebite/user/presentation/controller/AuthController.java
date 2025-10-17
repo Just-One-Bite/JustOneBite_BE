@@ -3,8 +3,10 @@ package com.delivery.justonebite.user.presentation.controller;
 import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import com.delivery.justonebite.user.application.service.AuthService;
+import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterRequest;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
+import com.delivery.justonebite.user.presentation.dto.response.CreateMasterResponse;
 import com.delivery.justonebite.user.presentation.dto.response.LoginResponse;
 import com.delivery.justonebite.user.presentation.dto.response.SignupResponse;
 import jakarta.validation.Valid;
@@ -41,5 +43,12 @@ public class AuthController {
     public ResponseEntity<TokenResponse> reisuue(@RequestBody ReissueRequest request) {
         TokenResponse token = authService.reissue(request);
         return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
+
+    @PostMapping("/admin/signup")
+    public ResponseEntity<CreateMasterResponse> createMaster(@RequestBody @Valid CreatedMasterRequest request) {
+        AuthService.AuthResult master = authService.createMaster(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CreateMasterResponse.toDto(master.user(), master.tokenResponse()));
     }
 }
