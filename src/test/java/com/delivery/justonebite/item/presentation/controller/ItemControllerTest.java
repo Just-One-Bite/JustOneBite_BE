@@ -1,6 +1,6 @@
 package com.delivery.justonebite.item.presentation.controller;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.item.application.service.ItemService;
 
 import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;

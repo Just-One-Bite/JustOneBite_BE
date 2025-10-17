@@ -2,7 +2,7 @@ package com.delivery.justonebite.ai_history.presentation.controller;
 
 import com.delivery.justonebite.ai_history.application.service.AiRequestHistoryService;
 import com.delivery.justonebite.ai_history.presentation.dto.AiRequestHistoryResponse;
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.item.presentation.controller.ItemController;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
