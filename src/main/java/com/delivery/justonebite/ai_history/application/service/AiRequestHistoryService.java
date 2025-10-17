@@ -5,6 +5,7 @@ import com.delivery.justonebite.ai_history.domain.repository.AiRequestHistoryRep
 import com.delivery.justonebite.ai_history.presentation.dto.AiRequestHistoryResponse;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
+import com.delivery.justonebite.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,15 +23,15 @@ public class AiRequestHistoryService {
         AiRequestHistory history = aiRequestHistoryRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        if (!history.getUserId().equals(userId)) {
+        if (!history.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
         return AiRequestHistoryResponse.from(history);
     }
 
-    public Page<AiRequestHistoryResponse> getHistories(Long userId, Pageable pageable) {
-        Page<AiRequestHistory> histories = aiRequestHistoryRepository.findAllByUserId(userId, pageable);
+    public Page<AiRequestHistoryResponse> getHistories(User user, Pageable pageable) {
+        Page<AiRequestHistory> histories = aiRequestHistoryRepository.findAllByUser(user, pageable);
         return histories.map(AiRequestHistoryResponse::from);
     }
 }
