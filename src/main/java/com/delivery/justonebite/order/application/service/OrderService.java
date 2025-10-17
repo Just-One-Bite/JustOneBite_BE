@@ -23,6 +23,7 @@ import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResp
 import com.delivery.justonebite.payment.application.service.PaymentService;
 import com.delivery.justonebite.payment.domain.entity.Payment;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentFailResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
 import com.delivery.justonebite.user.domain.entity.Address;
@@ -45,6 +46,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,11 +102,8 @@ public class OrderService {
         } else {
             // 결제 요청 실패 시 (카드 거절, 취소)
             orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
-            throw new CustomException(ErrorCode.PAYMENT_REQUEST_FAIL);
+            return new PaymentFailResponse(order.getId(), HttpStatusCode.valueOf(500).toString(), ErrorCode.PAYMENT_REQUEST_FAIL.getDescription());
         }
-
-//        // 주문 내역 저장
-//        orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.PENDING));
 
         return paymentResponse;
     }
