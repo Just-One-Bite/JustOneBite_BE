@@ -1,6 +1,6 @@
 package com.delivery.justonebite.user.application.service;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.user.domain.entity.Address;

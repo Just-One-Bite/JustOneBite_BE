@@ -40,11 +40,7 @@ public class WebSecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .rememberMe(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "v1/auth/signup",
-                                "v1/auth/signin",
-                                "v1/auth/reissue"
-                        ).permitAll()
+                        .requestMatchers("v1/auth/**").permitAll()
                         .requestMatchers("v1/auth/logout").authenticated()
                         .requestMatchers("/swagger-ui/**").permitAll()      // Swagger UI HTML/JS/CSS 파일
                         .requestMatchers("/v3/api-docs/**").permitAll()     // OpenAPI JSON/YAML 정의 파일

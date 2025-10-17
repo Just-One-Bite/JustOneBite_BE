@@ -1,7 +1,6 @@
 package com.delivery.justonebite.user.application.service;
 
 import com.delivery.justonebite.global.common.jwt.JwtUtil;
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.config.redis.service.RedisService;
 import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
@@ -11,21 +10,18 @@ import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterRequest;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
+import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
 import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
