@@ -18,7 +18,17 @@ import java.util.UUID;
 @Repository
 public interface ShopRepository extends JpaRepository<Shop, UUID> {
 
-    //이름, 설명으로 검색
+    // 가게이름, 설명으로 검색
+    Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String name, String description, Pageable pageable
+    );
+    // 삭제되지 않은 가게 조회
+    Optional<Shop> findByIdAndDeletedAtIsNull(UUID id);
+
+
+    //리뷰 평점 관련 코드 --
+
+
     @Query("select s.id as id, s.averageRating as averageRating from Shop s where s.id in :ids")
     List<ShopAvgProjection> findAvgByIds(@Param("ids") List<UUID> ids);
 
@@ -48,12 +58,6 @@ UPDATE h_shop s
   )
 """, nativeQuery = true)
     int bulkResetAvgForZeroReview();
-
-    Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description, Pageable pageable
-    );
-
-    Optional<Shop> findByIdAndDeletedAtIsNull(UUID id);
 
 
 }
