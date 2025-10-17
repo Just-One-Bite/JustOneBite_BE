@@ -20,6 +20,7 @@ import com.delivery.justonebite.order.presentation.dto.response.CustomerOrderRes
 import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
+import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.PaymentDto;
 import com.delivery.justonebite.payment.application.service.PaymentService;
 import com.delivery.justonebite.payment.domain.entity.Payment;
 import com.delivery.justonebite.payment.domain.entity.PaymentStatus;
@@ -137,8 +138,10 @@ public class OrderService {
             .map(OrderItemDto::from)
             .toList();
 
-        ShopInfoDto dto = ShopInfoDto.toDto(order.getShop().getId(), order.getShop().getName());
-        return OrderDetailsResponse.toDto(order, dto, orderItems);
+        ShopInfoDto shopInfo = ShopInfoDto.toDto(order.getShop().getId(), order.getShop().getName());
+        PaymentDto payment = PaymentDto.toDto(paymentService.getPaymentByOrderId(orderId));
+
+        return OrderDetailsResponse.toDto(order, shopInfo, orderItems, payment);
     }
 
     private void authorizeCustomer(User user) {
