@@ -22,11 +22,11 @@
 | 이름 | 역할 | 주요 담당 |
 |------|------|------------|
 | **배원진** | 리뷰(Review) | 리뷰 작성/조회/수정/삭제, 평점 통계, 글로벌 예외처리 |
-| **민송경** | 주문(Order) | 주문  |
+| **민송경** | 주문(Order) | 주문 요청/취소/주문 상태 관리/주문 상태 이력 관리/고객별 주문 목록 및 상세정보 조회 |
 | **서지희** | 결제(Payment) | 결제 및 거래 승인, 취소 |
 | **송준일** | 회원(User) | 회원가입, 로그인, JWT 인증 |
 | **노희현** | 가게(Shop) | 가게 등록, 수정, 삭제 및 리뷰와 주문내역 조회 | 
-| **남예준** | 인프라 | AWS EC2  CI/CD 구축 |
+| **남예준** | 상품(Item), AI, 인프라 | 상품 CRUD, AI API, AWS EC2 CI/CD 구축 |
 
 ---
 
@@ -57,7 +57,7 @@
 
 
 
-> - User ↔ Order ↔ Payment ↔ Review ↔ Shop 간 다대일 관계로 구성  
+> - User ↔ Order ↔ Payment ↔ Review ↔ Shop ↔ Item 간 다대일 관계로 구성  
 > - Soft Delete 및 Auditing 기반으로 데이터 이력 추적 가능  
 > - Review 도메인은 Shop과 직접 연결되어 평균 평점 자동 반영
 
@@ -77,7 +77,7 @@
 | **Framework** | Spring Boot 3.5.6 / Spring Data JPA / Spring Security / **Spring Scheduler** |
 | **Database** | PostgreSQL |
 | **Build Tool** | Gradle |
-| **Infra** | AWS EC2 / Nginx / S3 / RDS |
+| **Infra** | AWS EC2 / Nginx / RDS |
 | **CI/CD** | GitHub Actions |
 | **Test** | JUnit 5 / Mockito |
 | **Docs & Tool** | Swagger / Postman / Notion / Slack |
@@ -185,24 +185,31 @@ jwt:
 - 가게별 리뷰 평점 자동 반영
 - 가게별 주문 조회 및 리뷰 조회 
  
-
 ### 주문 (Order)
 - 주문 생성 / 취소 / 상태 변경  
   (`PENDING` → `ACCEPTED` → `PREPARING` → `DELIVERING` → `COMPLETED`)
-- 주문 내역 관리 및 재주문 기능
+- 주문별 이력 관리
+- 주문 생성 단계에서의 결제 요청 처리
 - 주문 후 5분 이내 취소 제한 로직
 
 ###  결제 (Payment)
 - 결제 요청 / 승인 / 취소
- -
+- 결제 유효 시간 관리: 자동 만료 및 주문 취소 (스케줄링 기반)
 
 ###  리뷰 (Review)
 - 주문 완료 고객만 리뷰 작성 가능
 - 리뷰 수정 / 삭제 (Soft Delete)
 - 가게 평균 평점 자동 갱신 (Spring Scheduler 기반)
- 
    
+###  상품 (Item)
+- 상품 조회를 제외한 기능은 OWNER, MANAGER, MASTER만 가능
+- 상품 수정 / 삭제 (Soft Delete), 상품 숨김 기능
+- CUSTOMER와 그 외 역할에 대한 조회 대상 row(숨김 및 soft delete) 구분
+- Gemini API를 이용한 AI 상품 설명 기능 제공
 
+###  AI 사용 기록 (AI Request History)
+- 상품 생성 및 수정 시 aiGenerated value에 따른 사용 기록 저장
+- user 별로 해당 기록 조회
 
      
 

@@ -164,7 +164,7 @@ class ReviewControllerTest {
                 USER_ID
         );
 
-        given(reviewService.update(eq(REVIEW_ID), any(Long.class), any(UserRole.class), any()))
+        given(reviewService.update(eq(REVIEW_ID), any(Long.class), any()))
                 .willReturn(resp);
 
         String body = """

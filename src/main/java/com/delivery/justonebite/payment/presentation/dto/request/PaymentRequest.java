@@ -16,5 +16,6 @@ public record PaymentRequest(
         @NotNull(message = "주문 금액은 필수입니다.")
         @Min(value = 1000, message = "총 금액은 1000원 이상이어야 합니다.")
         Integer amount,
+        @NotNull(message = "주문 요청 응답 상태는 필수입니다.")
         Boolean status
 ) { }
