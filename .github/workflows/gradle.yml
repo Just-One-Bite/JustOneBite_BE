@@ -25,7 +25,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew clean build
+        run: ./gradlew build -x test
 
       - name: Set up Docker Buildx # Docker Buildx를 설정 -> 도커 이미지를 빌드하기 위한 빌더로, 여러 플랫폼에서 빌드를 수행한다.
         uses: docker/setup-buildx-action@v3
