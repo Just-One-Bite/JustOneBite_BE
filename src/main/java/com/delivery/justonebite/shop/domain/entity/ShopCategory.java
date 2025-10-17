@@ -14,24 +14,26 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ShopCategory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "shop_category_id", updatable = false, nullable = false)
-    private UUID id;
+    @EmbeddedId
+    private ShopCategoryId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("shopId")
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("categoryId")
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @Builder
-    private ShopCategory(Shop shop, Category category) {
+    public ShopCategory(Shop shop, Category category) {
         this.shop = shop;
         this.category = category;
+        this.id = new ShopCategoryId(shop.getId(), category.getId());
     }
+
 
     public static ShopCategory create(Shop shop, Category category) {
         return ShopCategory.builder()

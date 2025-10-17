@@ -19,9 +19,29 @@ import java.util.UUID;
 public interface ShopRepository extends JpaRepository<Shop, UUID> {
 
     // 가게이름, 설명으로 검색
-    Page<Shop> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description, Pageable pageable
-    );
+    @Query(value = """
+        SELECT * FROM (
+            SELECT * FROM h_shop
+             WHERE LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            UNION
+            SELECT * FROM h_shop
+             WHERE LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        ) AS shop_union
+        ORDER BY shop_union.created_at DESC
+        """,
+            countQuery = """
+        SELECT COUNT(*) FROM (
+            SELECT shop_id FROM h_shop
+             WHERE LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            UNION
+            SELECT shop_id FROM h_shop
+             WHERE LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        ) AS count_query
+        """,
+            nativeQuery = true)
+    Page<Shop> searchByNameOrDescription(@Param("keyword") String keyword, Pageable pageable);
+
+
     // 삭제되지 않은 가게 조회
     Optional<Shop> findByIdAndDeletedAtIsNull(UUID id);
 

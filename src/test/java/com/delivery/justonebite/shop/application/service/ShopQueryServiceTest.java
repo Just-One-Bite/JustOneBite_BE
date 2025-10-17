@@ -46,8 +46,11 @@ class ShopQueryServiceTest {
     @DisplayName("검색어가 있을 때 가게 이름/설명으로 검색")
     void searchShops_withQuery_success() {
         ShopSearchRequest request = ShopSearchRequest.of("치킨", 0, 10, "createdAt", "DESC");
-        Pageable pageable = PageRequest.of(request.page(), request.size(),
-                Sort.by(Sort.Direction.fromString(request.direction()), request.sortBy()));
+        Pageable pageable = PageRequest.of(
+                request.page(),
+                request.size(),
+                Sort.by(Sort.Direction.fromString(request.direction()), request.sortBy())
+        );
 
         Shop s1 = Shop.builder()
                 .id(UUID.randomUUID())
@@ -63,9 +66,9 @@ class ShopQueryServiceTest {
 
         Page<Shop> shopPage = new PageImpl<>(List.of(s1, s2), pageable, 2);
 
-        given(shopRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                request.q(), request.q(), pageable
-        )).willReturn(shopPage);
+
+        given(shopRepository.searchByNameOrDescription(request.q(), pageable))
+                .willReturn(shopPage);
 
         ShopAvgProjection p1 = mock(ShopAvgProjection.class);
         given(p1.getShopId()).willReturn(s1.getId());
@@ -77,16 +80,17 @@ class ShopQueryServiceTest {
 
         given(shopRepository.findAvgByIds(any())).willReturn(List.of(p1, p2));
 
-
         Page<ShopSearchResponse> result = shopQueryService.searchShops(request);
-
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent().get(0).averageRating()).isEqualTo(4.5);
-        verify(shopRepository).findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(request.q(), request.q(), pageable);
+
+
+        verify(shopRepository).searchByNameOrDescription(request.q(), pageable);
         verify(shopRepository).findAvgByIds(any());
     }
+
 
 
     @Test
