@@ -23,14 +23,14 @@ public class UserController {
 
     private final UserService userService;
 
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MASTER')")
     @GetMapping("/me")
     public ResponseEntity<GetProfileResponse> getMyProfile(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         GetProfileResponse myProfile = userService.findMyProfile(userDetails);
         return ResponseEntity.status(HttpStatus.OK).body(myProfile);
     }
 
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MASTER')")
     @PatchMapping("/me")
     public ResponseEntity<UpdateProfileResponse> updateMyProfile(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -40,7 +40,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(myProfile);
     }
 
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MASTER')")
     @PatchMapping("/me/password")
     public ResponseEntity<Void> updatePassword(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
