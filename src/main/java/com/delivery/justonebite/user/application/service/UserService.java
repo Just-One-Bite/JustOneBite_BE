@@ -1,6 +1,6 @@
 package com.delivery.justonebite.user.application.service;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.user.domain.entity.User;
@@ -22,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
     @Transactional(readOnly = true)
     public GetProfileResponse findMyProfile(UserDetailsImpl userDetails) {
@@ -53,6 +54,7 @@ public class UserService {
         User foundUser = findUser(userDetails.getUserId());
         verifyPassword(request.password(), foundUser);
         foundUser.softDelete(userDetails.getUserId());
+        authService.invalidateTokensForCurrentUser();
     }
 
     @Transactional

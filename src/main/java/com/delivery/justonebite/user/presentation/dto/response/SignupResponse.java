@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public record SignupResponse(
         String accessToken,
         String refreshToken,
-        Long id,
+        Long userId,
         String email,
         String name,
         String phoneNumber,
@@ -24,15 +24,13 @@ public record SignupResponse(
         return SignupResponse.builder()
                 .accessToken(tokenResponse.accessToken())
                 .refreshToken(tokenResponse.refreshToken())
-                .id(user.getId())
+                .userId(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .phoneNumber(user.getPhoneNumber())
                 .userRole(user.getUserRole())
                 .createdAt(user.getCreatedAt())
                 .createdBy(user.getCreatedBy())
-                .updatedAt(user.getUpdatedAt())
-                .updatedBy(user.getUpdatedBy())
                 .build();
     }
 }

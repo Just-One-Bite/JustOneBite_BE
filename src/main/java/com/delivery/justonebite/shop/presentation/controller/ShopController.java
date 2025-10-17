@@ -1,6 +1,6 @@
 package com.delivery.justonebite.shop.presentation.controller;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.shop.application.service.ShopQueryService;
 import com.delivery.justonebite.shop.application.service.ShopReviewService;
 import com.delivery.justonebite.shop.application.service.ShopService;

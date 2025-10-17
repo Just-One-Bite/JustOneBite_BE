@@ -1,4 +1,4 @@
-package com.delivery.justonebite.global.common.security;
+package com.delivery.justonebite.global.config.security;
 
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;

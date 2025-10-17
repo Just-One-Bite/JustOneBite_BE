@@ -1,5 +1,6 @@
 package com.delivery.justonebite.user.presentation.controller;
 
+import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import com.delivery.justonebite.user.application.service.AuthService;
 import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterRequest;
@@ -36,6 +37,12 @@ public class AuthController {
         TokenResponse token = authService.login(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(LoginResponse.toDto(token.accessToken(), token.refreshToken()));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenResponse> reisuue(@RequestBody ReissueRequest request) {
+        TokenResponse token = authService.reissue(request);
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
     @PostMapping("/admin/signup")

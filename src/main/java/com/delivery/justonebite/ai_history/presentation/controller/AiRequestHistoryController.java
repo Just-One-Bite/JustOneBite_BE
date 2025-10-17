@@ -2,7 +2,7 @@ package com.delivery.justonebite.ai_history.presentation.controller;
 
 import com.delivery.justonebite.ai_history.application.service.AiRequestHistoryService;
 import com.delivery.justonebite.ai_history.presentation.dto.AiRequestHistoryResponse;
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

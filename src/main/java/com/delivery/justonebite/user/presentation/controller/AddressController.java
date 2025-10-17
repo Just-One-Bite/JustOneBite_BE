@@ -1,6 +1,6 @@
 package com.delivery.justonebite.user.presentation.controller;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.user.application.service.AddressService;
 import com.delivery.justonebite.user.presentation.dto.request.RegistAddressRequest;
 import com.delivery.justonebite.user.presentation.dto.response.DefaultAddressResponse;

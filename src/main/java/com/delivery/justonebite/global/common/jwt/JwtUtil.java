@@ -72,7 +72,7 @@ public class JwtUtil {
                         .compact();
     }
 
-    public String getSubjectFromRefreshToken(String token) {
+    public String getSubjectFromToken(String token) {
         return extractClaims(token).getSubject();
     }
 
@@ -109,5 +109,15 @@ public class JwtUtil {
             log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
         return false;
+    }
+
+    public Long getRemainingExpiration(String token) {
+        try {
+            Date expiration = extractClaims(token).getExpiration();
+            long now = System.currentTimeMillis();
+            return expiration.getTime() - now;
+        } catch (Exception e) {
+            return 0L; // 유효하지 않거나 만료된 토큰의 경우
+        }
     }
 }
