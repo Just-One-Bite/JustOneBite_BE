@@ -1,4 +1,4 @@
-package com.delivery.justonebite.shop.domain.repository;
+  package com.delivery.justonebite.shop.domain.repository;
 
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.projection.ShopAvgProjection;

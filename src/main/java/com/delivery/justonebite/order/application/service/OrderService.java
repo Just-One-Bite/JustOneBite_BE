@@ -78,7 +78,7 @@ public class OrderService {
         // OrderFactory에서 총 금액 계산 및 Order 객체 생성, OrderItem 객체 생성 모두 처리
         Order order = orderFactory.create(user, shop, address, request, itemMap);
         // 총 금액 검증
-        validateOrderTotalPrice(request, order);
+        validateOrderTotalPrice(request, order.getTotalPrice());
 
         orderRepository.save(order);
 
@@ -203,9 +203,9 @@ public class OrderService {
         return foundItems;
     }
 
-    private void validateOrderTotalPrice(CreateOrderRequest request, Order order) {
+    private void validateOrderTotalPrice(CreateOrderRequest request, Integer orderTotalPrice) {
         // 클라이언트에서 받아온 총 금액과 실제 상품 금액을 다 합한 총 금액이 같은지 검증
-        if (!request.totalPrice().equals(order.getTotalPrice())) {
+        if (!request.totalPrice().equals(orderTotalPrice)) {
             throw new CustomException(ErrorCode.TOTAL_PRICE_NOT_MATCH);
         }
     }
