@@ -69,21 +69,5 @@ public interface ShopRepository extends JpaRepository<Shop, UUID> {
         """, nativeQuery = true)
     int bulkUpdateAllAvg();
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = """
-        WITH sub AS (
-          SELECT ROUND(AVG(r.rating)::numeric, 1) AS avg_rating
-          FROM h_review r
-          WHERE r.deleted_at IS NULL
-            AND r.shop_id = :shopId
-        )
-        UPDATE h_shop s
-           SET average_rating = COALESCE(sub.avg_rating, 0)
-          FROM sub
-         WHERE s.shop_id = :shopId
-           AND s.average_rating IS DISTINCT FROM COALESCE(sub.avg_rating, 0)
-        """, nativeQuery = true)
-    int updateAvgForShop(@Param("shopId") UUID shopId);
- 
 
 }
