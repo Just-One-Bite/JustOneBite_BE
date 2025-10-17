@@ -11,6 +11,11 @@ import com.delivery.justonebite.payment.presentation.dto.request.PaymentCancelRe
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
 import com.delivery.justonebite.payment.presentation.dto.response.*;
+import com.delivery.justonebite.order.domain.entity.Order;
+import com.delivery.justonebite.order.domain.entity.OrderHistory;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
+import com.delivery.justonebite.order.domain.repository.OrderRepository;
+import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,8 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
+    private final OrderRepository orderRepository;
+    private final OrderHistoryRepository orderHistoryRepository;
 
     public Payment getPaymentById(UUID paymentId) {
         return paymentRepository.findByPaymentId(paymentId)
@@ -51,17 +58,20 @@ public class PaymentService {
         return new PaymentSuccessResponse(request.orderId(), payment.getPaymentId(), request.amount());
     }
 
-    // TODO: 요청 후 일정 시간 후 승인불가(만료) - 스케줄러 이용해서
     @Transactional
     public Object confirmPayment(PaymentConfirmRequest request) {
         Payment payment = paymentRepository.findByPaymentId(request.paymentId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 
+        // 만료 상태 확인
+        if (PaymentStatus.EXPIRED.equals(payment.getStatus())) {
+            updateOrderStatusToCancel(payment.getOrderId());
+            throw new CustomException(ErrorCode.PAYMENT_EXPIRED);
+        }
         // 결제 상태 검증
         if (!PaymentStatus.SUCCESS.equals(payment.getStatus())) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_STATUS);
         }
-
         // 금액 검증
         if (!payment.getTotalAmount().equals(request.amount())) {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_NOT_MATCH);
@@ -76,8 +86,8 @@ public class PaymentService {
 
             return PaymentConfirmResponse.from(payment);
         } catch (Exception e) {
-            // TODO: order history cancel 업데이트 쳐야됨
             payment.updateStatus(PaymentStatus.ABORTED);
+            updateOrderStatusToCancel(payment.getOrderId());
             throw new CustomException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
     }
@@ -99,8 +109,17 @@ public class PaymentService {
             payment.updateStatus(PaymentStatus.PARTIAL_CANCELED);
         }
         Transaction transaction = Transaction.createCancelTransaction(payment, request.cancelAmount(), request.cancelReason(), payment.getStatus());
-
+        transactionRepository.save(transaction);
         payment.updateLastTransactionId(transaction.getTransactionId()); // save 안해도 자동 commit
         return PaymentCancelResponse.from(payment, request.cancelReason());
+    }
+
+    // orderStatus 변경 및 orderHistory 객체 생성
+    private void updateOrderStatusToCancel(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        
+        order.updateExpiredStatus(PaymentStatus.EXPIRED);
+        orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
     }
 }

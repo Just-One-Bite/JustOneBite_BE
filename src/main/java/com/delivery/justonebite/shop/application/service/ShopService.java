@@ -30,9 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,10 +45,9 @@ public class ShopService {
     private final OrderItemRepository orderItemRepository;
 
 
-    //가게 등록
+    // 가게 등록
     @Transactional
     public Shop createShop(ShopCreateRequest request, Long userId, UserRole role) {
-        //권한 체크
         if (role != UserRole.OWNER) {
             throw new CustomException(ErrorCode.INVALID_USER_ROLE);
         }
@@ -59,24 +56,28 @@ public class ShopService {
 
         List<String> categoryNames = request.categories();
         if (categoryNames != null && !categoryNames.isEmpty()) {
-            //기존 카테고리 조회 (한 번에 IN 쿼리)
-            Map<String, Category> existingByName = categoryRepository
-                    .findAllByCategoryNameIn(categoryNames).stream()
+
+            // 공백/중복 제거
+            List<String> normalized = categoryNames.stream()
+                    .filter(name -> name != null && !name.isBlank())
+                    .map(String::trim)
+                    .distinct()
+                    .toList();
+
+            // DB에 존재하는 카테고리 조회
+            Map<String, Category> existing = categoryRepository
+                    .findAllByCategoryNameIn(normalized).stream()
                     .collect(Collectors.toMap(Category::getCategoryName, c -> c));
 
-            //없는 카테고리는 새로 생성
-            for (String categoryName : categoryNames) {
-                Category category = existingByName.get(categoryName);
+            // 없는 카테고리는 새로 생성
+            for (String name : normalized) {
+                Category category = existing.get(name);
                 if (category == null) {
-                    category = categoryRepository.save(
-                            Category.builder()
-                                    .categoryName(categoryName)
-                                    .build()
-                    );
-                    existingByName.put(categoryName, category); // 새로 추가된 카테고리도 Map에 넣기
+                    category = categoryRepository.save(Category.builder()
+                            .categoryName(name)
+                            .build());
+                    existing.put(name, category);
                 }
-
-                //ShopCategory 관계 추가
                 shop.addCategory(category);
             }
         }
@@ -84,21 +85,23 @@ public class ShopService {
         return shopRepository.save(shop);
     }
 
+
     //가게 수정
     @Transactional
     public ShopUpdateResponse updateShop(ShopUpdateRequest request, UUID shopId, Long userId, UserRole role) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SHOP_NOT_FOUND));
+
         // 권한 체크
         if (!(role == UserRole.OWNER || role == UserRole.MASTER || role == UserRole.MANAGER)) {
             throw new CustomException(ErrorCode.INVALID_USER_ROLE);
         }
-        // OWNER 본인 가게 여부 확인
+
         if (role == UserRole.OWNER && !shop.getOwnerId().equals(userId)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_SHOP_ACCESS);
         }
 
-        // 1. 변경된 필드 수정
+        // 필드 업데이트
         shop.updateInfo(
                 request.name(),
                 request.phone_number(),
@@ -106,18 +109,68 @@ public class ShopService {
                 request.description()
         );
 
-        // 2. 카테고리 문자열 → Category 엔티티 변환
-        if (request.categories() != null && !request.categories().isEmpty()) {
-            shop.getCategories().clear();
-            for (String categoryName : request.categories()) {
-                Category category = categoryRepository.findByCategoryName(categoryName)
-                        .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
-                ShopCategory sc = ShopCategory.builder().shop(shop).category(category).build();
-                shop.getCategories().add(sc);
+        // 카테고리 수정
+        if (request.categories() != null) {
+            Set<String> currentNames = shop.getCategories().stream()
+                    .map(sc -> sc.getCategory().getCategoryName())
+                    .collect(Collectors.toSet());
+
+            Set<String> newNames = new HashSet<>(request.categories());
+
+            // 아무 변화도 없으면 skip
+            if (!currentNames.equals(newNames)) {
+
+                // 삭제할 카테고리: 현재엔 있지만 새 목록엔 없는 것
+                Set<String> toRemove = currentNames.stream()
+                        .filter(name -> !newNames.contains(name))
+                        .collect(Collectors.toSet());
+
+                // 추가할 카테고리: 새 목록엔 있지만 현재엔 없는 것
+                Set<String> toAdd = newNames.stream()
+                        .filter(name -> !currentNames.contains(name))
+                        .collect(Collectors.toSet());
+
+                // 삭제
+                shop.getCategories().removeIf(sc -> toRemove.contains(sc.getCategory().getCategoryName()));
+
+                if (!toAdd.isEmpty()) {
+                    List<Category> found = categoryRepository.findAllByCategoryNameIn(new ArrayList<>(toAdd));
+
+                    // DB에 존재하는 카테고리 이름 set
+                    Set<String> foundNames = found.stream()
+                            .map(Category::getCategoryName)
+                            .collect(Collectors.toSet());
+
+                    // 존재하지 않는 이름
+                    List<String> notFound = toAdd.stream()
+                            .filter(name -> !foundNames.contains(name))
+                            .toList();
+
+                    // 없는 카테고리는 새로 생성
+                    for (String name : notFound) {
+                        Category newCategory = categoryRepository.save(Category.builder()
+                                .categoryName(name)
+                                .build());
+                        found.add(newCategory);
+                    }
+
+                    // ShopCategory 추가
+                    for (Category category : found) {
+                        shop.getCategories().add(
+                                ShopCategory.builder()
+                                        .shop(shop)
+                                        .category(category)
+                                        .build()
+                        );
+                    }
+                }
             }
         }
-        return new ShopUpdateResponse(shop.getUpdatedAt(),shop.getUpdatedBy());
+
+            return new ShopUpdateResponse(shop.getUpdatedAt(), shop.getUpdatedBy());
+
     }
+
 
     //가게 삭제
     @Transactional

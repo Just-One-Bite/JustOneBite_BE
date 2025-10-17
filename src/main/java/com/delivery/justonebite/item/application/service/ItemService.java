@@ -28,6 +28,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ItemService {
+    private final UserRepository userRepository;
 
     private final ItemRepository itemRepository;
 
@@ -36,7 +37,7 @@ public class ItemService {
     private final GeminiClient geminiClient;
 
     private final AiRequestHistoryRepository aiRequestHistoryRepository;
-    private final UserRepository userRepository;
+
 
     // 상품 CREATE
     @Transactional

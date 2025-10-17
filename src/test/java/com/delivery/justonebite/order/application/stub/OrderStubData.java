@@ -1,4 +1,4 @@
-package com.delivery.justonebite.order.stub;
+package com.delivery.justonebite.order.application.stub;
 
 import static org.mockito.BDDMockito.given;
 
@@ -11,7 +11,9 @@ import com.delivery.justonebite.order.presentation.dto.response.GetOrderStatusRe
 import com.delivery.justonebite.order.presentation.dto.response.OrderCancelResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.OrderInfoDto;
+import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.PaymentDto;
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse.ShopInfoDto;
+import com.delivery.justonebite.payment.domain.entity.PaymentStatus;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.user.domain.entity.User;
 import java.time.LocalDateTime;
@@ -59,6 +61,10 @@ public class OrderStubData {
 
         public static ShopInfoDto getShopInfoDto(Shop shop) {
             return ShopInfoDto.toDto(shop.getId(), shop.getName());
+        }
+
+        public static PaymentDto getMockPaymentDto(Integer totalPrice, PaymentStatus status) {
+            return new PaymentDto(totalPrice, status.name());
         }
 
         public static List<OrderItemDto> getMockOrderItemsDto() {
@@ -151,7 +157,7 @@ public class OrderStubData {
             MockData.getShopInfoDto(shop),
             MockData.getMockOrderInfoDto(mockOrder),
             MockData.getMockOrderItemsDto(),
-            null // TODO: 추후 수정 예정
+            MockData.getMockPaymentDto(25000, PaymentStatus.DONE)
         );
     }
 
