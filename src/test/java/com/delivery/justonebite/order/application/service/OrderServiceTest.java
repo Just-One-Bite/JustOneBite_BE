@@ -471,9 +471,14 @@ class OrderServiceTest {
     void cancelOrder() {
         UUID orderId = UUID.randomUUID();
         UUID shopId = UUID.randomUUID();
+        UUID paymentKey = UUID.randomUUID();
         final int totalPrice = 50000;
 
-        CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
+        CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name(),
+                paymentKey,
+                "단순 변심",
+                50000
+            );
 
         Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
@@ -500,9 +505,15 @@ class OrderServiceTest {
     void cancelOrderOrderStatusIsNotPending() {
         UUID orderId = UUID.randomUUID();
         UUID shopId = UUID.randomUUID();
+        UUID paymentKey = UUID.randomUUID();
         final int totalPrice = 50000;
 
-        CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
+        CancelOrderRequest request = new CancelOrderRequest(
+                OrderStatus.ORDER_CANCELLED.name(),
+                paymentKey,
+                "단순 변심",
+                50000
+            );
 
         Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
@@ -528,10 +539,15 @@ class OrderServiceTest {
     void cancelOrderTimeExceed() {
         UUID orderId = UUID.randomUUID();
         UUID shopId = UUID.randomUUID();
+        UUID paymentKey = UUID.randomUUID();
         final int totalPrice = 50000;
 
-        CancelOrderRequest request = new CancelOrderRequest(OrderStatus.ORDER_CANCELLED.name());
-
+        CancelOrderRequest request = new CancelOrderRequest(
+            OrderStatus.ORDER_CANCELLED.name(),
+            paymentKey,
+            "단순 변심",
+            50000
+        );
         Order mockOrder = OrderTestMocks.mockOrder(orderId, mockCustomer, totalPrice);
 
         // Order 엔티티가 5분 이상 지난 시각을 반환하도록 설정
