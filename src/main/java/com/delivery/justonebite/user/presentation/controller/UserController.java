@@ -98,6 +98,7 @@ public class UserController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "회원 탈퇴에 성공하였습니다."),
                     @ApiResponse(responseCode = "401", description = "인증되지 않은 요청입니다. (JWT 토큰 누락 또는 만료)", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "401", description = "유효한 인증 정보가 없습니다.", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다. (CUSTOMER, OWNER 아님)", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "저장된 유저 정보가 없습니다.", content = @Content(mediaType = "application/json"))
             }

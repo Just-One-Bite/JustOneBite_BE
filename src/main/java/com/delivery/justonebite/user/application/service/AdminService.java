@@ -1,5 +1,7 @@
 package com.delivery.justonebite.user.application.service;
 
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import com.delivery.justonebite.user.domain.repository.UserRepository;
@@ -18,6 +20,9 @@ public class AdminService {
 
     @Transactional
     public CreateManagerResponse createManager(CreateManagerRequest request) {
+        if (userRepository.existsByEmailIncludeDeleted(request.email())) {
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
         User user = request.toUser(UserRole.MANAGER, passwordEncoder.encode(request.password()));
         userRepository.save(user);
         return CreateManagerResponse.toDto(user);
