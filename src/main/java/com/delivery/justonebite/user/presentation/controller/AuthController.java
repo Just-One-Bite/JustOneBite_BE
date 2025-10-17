@@ -40,7 +40,8 @@ public class AuthController {
 
     @PostMapping("/admin/signup")
     public ResponseEntity<CreateMasterResponse> createMaster(@RequestBody @Valid CreatedMasterRequest request) {
-        CreateMasterResponse master = authService.createMaster(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(master);
+        AuthService.AuthResult master = authService.createMaster(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CreateMasterResponse.toDto(master.user(), master.tokenResponse()));
     }
 }

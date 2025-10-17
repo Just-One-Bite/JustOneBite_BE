@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 
 @Builder
 public record CreateMasterResponse(
-        String token,
+        String accessToken,
+        String refreshToken,
         Long userId,
         String email,
         String name,
@@ -19,9 +20,10 @@ public record CreateMasterResponse(
         LocalDateTime updatedAt,
         Long updatedBy
 ) {
-    public static CreateMasterResponse toDto(String token, User user) {
+    public static CreateMasterResponse toDto(User user, TokenResponse tokenResponse) {
         return CreateMasterResponse.builder()
-                .token(token)
+                .accessToken(tokenResponse.accessToken())
+                .refreshToken(tokenResponse.refreshToken())
                 .userId(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())

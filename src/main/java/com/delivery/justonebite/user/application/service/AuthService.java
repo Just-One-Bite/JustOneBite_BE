@@ -1,7 +1,6 @@
 package com.delivery.justonebite.user.application.service;
 
 import com.delivery.justonebite.global.common.jwt.JwtUtil;
-import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
@@ -11,8 +10,7 @@ import com.delivery.justonebite.user.domain.repository.UserRepository;
 import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterRequest;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
-import com.delivery.justonebite.user.presentation.dto.response.CreateMasterResponse;
-import com.delivery.justonebite.user.presentation.dto.response.SignupResponse;
+import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,7 +19,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
@@ -37,20 +34,18 @@ public class AuthService {
     private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
-    public SignupResponse signup(SignupRequest request) {
-    @Transactional
     public AuthResult signup(SignupRequest request) {
         if (userRepository.existsByEmailIncludeDeleted(request.email())) {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         User user = request.toUser(passwordEncoder.encode(request.password()));
         userRepository.save(user);
-        String token = generateToken(user);
-        return SignupResponse.toDto(token);
+        TokenResponse tokenResponse = issueTokensAndSaveRefreshToken(user);
+        return AuthResult.toDto(user, tokenResponse);
     }
 
     @Transactional
-    public CreateMasterResponse createMaster(CreatedMasterRequest request) {
+    public AuthResult createMaster(CreatedMasterRequest request) {
         if (userRepository.existsByUserRole(UserRole.MASTER)) {
             throw new CustomException(ErrorCode.MASTER_ALREADY_EXISTS);
         }
@@ -59,15 +54,7 @@ public class AuthService {
         }
         User user = request.toUser(UserRole.MASTER, passwordEncoder.encode(request.password()));
         userRepository.save(user);
-        String token = generateToken(user);
-        return CreateMasterResponse.toDto(token, user);
-    }
-
-    private String generateToken(User user) {
-        String bearerToken = jwtUtil.createToken(user);
-        return jwtUtil.removePrefix(bearerToken);
         TokenResponse tokenResponse = issueTokensAndSaveRefreshToken(user);
-
         return AuthResult.toDto(user, tokenResponse);
     }
 
