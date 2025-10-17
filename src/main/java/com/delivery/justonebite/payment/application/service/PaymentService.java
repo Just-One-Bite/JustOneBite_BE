@@ -99,7 +99,7 @@ public class PaymentService {
             payment.updateStatus(PaymentStatus.PARTIAL_CANCELED);
         }
         Transaction transaction = Transaction.createCancelTransaction(payment, request.cancelAmount(), request.cancelReason(), payment.getStatus());
-
+        transactionRepository.save(transaction);
         payment.updateLastTransactionId(transaction.getTransactionId()); // save 안해도 자동 commit
         return PaymentCancelResponse.from(payment, request.cancelReason());
     }
