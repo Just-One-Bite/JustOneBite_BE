@@ -12,7 +12,7 @@ public class RatingAggregationScheduler {
 
     private final ReviewAggregationService service;
 
-    @Scheduled(cron = "0 0 6 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = " 0 0 6 * * *", zone = "Asia/Seoul")
     public void recomputeNightly() {
         long t0 = System.currentTimeMillis();
         try {
