@@ -18,4 +18,9 @@ public class ReviewAggregationService {
         int updated = shopRepository.bulkUpdateAllAvg();
     }
 
+    @Transactional
+    public void updateShopAvgByShopId(UUID shopId) {
+        shopRepository.updateAvgForShop(shopId);
+    }
+
 }
