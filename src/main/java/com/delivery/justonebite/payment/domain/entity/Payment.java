@@ -42,6 +42,7 @@ public class Payment {
     @Column(name = "balance_amount", nullable = false)
     private Integer balanceAmount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "last_status", nullable = false)
     private PaymentStatus status;
 
@@ -59,6 +60,7 @@ public class Payment {
                 .totalAmount(amount)
                 .balanceAmount(amount)
                 .status(PaymentStatus.READY)
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

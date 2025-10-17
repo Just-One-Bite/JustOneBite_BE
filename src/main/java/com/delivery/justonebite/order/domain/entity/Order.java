@@ -4,6 +4,7 @@ import com.delivery.justonebite.global.common.entity.BaseEntity;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.order.domain.enums.OrderStatus;
+import com.delivery.justonebite.payment.domain.entity.PaymentStatus;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -93,6 +94,12 @@ public class Order extends BaseEntity {
             validateCancellationTime(nextStatus);
         }
         this.currentStatus = nextStatus;
+    }
+
+    public void updateExpiredStatus(PaymentStatus paymentStatus) {
+        if (paymentStatus == PaymentStatus.EXPIRED) {
+            this.currentStatus = OrderStatus.ORDER_CANCELLED;
+        }
     }
 
     public void validateCancellationTotalPrice(Integer cancelPrice) {
