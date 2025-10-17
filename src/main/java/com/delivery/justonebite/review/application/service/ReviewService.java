@@ -26,6 +26,7 @@ import static com.delivery.justonebite.review.entity.Review.create;
 @RequiredArgsConstructor
 public class ReviewService {
 
+
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final OrderHistoryRepository orderHistoryRepository;
@@ -44,8 +45,6 @@ public class ReviewService {
 
         Review review = buildReview(order, currentUserId, request);
         Review saved = reviewRepository.save(review);
-        reviewAggregationService.updateShopAvgByShopId(order.getShop().getId());
- 
         return CreateReviewResponse.from(saved);
     }
 
@@ -71,15 +70,8 @@ public class ReviewService {
         assertAuthor(review, currentUserId);
 
         if (isNoop(req)) return ReviewResponse.from(review);
-        boolean ratingChanged = review.applyUpdate(req);
-        if (ratingChanged){
-            UUID shopId = review.getOrder().getShop().getId();
-            reviewAggregationService.updateShopAvgByShopId(shopId);
-        }
 
- 
         applyUpdates(review, req);
- 
         return ReviewResponse.from(review);
     }
 
@@ -94,9 +86,6 @@ public class ReviewService {
             throw new CustomException(ErrorCode.ALREADY_DELETED_REVIEW);
         }
         review.softDelete(currentUserId);
-        UUID shopId = review.getOrder().getShop().getId();
-        reviewAggregationService.updateShopAvgByShopId(shopId);
- 
     }
 
     @Transactional
@@ -110,9 +99,6 @@ public class ReviewService {
             throw new CustomException(ErrorCode.ALREADY_ACTIVE_REVIEW);
         }
         review.restore();
-        UUID shopId = review.getOrder().getShop().getId();
-        reviewAggregationService.updateShopAvgByShopId(shopId);
- 
     }
 
     private void validateCanWrite(UserRole role) {

@@ -12,7 +12,6 @@ import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequ
 import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
-
 import com.delivery.justonebite.review.repository.ReviewRepository;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.user.domain.entity.User;
