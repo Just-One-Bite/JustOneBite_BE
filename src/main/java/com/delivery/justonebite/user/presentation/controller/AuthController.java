@@ -2,8 +2,10 @@ package com.delivery.justonebite.user.presentation.controller;
 
 import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import com.delivery.justonebite.user.application.service.AuthService;
+import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterRequest;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
+import com.delivery.justonebite.user.presentation.dto.response.CreateMasterResponse;
 import com.delivery.justonebite.user.presentation.dto.response.LoginResponse;
 import com.delivery.justonebite.user.presentation.dto.response.SignupResponse;
 import jakarta.validation.Valid;
@@ -34,5 +36,12 @@ public class AuthController {
         TokenResponse token = authService.login(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(LoginResponse.toDto(token.accessToken(), token.refreshToken()));
+    }
+
+    @PostMapping("/admin/signup")
+    public ResponseEntity<CreateMasterResponse> createMaster(@RequestBody @Valid CreatedMasterRequest request) {
+        AuthService.AuthResult master = authService.createMaster(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CreateMasterResponse.toDto(master.user(), master.tokenResponse()));
     }
 }
