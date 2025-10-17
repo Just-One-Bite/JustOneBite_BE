@@ -95,6 +95,13 @@ public class Order extends BaseEntity {
         this.currentStatus = nextStatus;
     }
 
+    public void validateCancellationTotalPrice(Integer cancelPrice) {
+        if (this.totalPrice == null || !this.totalPrice.equals(cancelPrice)) {
+            // 고객으로부터 들어오는 취소 요청은 부분 취소 불가
+            throw new CustomException(ErrorCode.CANCEL_AMOUNT_NOT_MATCH);
+        }
+    }
+
     public void validateCancellationStatus(OrderStatus status) {
         // 현재 상태가 PENDING 상태여야만 주문 취소 가능
         if (this.currentStatus != OrderStatus.PENDING) {

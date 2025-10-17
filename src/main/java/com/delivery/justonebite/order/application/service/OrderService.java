@@ -22,7 +22,11 @@ import com.delivery.justonebite.order.presentation.dto.response.OrderCancelRespo
 import com.delivery.justonebite.order.presentation.dto.response.OrderDetailsResponse;
 import com.delivery.justonebite.payment.application.service.PaymentService;
 import com.delivery.justonebite.payment.domain.entity.Payment;
+import com.delivery.justonebite.payment.domain.entity.PaymentStatus;
+import com.delivery.justonebite.payment.domain.repository.PaymentRepository;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentCancelRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentCancelResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentFailResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentSuccessResponse;
@@ -61,6 +65,7 @@ public class OrderService {
     private final ItemRepository itemRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
     private final AddressRepository addressRepository;
     private final OrderFactory orderFactory;
 
@@ -106,16 +111,6 @@ public class OrderService {
         }
 
         return paymentResponse;
-    }
-
-    private PaymentResponse requestPayment(Order order) {
-        PaymentRequest request = PaymentRequest.builder()
-            .orderId(order.getId())
-            .orderName(order.getOrderName())
-            .amount(order.getTotalPrice())
-            .status(true)
-            .build();
-        return paymentService.requestPayment(request);
     }
 
     @Transactional(readOnly = true)
@@ -190,14 +185,31 @@ public class OrderService {
             throw new CustomException(ErrorCode.INVALID_CANCEL_STATUS_VALUE);
         }
 
-        authorizeCustomer(user);
+        // 결제 상태가 완료되어야하만 취소 요청 가능
+        Payment payment = paymentService.getPaymentByOrderId(orderId);
+        if (!PaymentStatus.DONE.name().equals(payment.getStatus().name())) {
+            throw new CustomException(ErrorCode.PAYMENT_STATUS_CANCEL_NOT_ALLOWED);
+        }
 
         Order order = orderRepository.findByIdWithCustomer(orderId)
             .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
+        // Order에 기록된 총 금액과 취소 요청 금액이 동일한지 확인
+        // (고객으로부터 들어오는 취소 요청은 전액 취소로 가정)
+        order.validateCancellationTotalPrice(request.cancelAmount());
+
+        // 권한 검증
+        authorizeCustomer(user);
+
         // 현재 로그인한 사용자가 주문자와 동일하지 않을 경우
         if (!user.getId().equals(order.getCustomer().getId())) {
             throw new CustomException(ErrorCode.ORDER_USER_NOT_MATCH);
+        }
+
+        // 결제 취소 요청
+        PaymentCancelResponse paymentCancelResponse = requestPaymentCancel(request);
+        if (!PaymentStatus.CANCELED.name().equals(paymentCancelResponse.status().name())) {
+            throw new CustomException(ErrorCode.ORDER_CANCEL_FAILED);
         }
 
         // Order의 currentStatus 업데이트 (모든 비즈니스 규칙 위임)
@@ -207,6 +219,26 @@ public class OrderService {
         orderHistoryRepository.save(OrderHistory.create(order, OrderStatus.ORDER_CANCELLED));
 
         return OrderCancelResponse.toDto(order, LocalDateTime.now());
+    }
+
+    private PaymentResponse requestPayment(Order order) {
+        PaymentRequest request = PaymentRequest.builder()
+            .orderId(order.getId())
+            .orderName(order.getOrderName())
+            .amount(order.getTotalPrice())
+            .status(true)
+            .build();
+        return paymentService.requestPayment(request);
+    }
+
+    private PaymentCancelResponse requestPaymentCancel(CancelOrderRequest request) {
+        PaymentCancelRequest cancelRequest = PaymentCancelRequest.builder()
+            .paymentKey(request.paymentKey())
+            .cancelReason(request.cancelReason())
+            .cancelAmount(request.cancelAmount())
+            .build();
+
+        return paymentService.cancelPayment(cancelRequest);
     }
 
     private void authorizeOwner(User user) {
