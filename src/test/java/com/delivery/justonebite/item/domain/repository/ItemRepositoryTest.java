@@ -1,7 +1,8 @@
 package com.delivery.justonebite.item.domain.repository;
 
 import com.delivery.justonebite.item.domain.entity.Item;
-import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
+
+import com.delivery.justonebite.item.presentation.dto.request.ItemUpdateRequest;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.User;

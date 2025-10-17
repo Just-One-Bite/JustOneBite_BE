@@ -6,10 +6,11 @@ import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.item.infrastructure.api.gemini.client.GeminiClient;
-import com.delivery.justonebite.item.presentation.dto.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemRequest;
-import com.delivery.justonebite.item.presentation.dto.ItemResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemUpdateRequest;
+
+import com.delivery.justonebite.item.presentation.dto.request.ItemRequest;
+import com.delivery.justonebite.item.presentation.dto.request.ItemUpdateRequest;
+import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;
+import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import org.junit.jupiter.api.AfterEach;

@@ -2,8 +2,10 @@ package com.delivery.justonebite.payment.presentation.controller;
 
 import com.delivery.justonebite.payment.domain.entity.Payment;
 import com.delivery.justonebite.payment.application.service.PaymentService;
+import com.delivery.justonebite.payment.presentation.dto.request.PaymentCancelRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.delivery.justonebite.payment.presentation.dto.request.PaymentRequest;
+import com.delivery.justonebite.payment.presentation.dto.response.PaymentCancelResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentConfirmResponse;
 import com.delivery.justonebite.payment.presentation.dto.response.PaymentResponse;
 import jakarta.validation.Valid;
@@ -47,4 +49,10 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    // 결제 취소
+    @PostMapping("/cancel")
+    public ResponseEntity<PaymentCancelResponse> cancelPayment(@Valid @RequestBody PaymentCancelRequest request) {
+        PaymentCancelResponse response = paymentService.cancelPayment(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

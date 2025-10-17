@@ -2,9 +2,10 @@ package com.delivery.justonebite.item.presentation.controller;
 
 import com.delivery.justonebite.global.common.security.UserDetailsImpl;
 import com.delivery.justonebite.item.application.service.ItemService;
-import com.delivery.justonebite.item.presentation.dto.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemOwnerDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.ItemResponse;
+
+import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;
+import com.delivery.justonebite.item.presentation.dto.response.ItemOwnerDetailResponse;
+import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;

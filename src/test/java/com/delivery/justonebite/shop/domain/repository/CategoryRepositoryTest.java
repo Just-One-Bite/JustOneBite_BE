@@ -32,18 +32,18 @@ class CategoryRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User customer;
+    private User owner;
 
     @BeforeEach
     void setUp(){
         //테스트용 유저
-        customer = userRepository.save(
+        owner = userRepository.save(
                 User.builder()
-                        .email("customer@gmail.com")
+                        .email("owner@gmail.com")
                         .name("고객")
                         .phoneNumber("010-1345-6789")
-                        .password("Customer1234!")
-                        .userRole(UserRole.CUSTOMER)
+                        .password("Owner1234!")
+                        .userRole(UserRole.OWNER)
                         .build()
 
         );
@@ -52,7 +52,7 @@ class CategoryRepositoryTest {
         //테스트용 가게 저장
         shopRepository.save(
                 Shop.builder()
-                        .ownerId(customer.getId())
+                        .ownerId(owner.getId())
                         .name("맛있는 치킨집")
                         .registrationNumber("123-45-6789")
                         .province("서울특별시")
@@ -62,8 +62,8 @@ class CategoryRepositoryTest {
                         .phoneNumber("02-1234-1234")
                         .description("바삭한 후라이드")
                         .operatingHour("10:00 - 22:00")
-                        .createdBy(customer.getId())
-                        .updatedBy(customer.getId())
+                        .createdBy(owner.getId())
+                        .updatedBy(owner.getId())
                         .build()
         );
 
