@@ -24,6 +24,11 @@ spring:
       host: redis
       port: 6379
       password: ${REDIS_PASSWORD}
+
+logging:
+  level:
+    root: DEBUG
+    
 gemini:
   api:
     url: ${GEMINI_API_URL}
