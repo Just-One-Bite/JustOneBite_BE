@@ -14,6 +14,7 @@ public enum ErrorCode {
     INVALID_MEMBER("유효하지 않은 사용자입니다.", HttpStatus.FORBIDDEN),
     NOT_VALID_TOKEN("토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
     EXPIRED_TOKEN("토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
+    AUTHENTICATION_FAILED("인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
     FORBIDDEN_ACCESS("접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
     DELETED_ACCOUNT("탈퇴 처리된 유저입니다.", HttpStatus.FORBIDDEN),
     RE_LOGIN_REQUIRED("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.", HttpStatus.UNAUTHORIZED),
