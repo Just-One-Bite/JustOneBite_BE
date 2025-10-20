@@ -23,6 +23,7 @@ spring:
     redis:
       host: redis
       port: 6379
+      username: default
       password: ${REDIS_PASSWORD}
 
 logging:
