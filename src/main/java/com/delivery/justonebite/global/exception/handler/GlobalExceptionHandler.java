@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -59,6 +60,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrity(Exception e) {
         return ResponseEntity.status(DATA_INTEGRITY_VIOLATION.getStatus())
                 .body(new ErrorResponse(DATA_INTEGRITY_VIOLATION, "데이터 무결성에 위배되었습니다."));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+        return ResponseEntity.status(FORBIDDEN_ACCESS.getStatus()).body(new ErrorResponse(FORBIDDEN_ACCESS));
     }
 
     /** 그 밖의 예외(500) */
