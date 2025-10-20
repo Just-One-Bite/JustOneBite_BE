@@ -25,10 +25,6 @@ spring:
       port: 6379
       username: default
       password: ${REDIS_PASSWORD}
-
-logging:
-  level:
-    root: DEBUG
     
 gemini:
   api:
