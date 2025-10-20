@@ -1,14 +1,11 @@
 package com.delivery.justonebite.user.presentation.controller;
 
 import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
-import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
+import com.delivery.justonebite.user.presentation.dto.response.*;
 import com.delivery.justonebite.user.application.service.AuthService;
 import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterRequest;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
-import com.delivery.justonebite.user.presentation.dto.response.CreateMasterResponse;
-import com.delivery.justonebite.user.presentation.dto.response.LoginResponse;
-import com.delivery.justonebite.user.presentation.dto.response.SignupResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,7 +24,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@RequestBody @Valid SignupRequest request) {
-        AuthService.AuthResult authResult = authService.signup(request);
+        AuthResult authResult = authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SignupResponse.toDto(authResult.user(), authResult.tokenResponse()));
     }
@@ -47,7 +44,7 @@ public class AuthController {
 
     @PostMapping("/admin/signup")
     public ResponseEntity<CreateMasterResponse> createMaster(@RequestBody @Valid CreatedMasterRequest request) {
-        AuthService.AuthResult master = authService.createMaster(request);
+        AuthResult master = authService.createMaster(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CreateMasterResponse.toDto(master.user(), master.tokenResponse()));
     }
