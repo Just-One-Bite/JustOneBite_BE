@@ -51,7 +51,7 @@ jobs:
           DOCKERHUB_PW: ${{ secrets.DOCKERHUB_TOKEN }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          # REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           GEMINI_API_URL: ${{ secrets.GEMINI_API_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
