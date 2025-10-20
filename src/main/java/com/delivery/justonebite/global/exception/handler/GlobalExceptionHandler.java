@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
-        return ResponseEntity.status(FORBIDDEN_ACCESS.getStatus()).body(new ErrorResponse(FORBIDDEN_ACCESS, e.getMessage()));
+        return ResponseEntity.status(FORBIDDEN_ACCESS.getStatus()).body(new ErrorResponse(FORBIDDEN_ACCESS));
     }
 
     /** 그 밖의 예외(500) */
