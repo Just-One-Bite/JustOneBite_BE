@@ -12,8 +12,8 @@ import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterReque
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
+import com.delivery.justonebite.user.presentation.dto.response.AuthResult;
 import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -114,15 +114,5 @@ public class AuthService {
     private void invalidateTokens(String email, String accessToken) {
         redisService.deleteRefreshToken(email);
         redisService.addToDenylist(accessToken);
-    }
-
-    @Builder
-    public record AuthResult(User user, TokenResponse tokenResponse) {
-        public static AuthResult toDto(User user, TokenResponse tokenResponse) {
-            return AuthResult.builder()
-                    .user(user)
-                    .tokenResponse(tokenResponse)
-                    .build();
-        }
     }
 }

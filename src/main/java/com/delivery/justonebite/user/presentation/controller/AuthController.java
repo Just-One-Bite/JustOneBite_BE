@@ -5,10 +5,7 @@ import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterReque
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
 import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
-import com.delivery.justonebite.user.presentation.dto.response.CreateMasterResponse;
-import com.delivery.justonebite.user.presentation.dto.response.LoginResponse;
-import com.delivery.justonebite.user.presentation.dto.response.SignupResponse;
-import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
+import com.delivery.justonebite.user.presentation.dto.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,7 +37,7 @@ public class AuthController {
     )
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@RequestBody @Valid SignupRequest request) {
-        AuthService.AuthResult authResult = authService.signup(request);
+        AuthResult authResult = authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SignupResponse.toDto(authResult.user(), authResult.tokenResponse()));
     }
@@ -71,7 +68,7 @@ public class AuthController {
             }
     )
     @PostMapping("/reissue")
-    public ResponseEntity<TokenResponse> reisuue(@RequestBody ReissueRequest request) {
+    public ResponseEntity<TokenResponse> reissue(@RequestBody ReissueRequest request) {
         TokenResponse token = authService.reissue(request);
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
@@ -88,7 +85,7 @@ public class AuthController {
     )
     @PostMapping("/admin/signup")
     public ResponseEntity<CreateMasterResponse> createMaster(@RequestBody @Valid CreatedMasterRequest request) {
-        AuthService.AuthResult master = authService.createMaster(request);
+        AuthResult master = authService.createMaster(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CreateMasterResponse.toDto(master.user(), master.tokenResponse()));
     }
