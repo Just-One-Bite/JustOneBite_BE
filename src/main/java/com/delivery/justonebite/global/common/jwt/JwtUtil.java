@@ -1,6 +1,7 @@
 package com.delivery.justonebite.global.common.jwt;
 
 import com.delivery.justonebite.user.domain.entity.User;
+import com.delivery.justonebite.user.presentation.dto.response.TokenResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -18,7 +19,8 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_EXPIRATION = 60 * 60 * 1000L;
+    public static final long ACCESS_TOKEN_EXPIRATION = 60 * 60 * 1000L; // 1시간
+    public static final long REFRESH_TOKEN_EXPIRATION = 30 * 24 * 60 * 60 * 1000L; // 30일
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -31,7 +33,18 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(User user) {
+    public TokenResponse generateToken(User user) {
+        String bearerAccessToken = createAccessToken(user);
+        String bearerRefreshToken = createRefreshToken(user.getEmail());
+
+        String accessToken = removePrefix(bearerAccessToken);
+        String refreshToken = removePrefix(bearerRefreshToken);
+
+        return TokenResponse.toDto(accessToken, refreshToken);
+    }
+
+    /** access token 생성 */
+    public String createAccessToken(User user) {
         String email = user.getEmail();
         String role = user.getUserRole().toString();
         Date date = new Date();
@@ -40,10 +53,27 @@ public class JwtUtil {
                 Jwts.builder()
                         .setSubject(email)
                         .claim("role", role)
-                        .setExpiration(new Date(date.getTime() + TOKEN_EXPIRATION))
+                        .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_EXPIRATION))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
                         .compact();
+    }
+
+    /** refresh token 생성 */
+    public String createRefreshToken(String email) {
+        Date date = new Date();
+
+        return BEARER_PREFIX +
+                Jwts.builder()
+                        .setSubject(email)
+                        .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_EXPIRATION))
+                        .setIssuedAt(date)
+                        .signWith(key, signatureAlgorithm)
+                        .compact();
+    }
+
+    public String getSubjectFromToken(String token) {
+        return extractClaims(token).getSubject();
     }
 
     public String substringToken(String token) {
@@ -79,5 +109,15 @@ public class JwtUtil {
             log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
         return false;
+    }
+
+    public Long getRemainingExpiration(String token) {
+        try {
+            Date expiration = extractClaims(token).getExpiration();
+            long now = System.currentTimeMillis();
+            return expiration.getTime() - now;
+        } catch (Exception e) {
+            return 0L; // 유효하지 않거나 만료된 토큰의 경우
+        }
     }
 }

@@ -1,28 +1,34 @@
 package com.delivery.justonebite.item.application.service;
 
-import com.delivery.justonebite.global.exception.custom.CustomException;
-import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.ai_history.domain.entity.AiRequestHistory;
 import com.delivery.justonebite.ai_history.domain.repository.AiRequestHistoryRepository;
+import com.delivery.justonebite.global.exception.custom.CustomException;
+import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.item.infrastructure.api.gemini.client.GeminiClient;
-import com.delivery.justonebite.item.presentation.dto.*;
+import com.delivery.justonebite.item.presentation.dto.request.ItemRequest;
+import com.delivery.justonebite.item.presentation.dto.request.ItemUpdateRequest;
+import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;
+import com.delivery.justonebite.item.presentation.dto.response.ItemOwnerDetailResponse;
+import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
+import com.delivery.justonebite.user.domain.entity.User;
 import com.delivery.justonebite.user.domain.entity.UserRole;
+import com.delivery.justonebite.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ItemService {
+    private final UserRepository userRepository;
 
     private final ItemRepository itemRepository;
 
@@ -32,10 +38,9 @@ public class ItemService {
 
     private final AiRequestHistoryRepository aiRequestHistoryRepository;
 
+
     // 상품 CREATE
     @Transactional
-
-
     public ItemResponse createItem(Long userId, UserRole role, ItemRequest request) {
         Shop shop = checkValidRequestWithShop(userId, role, UUID.fromString(request.shopId()));
 
@@ -130,14 +135,16 @@ public class ItemService {
     }
 
     private void saveAiRequestHistory(Long userId, String request, String response) {
-        AiRequestHistory requestHistory = new AiRequestHistory(userId, "gemini-2.5-flash", request, response);
+        User user = userRepository.findById(userId).orElseThrow(
+            () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        AiRequestHistory requestHistory = new AiRequestHistory(user, "gemini-2.5-flash", request, response);
         aiRequestHistoryRepository.save(requestHistory);
     }
 
     // Read, Update, Delete, Hide : 상품의 제어 권한 보유 여부 확인
     private Item checkValidRequestWithItem(Long userId, UserRole role, UUID itemId) {
-        authorization(Set.of(UserRole.OWNER, UserRole.MANAGER, UserRole.MASTER), role);
-
         Item item = itemRepository.findByItemIdWithNativeQuery(itemId).orElseThrow(
             () -> new CustomException(ErrorCode.INVALID_ITEM)
         );
@@ -149,8 +156,6 @@ public class ItemService {
 
     // Create, ReadAll : 상품의 제어 권한 보유 여부 확인
     private Shop checkValidRequestWithShop(Long userId, UserRole role, UUID shopId) {
-        authorization(Set.of(UserRole.OWNER, UserRole.MANAGER, UserRole.MASTER), role);
-
         Shop shop = shopRepository.findById(shopId).orElseThrow(
             () -> new CustomException(ErrorCode.SHOP_NOT_FOUND)
         );
@@ -158,13 +163,6 @@ public class ItemService {
         isOwner(shop, userId, role);
 
         return shop;
-    }
-
-    private void authorization(Set<UserRole> validRoles, UserRole role) {
-        if (validRoles.contains(role)) {
-            return;
-        }
-        throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
     }
 
     private void isOwner(Shop shop, Long userId, UserRole role) {

@@ -1,6 +1,6 @@
 package com.delivery.justonebite.review.presentation.controller;
 
-import com.delivery.justonebite.global.common.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.review.application.service.ReviewService;
 import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
 import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
@@ -164,7 +164,7 @@ class ReviewControllerTest {
                 USER_ID
         );
 
-        given(reviewService.update(eq(REVIEW_ID), any(Long.class), any(UserRole.class), any()))
+        given(reviewService.update(eq(REVIEW_ID), any(Long.class), any()))
                 .willReturn(resp);
 
         String body = """

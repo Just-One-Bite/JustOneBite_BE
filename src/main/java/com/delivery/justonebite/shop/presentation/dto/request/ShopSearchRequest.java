@@ -1,13 +1,25 @@
 package com.delivery.justonebite.shop.presentation.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+@Schema(description = "가게 목록/검색 조회 요청 DTO")
 @Builder
 public record ShopSearchRequest(
+
+        @Schema(description = "검색어 (가게명, 카테고리명 등)", example = "치킨", nullable = true)
         String q,
+
+        @Schema(description = "페이지 번호 (0부터 시작)", example = "0")
         int page,
+
+        @Schema(description = "한 페이지당 데이터 개수 (10, 30, 50 허용)", example = "10")
         int size,
+
+        @Schema(description = "정렬 기준 (createdAt, averageRating 중 선택)", example = "averageRating")
         String sortBy,
+
+        @Schema(description = "정렬 방향 (ASC 또는 DESC)", example = "DESC")
         String direction
 ) {
     private static final int DEFAULT_SIZE = 10;
@@ -23,10 +35,9 @@ public record ShopSearchRequest(
             default -> "createdAt";
         };
 
-        //오름차순 / 내림차순 정렬(기본은 내림차순)
         String validDirection = (direction == null || direction.isBlank())
                 ? "DESC"
-                : direction.trim().toUpperCase(); // ← trim() 추가
+                : direction.trim().toUpperCase();
 
         return ShopSearchRequest.builder()
                 .q(q)

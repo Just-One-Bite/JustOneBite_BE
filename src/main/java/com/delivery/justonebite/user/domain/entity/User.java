@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
 
 @Getter
@@ -16,6 +17,7 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "h_user")
 @EqualsAndHashCode(of = "id", callSuper = false)
+@SQLRestriction("deleted_at is NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
@@ -58,5 +60,13 @@ public class User extends BaseEntity {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void softDelete(Long deleterId) {
+        super.markDeleted(deleterId);
+    }
+
+    public void updateUserRoleToOwner() {
+        this.userRole =  UserRole.OWNER;
     }
 }

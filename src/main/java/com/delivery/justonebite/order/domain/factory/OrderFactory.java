@@ -3,6 +3,7 @@ package com.delivery.justonebite.order.domain.factory;
 import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.order.domain.entity.Order;
 import com.delivery.justonebite.order.domain.entity.OrderItem;
+import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.presentation.dto.OrderItemDto;
 import com.delivery.justonebite.order.presentation.dto.request.CreateOrderRequest;
 import com.delivery.justonebite.shop.domain.entity.Shop;
@@ -37,6 +38,7 @@ public class OrderFactory {
             request.userPhoneNumber(),
             orderName,
             totalPrice,
+            OrderStatus.PENDING,
             request.orderRequest(),
             request.deliveryRequest()
         );

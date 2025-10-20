@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record UpdateProfileResponse(
-        Long id,
+        Long userId,
         String email,
         String name,
         String phoneNumber,
@@ -20,7 +20,7 @@ public record UpdateProfileResponse(
 ) {
     public static UpdateProfileResponse toDto(User user) {
         return UpdateProfileResponse.builder()
-                .id(user.getId())
+                .userId(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .phoneNumber(user.getPhoneNumber())
