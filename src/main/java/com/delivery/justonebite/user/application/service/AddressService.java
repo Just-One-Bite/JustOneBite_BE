@@ -40,21 +40,21 @@ public class AddressService {
                 request.isDefault()
         );
         addressRepository.save(address);
-        return RegistAddressResponse.toDto(address);
+        return RegistAddressResponse.from(address);
     }
 
     @Transactional
     public DefaultAddressResponse updateDefaultAddress(UserDetailsImpl userDetails, UUID addressId) {
         Address foundAddress = findAddress(addressId);
         if (foundAddress.isDefault()) {
-            return DefaultAddressResponse.toDto(foundAddress);
+            return DefaultAddressResponse.from(foundAddress);
         }
 
         addressRepository.findByUserAndIsDefault(userDetails.getUser(), true)
                 .ifPresent(oldDefaultAddress -> oldDefaultAddress.updateIsDefault(false));
 
         foundAddress.updateIsDefault(true);
-        return DefaultAddressResponse.toDto(foundAddress);
+        return DefaultAddressResponse.from(foundAddress);
     }
 
     private void checkAddressCountLimit(User user) {

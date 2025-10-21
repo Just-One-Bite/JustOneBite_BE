@@ -41,7 +41,7 @@ public class AuthService {
         User user = request.toUser(passwordEncoder.encode(request.password()));
         userRepository.save(user);
         TokenResponse tokenResponse = issueTokensAndSaveRefreshToken(user);
-        return AuthResult.toDto(user, tokenResponse);
+        return AuthResult.of(user, tokenResponse);
     }
 
     @Transactional
@@ -55,7 +55,7 @@ public class AuthService {
         User user = request.toUser(UserRole.MASTER, passwordEncoder.encode(request.password()));
         userRepository.save(user);
         TokenResponse tokenResponse = issueTokensAndSaveRefreshToken(user);
-        return AuthResult.toDto(user, tokenResponse);
+        return AuthResult.of(user, tokenResponse);
     }
 
     @Transactional

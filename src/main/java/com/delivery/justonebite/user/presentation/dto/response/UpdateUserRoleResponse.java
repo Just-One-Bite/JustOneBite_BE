@@ -29,7 +29,7 @@ public record UpdateUserRoleResponse(
         @Schema(description = "유저를 수정한 수정자", example = "3")
         Long updatedBy
 ) {
-    public static UpdateUserRoleResponse toDto(User user) {
+    public static UpdateUserRoleResponse from(User user) {
         return UpdateUserRoleResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())

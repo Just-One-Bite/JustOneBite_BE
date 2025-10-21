@@ -40,7 +40,7 @@ public class JwtUtil {
         String accessToken = removePrefix(bearerAccessToken);
         String refreshToken = removePrefix(bearerRefreshToken);
 
-        return TokenResponse.toDto(accessToken, refreshToken);
+        return TokenResponse.of(accessToken, refreshToken);
     }
 
     /** access token 생성 */
