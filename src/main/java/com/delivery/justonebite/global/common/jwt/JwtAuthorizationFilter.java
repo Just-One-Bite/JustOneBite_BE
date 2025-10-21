@@ -1,5 +1,6 @@
 package com.delivery.justonebite.global.common.jwt;
 
+import com.delivery.justonebite.global.config.redis.service.RedisService;
 import com.delivery.justonebite.global.config.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -8,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -26,7 +26,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisService redisService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -42,8 +42,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         if (token != null && jwtUtil.validateToken(token)) {
 
-            String isDenied = redisTemplate.opsForValue().get("ATD:" + token);
-            if (isDenied == null) {
+            boolean isDenied = redisService.isTokenInDenylist(token);
+
+            if (!isDenied) {
                 setAuthentication(token);
             }
         }
