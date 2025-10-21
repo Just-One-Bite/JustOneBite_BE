@@ -23,10 +23,8 @@ public class AddressService {
 
     @Transactional
     public RegistAddressResponse registAddress(UserDetailsImpl userDetails, RegistAddressRequest request) {
-        // 1. 유저별 주소 개수 제한 로직
         checkAddressCountLimit(userDetails.getUser());
 
-        // 2. 새 주소를 대표 주소로 설정하는 경우, 기존 대표 주소 해제
         if (request.isDefault()) {
             addressRepository.findByUserAndIsDefault(userDetails.getUser(), true)
                     .ifPresent(oldDefaultAddress -> oldDefaultAddress.updateIsDefault(false));
@@ -59,7 +57,7 @@ public class AddressService {
 
     private void checkAddressCountLimit(User user) {
         if (addressRepository.countByUser(user) >= MAX_ADDRESS_COUNT) {
-            throw new CustomException(ErrorCode.ADDRESS_LIMIT_EXCEEDED); // 예외 처리는 직접 정의하신 것을 사용
+            throw new CustomException(ErrorCode.ADDRESS_LIMIT_EXCEEDED);
         }
     }
 

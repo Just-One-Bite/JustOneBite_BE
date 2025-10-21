@@ -43,7 +43,6 @@ public class JwtUtil {
         return TokenResponse.of(accessToken, refreshToken);
     }
 
-    /** access token 생성 */
     public String createAccessToken(User user) {
         String email = user.getEmail();
         String role = user.getUserRole().toString();
@@ -59,7 +58,6 @@ public class JwtUtil {
                         .compact();
     }
 
-    /** refresh token 생성 */
     public String createRefreshToken(String email) {
         Date date = new Date();
 
@@ -117,7 +115,7 @@ public class JwtUtil {
             long now = System.currentTimeMillis();
             return expiration.getTime() - now;
         } catch (Exception e) {
-            return 0L; // 유효하지 않거나 만료된 토큰의 경우
+            return 0L;
         }
     }
 }

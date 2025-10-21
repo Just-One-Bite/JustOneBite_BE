@@ -92,14 +92,12 @@ public class AuthService {
         invalidateTokens(email, accessToken);
     }
 
-    // 토큰 발급 및 저장
     private TokenResponse issueTokensAndSaveRefreshToken(User user) {
         TokenResponse tokenResponse = jwtUtil.generateToken(user);
         redisService.saveRefreshToken(user.getEmail(), tokenResponse.refreshToken());
         return tokenResponse;
     }
 
-    // 회원 탈퇴 시 토큰 무효화
     public void invalidateTokensForCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getCredentials() == null) {
@@ -110,7 +108,6 @@ public class AuthService {
         invalidateTokens(email, accessToken);
     }
 
-    // 토큰 무효화
     private void invalidateTokens(String email, String accessToken) {
         redisService.deleteRefreshToken(email);
         redisService.addToDenylist(accessToken);
