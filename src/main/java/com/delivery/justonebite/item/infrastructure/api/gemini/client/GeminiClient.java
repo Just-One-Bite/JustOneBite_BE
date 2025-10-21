@@ -6,6 +6,7 @@ import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiRequest
 import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiRequestPart;
 import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiRequestTextPart;
 import com.delivery.justonebite.item.infrastructure.api.gemini.dto.GeminiResponse;
+import com.delivery.justonebite.item.infrastructure.api.gemini.service.GeminiService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class GeminiClient {
+public class GeminiClient implements GeminiService {
     private final RestTemplate restTemplate;
 
     @Value("${gemini.api.key}")
@@ -37,6 +38,7 @@ public class GeminiClient {
             .build();
     }
 
+    @Override
     public String generateAiResponse(String prompt) {
         HttpHeaders headers = new HttpHeaders();
 

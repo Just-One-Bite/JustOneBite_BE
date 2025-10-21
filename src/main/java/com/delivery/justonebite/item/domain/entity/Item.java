@@ -26,7 +26,6 @@ public class Item extends BaseEntity {
     @Column(name = "item_id")
     private UUID itemId;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     private Shop shop;
@@ -51,6 +50,10 @@ public class Item extends BaseEntity {
 
     public void updateDescription(String aiResponse) {
         this.description = aiResponse;
+    }
+
+    public void updateShop(Shop shop) {
+        this.shop = shop;
     }
 
     public void updateItem(ItemUpdateRequest request) {
