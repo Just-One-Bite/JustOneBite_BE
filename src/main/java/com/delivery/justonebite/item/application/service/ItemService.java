@@ -7,6 +7,7 @@ import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.item.infrastructure.api.gemini.client.GeminiClient;
+import com.delivery.justonebite.item.infrastructure.api.gemini.service.GeminiService;
 import com.delivery.justonebite.item.presentation.dto.request.ItemRequest;
 import com.delivery.justonebite.item.presentation.dto.request.ItemUpdateRequest;
 import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;
@@ -34,18 +35,16 @@ public class ItemService {
 
     private final ShopRepository shopRepository;
 
-    private final GeminiClient geminiClient;
+    private final GeminiService geminiService;
 
     private final AiRequestHistoryRepository aiRequestHistoryRepository;
 
-
-    // 상품 CREATE
     @Transactional
     public ItemResponse createItem(Long userId, UserRole role, ItemRequest request) {
         Shop shop = checkValidRequestWithShop(userId, role, UUID.fromString(request.shopId()));
 
         Item item = request.toItem();
-        item.setShop(shop);
+        item.updateShop(shop);
       
         if (request.aiGenerated()) {
             String response = generateAiResponse(item, request.description());
@@ -57,33 +56,28 @@ public class ItemService {
         return ItemResponse.from(item);
     }
 
-    // 숨김 및 삭제 상품 포함 단건 Read
     public ItemOwnerDetailResponse getItemFromOwner(Long userId, UserRole role, UUID itemId) {
         Item item = checkValidRequestWithItem(userId, role, itemId);
 
         return ItemOwnerDetailResponse.from(item);
     }
 
-    // 숨김 및 삭제 상품 제외 단건 Read
     public ItemDetailResponse getItemFromCustomer(UUID itemId) {
         return ItemDetailResponse.from(itemRepository.findByItemIdWithoutHidden(itemId).orElseThrow(
             () -> new CustomException(ErrorCode.INVALID_ITEM)
         ));
     }
 
-    // 가게별 숨김 및 삭제 상품 포함 Read
     public Page<ItemResponse> getItemsByShopFromOwner(Long userId, UserRole role, UUID shopId, Pageable pageable) {
         checkValidRequestWithShop(userId, role, shopId);
 
         return itemRepository.findAllByShopIdWithNativeQuery(shopId, pageable).map(ItemResponse::from);
     }
 
-    // 가게별 숨김 및 삭제 상품 제외 Read
     public Page<ItemResponse> getItemsByShopFromCustomer(UUID shopId, Pageable pageable) { // customer 입장에서의 상품 조회
         return itemRepository.findAllByShopIdWithoutHidden(shopId, pageable).map(ItemResponse::from);
     }
 
-    // 상품 Update
     @Transactional
     public ItemResponse updateItem(Long userId, UserRole role, UUID itemId, ItemUpdateRequest request) {
         Item item = checkValidRequestWithItem(userId, role, itemId);
@@ -93,44 +87,35 @@ public class ItemService {
         if (request.aiGenerated()) {
             String response = generateAiResponse(item, request.description());
             saveAiRequestHistory(userId, request.description(), response);
-        } else {
-            itemRepository.save(item);
         }
 
         return ItemResponse.from(item);
     }
 
-    // 상품 Soft Delete
     @Transactional
     public void softDelete(Long userId, UserRole role, UUID itemId) {
         Item item = checkValidRequestWithItem(userId, role, itemId);
 
         item.softDelete(userId);
-        itemRepository.save(item);
     }
 
-    // 상품 Restore
     @Transactional
     public void restoreItem(Long userId, UserRole role, UUID itemId) {
         Item item = checkValidRequestWithItem(userId, role, itemId);
 
         item.restore();
-        itemRepository.save(item);
     }
 
-    // 상품 Hidden / Reveal
     @Transactional
     public void toggleHidden(Long userId, UserRole role, UUID itemId) {
         Item item = checkValidRequestWithItem(userId, role, itemId);
 
         item.toggleIsHidden();
-        itemRepository.save(item);
     }
 
     private String generateAiResponse(Item item, String prompt) {
-        String response = geminiClient.generateAiResponse(prompt);
+        String response = geminiService.generateAiResponse(prompt);
         item.updateDescription(response);
-        itemRepository.save(item);
         return response;
     }
 
@@ -143,7 +128,6 @@ public class ItemService {
         aiRequestHistoryRepository.save(requestHistory);
     }
 
-    // Read, Update, Delete, Hide : 상품의 제어 권한 보유 여부 확인
     private Item checkValidRequestWithItem(Long userId, UserRole role, UUID itemId) {
         Item item = itemRepository.findByItemIdWithNativeQuery(itemId).orElseThrow(
             () -> new CustomException(ErrorCode.INVALID_ITEM)
@@ -154,7 +138,6 @@ public class ItemService {
         return item;
     }
 
-    // Create, ReadAll : 상품의 제어 권한 보유 여부 확인
     private Shop checkValidRequestWithShop(Long userId, UserRole role, UUID shopId) {
         Shop shop = shopRepository.findById(shopId).orElseThrow(
             () -> new CustomException(ErrorCode.SHOP_NOT_FOUND)
