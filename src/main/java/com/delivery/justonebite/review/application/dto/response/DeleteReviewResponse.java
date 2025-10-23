@@ -1,4 +1,4 @@
-package com.delivery.justonebite.review.presentation.dto.response;
+package com.delivery.justonebite.review.application.dto.response;
 
 import java.util.UUID;
 

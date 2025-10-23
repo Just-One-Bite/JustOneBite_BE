@@ -2,8 +2,8 @@ package com.delivery.justonebite.review.presentation.controller;
 
 import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.review.application.service.ReviewService;
-import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
-import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
+import com.delivery.justonebite.review.application.dto.response.CreateReviewResponse;
+import com.delivery.justonebite.review.application.dto.response.ReviewResponse;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

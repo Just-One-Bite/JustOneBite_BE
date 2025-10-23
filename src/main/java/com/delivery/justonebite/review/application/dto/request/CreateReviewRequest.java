@@ -1,4 +1,4 @@
-package com.delivery.justonebite.review.presentation.dto.request;
+package com.delivery.justonebite.review.application.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
