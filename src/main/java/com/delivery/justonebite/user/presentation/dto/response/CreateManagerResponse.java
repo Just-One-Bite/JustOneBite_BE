@@ -25,7 +25,7 @@ public record CreateManagerResponse(
         @Schema(description = "관리자 계정을 생성한 생성자", example = "1")
         Long createdBy
 ) {
-    public static CreateManagerResponse toDto(User user) {
+    public static CreateManagerResponse from(User user) {
         return CreateManagerResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())

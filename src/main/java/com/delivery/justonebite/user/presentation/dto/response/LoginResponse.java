@@ -11,7 +11,7 @@ public record LoginResponse(
         @Schema(description = "Access Token 재발급에 필요한 Refresh Token", example = "{refreshToken}")
         String refreshToken
 ) {
-    public static LoginResponse toDto(String accessToken, String refreshToken) {
+    public static LoginResponse of(String accessToken, String refreshToken) {
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

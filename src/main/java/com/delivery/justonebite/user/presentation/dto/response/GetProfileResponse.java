@@ -29,7 +29,7 @@ public record GetProfileResponse(
         @Schema(description = "유저를 수정한 수정자", example = "3")
         Long updatedBy
 ) {
-    public static GetProfileResponse toDto(User user) {
+    public static GetProfileResponse from(User user) {
         return GetProfileResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())

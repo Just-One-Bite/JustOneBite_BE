@@ -29,7 +29,7 @@ public record RegistAddressResponse(
         @Schema(description = "주소를 생성한 생성자", example = "3")
         Long createdBy
 ) {
-    public static RegistAddressResponse toDto(Address address) {
+    public static RegistAddressResponse from(Address address) {
         return RegistAddressResponse.builder()
                 .userId(address.getUser().getId())
                 .addressId(address.getAddressId())

@@ -27,7 +27,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public GetProfileResponse findMyProfile(UserDetailsImpl userDetails) {
         User foundUser = findUser(userDetails.getUserId());
-        return GetProfileResponse.toDto(foundUser);
+        return GetProfileResponse.from(foundUser);
     }
 
     @Transactional
@@ -38,7 +38,7 @@ public class UserService {
         User foundUser = findUser(userDetails.getUserId());
         verifyPassword(request.password(), foundUser);
         foundUser.updateProfile(request);
-        return UpdateProfileResponse.toDto(foundUser);
+        return UpdateProfileResponse.from(foundUser);
     }
 
     @Transactional
@@ -61,7 +61,7 @@ public class UserService {
     public UpdateUserRoleResponse updateUserRole(Long userId) {
         User foundUser = findUser(userId);
         foundUser.updateUserRoleToOwner();
-        return UpdateUserRoleResponse.toDto(foundUser);
+        return UpdateUserRoleResponse.from(foundUser);
     }
 
     private User findUser(Long userId) {

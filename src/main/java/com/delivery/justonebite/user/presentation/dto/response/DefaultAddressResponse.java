@@ -33,7 +33,7 @@ public record DefaultAddressResponse(
         @Schema(description = "주소를 수정한 수정자", example = "3")
         Long updatedBy
 ) {
-    public static DefaultAddressResponse toDto(Address address) {
+    public static DefaultAddressResponse from(Address address) {
         return DefaultAddressResponse.builder()
                 .userId(address.getUser().getId())
                 .addressId(address.getAddressId())
