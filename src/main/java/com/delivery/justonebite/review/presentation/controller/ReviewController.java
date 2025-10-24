@@ -2,13 +2,13 @@ package com.delivery.justonebite.review.presentation.controller;
 
 import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.review.application.service.ReviewService;
-import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
-import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
-import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
-import com.delivery.justonebite.review.presentation.dto.response.DeleteReviewResponse;
-import com.delivery.justonebite.review.presentation.dto.response.RestoreReviewResponse;
+import com.delivery.justonebite.review.application.dto.request.CreateReviewRequest;
+import com.delivery.justonebite.review.application.dto.request.UpdateReviewRequest;
+import com.delivery.justonebite.review.application.dto.response.CreateReviewResponse;
+import com.delivery.justonebite.review.application.dto.response.DeleteReviewResponse;
+import com.delivery.justonebite.review.application.dto.response.RestoreReviewResponse;
 
-import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
+import com.delivery.justonebite.review.application.dto.response.ReviewResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

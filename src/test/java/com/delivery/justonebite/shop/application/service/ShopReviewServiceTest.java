@@ -3,7 +3,7 @@ package com.delivery.justonebite.shop.application.service;
 import com.delivery.justonebite.global.exception.custom.CustomException;
 import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.review.application.service.ReviewService;
-import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
+import com.delivery.justonebite.review.application.dto.response.ReviewResponse;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.shop.presentation.dto.response.ShopReviewResponse;
 import org.junit.jupiter.api.BeforeEach;

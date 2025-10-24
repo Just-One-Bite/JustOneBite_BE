@@ -8,10 +8,10 @@ import com.delivery.justonebite.order.domain.enums.OrderStatus;
 import com.delivery.justonebite.order.domain.repository.OrderHistoryRepository;
 import com.delivery.justonebite.order.domain.repository.OrderRepository;
 import com.delivery.justonebite.review.entity.Review;
-import com.delivery.justonebite.review.presentation.dto.request.CreateReviewRequest;
-import com.delivery.justonebite.review.presentation.dto.request.UpdateReviewRequest;
-import com.delivery.justonebite.review.presentation.dto.response.CreateReviewResponse;
-import com.delivery.justonebite.review.presentation.dto.response.ReviewResponse;
+import com.delivery.justonebite.review.application.dto.request.CreateReviewRequest;
+import com.delivery.justonebite.review.application.dto.request.UpdateReviewRequest;
+import com.delivery.justonebite.review.application.dto.response.CreateReviewResponse;
+import com.delivery.justonebite.review.application.dto.response.ReviewResponse;
 import com.delivery.justonebite.review.repository.ReviewRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +69,7 @@ public class ReviewService {
         Review review = loadReviewOrThrow(reviewId);
         assertAuthor(review, currentUserId);
 
-        if (isNoop(req)) return ReviewResponse.from(review);
+        if (isNewUser(req)) return ReviewResponse.from(review);
 
         applyUpdates(review, req);
         return ReviewResponse.from(review);
@@ -151,7 +151,7 @@ public class ReviewService {
         }
     }
 
-    private boolean isNoop(UpdateReviewRequest req) {
+    private boolean isNewUser(UpdateReviewRequest req) {
         return req.content() == null && req.rating() == null;
     }
 
