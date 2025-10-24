@@ -1,4 +1,4 @@
-package com.delivery.justonebite.item.presentation.dto.response;
+package com.delivery.justonebite.item.application.dto.response;
 
 import com.delivery.justonebite.item.domain.entity.Item;
 import io.swagger.v3.oas.annotations.media.Schema;
