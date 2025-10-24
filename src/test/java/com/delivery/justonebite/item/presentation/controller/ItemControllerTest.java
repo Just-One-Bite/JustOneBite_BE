@@ -1,11 +1,14 @@
 package com.delivery.justonebite.item.presentation.controller;
 
+import com.delivery.justonebite.global.common.jwt.JwtUtil;
+import com.delivery.justonebite.global.config.redis.service.RedisService;
 import com.delivery.justonebite.global.config.security.UserDetailsImpl;
+import com.delivery.justonebite.global.config.security.UserDetailsServiceImpl;
 import com.delivery.justonebite.item.application.service.ItemService;
 
-import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.response.ItemOwnerDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
+import com.delivery.justonebite.item.application.dto.response.ItemDetailResponse;
+import com.delivery.justonebite.item.application.dto.response.ItemOwnerDetailResponse;
+import com.delivery.justonebite.item.application.dto.response.ItemResponse;
 import com.delivery.justonebite.user.domain.entity.UserRole;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +37,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest(controllers = ItemController.class)
 @AutoConfigureMockMvc
@@ -43,7 +46,19 @@ class ItemControllerTest {
     MockMvc mvc;
 
     @MockitoBean
+    JwtUtil jwtUtil;
+
+    @MockitoBean
+    UserDetailsServiceImpl userDetailsService;
+
+    @MockitoBean
+    RedisService redisService;
+
+    @MockitoBean
     ItemService itemService;
+
+    @Autowired
+    private WebApplicationContext context;
 
     @MockitoBean
     JpaMetamodelMappingContext jpaMetamodelMappingContext;
@@ -81,12 +96,12 @@ class ItemControllerTest {
 
         String body = """
                 {
-                  "shop_id": "%s",
+                  "shopId": "%s",
                   "name": "김치찜",
                   "price": 15000,
                   "image": "image",
                   "description": "맛있는 김치찜",
-                  "ai_generated": false
+                  "aiGenerated": false
                 }
                 """.formatted(SHOP_ID);
 
@@ -210,7 +225,7 @@ class ItemControllerTest {
                   "price": 15000,
                   "image": "image",
                   "description": "맛있는 김치찜",
-                  "ai_generated": false
+                  "aiGenerated": false
                 }
                 """;
 

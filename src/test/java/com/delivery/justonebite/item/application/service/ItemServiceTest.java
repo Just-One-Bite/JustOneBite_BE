@@ -6,11 +6,11 @@ import com.delivery.justonebite.global.exception.response.ErrorCode;
 import com.delivery.justonebite.item.domain.entity.Item;
 import com.delivery.justonebite.item.domain.repository.ItemRepository;
 import com.delivery.justonebite.item.infrastructure.api.gemini.client.GeminiClient;
-import com.delivery.justonebite.item.presentation.dto.request.ItemRequest;
-import com.delivery.justonebite.item.presentation.dto.request.ItemUpdateRequest;
-import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.response.ItemOwnerDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
+import com.delivery.justonebite.item.application.dto.request.ItemRequest;
+import com.delivery.justonebite.item.application.dto.request.ItemUpdateRequest;
+import com.delivery.justonebite.item.application.dto.response.ItemDetailResponse;
+import com.delivery.justonebite.item.application.dto.response.ItemOwnerDetailResponse;
+import com.delivery.justonebite.item.application.dto.response.ItemResponse;
 import com.delivery.justonebite.shop.domain.entity.Shop;
 import com.delivery.justonebite.shop.domain.repository.ShopRepository;
 import com.delivery.justonebite.user.domain.entity.UserRole;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ItemServiceOwnerTest {
+class ItemServiceTest {
 
     private final Long OWNER_ID = 1L;
     private final Long ANOTHER_OWNER_ID = 2L;

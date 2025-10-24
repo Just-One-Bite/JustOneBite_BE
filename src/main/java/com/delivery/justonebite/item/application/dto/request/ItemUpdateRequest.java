@@ -1,4 +1,4 @@
-package com.delivery.justonebite.item.presentation.dto.request;
+package com.delivery.justonebite.item.application.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
