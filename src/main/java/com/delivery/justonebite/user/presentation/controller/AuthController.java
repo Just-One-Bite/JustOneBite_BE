@@ -5,9 +5,7 @@ import com.delivery.justonebite.user.presentation.dto.response.*;
 import com.delivery.justonebite.user.application.service.AuthService;
 import com.delivery.justonebite.user.presentation.dto.request.CreatedMasterRequest;
 import com.delivery.justonebite.user.presentation.dto.request.LoginRequest;
-import com.delivery.justonebite.user.presentation.dto.request.ReissueRequest;
 import com.delivery.justonebite.user.presentation.dto.request.SignupRequest;
-import com.delivery.justonebite.user.presentation.dto.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -41,7 +39,7 @@ public class AuthController {
     public ResponseEntity<SignupResponse> signup(@RequestBody @Valid SignupRequest request) {
         AuthResult authResult = authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(SignupResponse.toDto(authResult.user(), authResult.tokenResponse()));
+                .body(SignupResponse.of(authResult.user(), authResult.tokenResponse()));
     }
 
     @Operation(
@@ -56,7 +54,7 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         TokenResponse token = authService.login(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(LoginResponse.toDto(token.accessToken(), token.refreshToken()));
+                .body(LoginResponse.of(token.accessToken(), token.refreshToken()));
     }
 
     @Operation(
@@ -89,6 +87,6 @@ public class AuthController {
     public ResponseEntity<CreateMasterResponse> createMaster(@RequestBody @Valid CreatedMasterRequest request) {
         AuthResult master = authService.createMaster(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CreateMasterResponse.toDto(master.user(), master.tokenResponse()));
+                .body(CreateMasterResponse.of(master.user(), master.tokenResponse()));
     }
 }

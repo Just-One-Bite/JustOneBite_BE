@@ -29,7 +29,7 @@ public record SignupResponse(
         @Schema(description = "유저를 생성한 생성자", example = "3")
         Long createdBy
 ) {
-    public static SignupResponse toDto(User user, TokenResponse tokenResponse) {
+    public static SignupResponse of(User user, TokenResponse tokenResponse) {
         return SignupResponse.builder()
                 .accessToken(tokenResponse.accessToken())
                 .refreshToken(tokenResponse.refreshToken())

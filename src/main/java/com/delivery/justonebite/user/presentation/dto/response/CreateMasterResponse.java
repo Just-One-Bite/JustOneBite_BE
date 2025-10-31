@@ -29,7 +29,7 @@ public record CreateMasterResponse(
         @Schema(description = "최종 관리자 계정을 생성한 생성자", example = "2025:01:01T00:00:00")
         Long createdBy
 ) {
-    public static CreateMasterResponse toDto(User user, TokenResponse tokenResponse) {
+    public static CreateMasterResponse of(User user, TokenResponse tokenResponse) {
         return CreateMasterResponse.builder()
                 .accessToken(tokenResponse.accessToken())
                 .refreshToken(tokenResponse.refreshToken())

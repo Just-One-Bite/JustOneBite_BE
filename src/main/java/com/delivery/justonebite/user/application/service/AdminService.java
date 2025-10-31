@@ -25,6 +25,6 @@ public class AdminService {
         }
         User user = request.toUser(UserRole.MANAGER, passwordEncoder.encode(request.password()));
         userRepository.save(user);
-        return CreateManagerResponse.toDto(user);
+        return CreateManagerResponse.from(user);
     }
 }
