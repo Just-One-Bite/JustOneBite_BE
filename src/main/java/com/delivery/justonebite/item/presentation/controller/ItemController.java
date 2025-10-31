@@ -2,11 +2,11 @@ package com.delivery.justonebite.item.presentation.controller;
 
 import com.delivery.justonebite.global.config.security.UserDetailsImpl;
 import com.delivery.justonebite.item.application.service.ItemService;
-import com.delivery.justonebite.item.presentation.dto.request.ItemRequest;
-import com.delivery.justonebite.item.presentation.dto.request.ItemUpdateRequest;
-import com.delivery.justonebite.item.presentation.dto.response.ItemDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.response.ItemOwnerDetailResponse;
-import com.delivery.justonebite.item.presentation.dto.response.ItemResponse;
+import com.delivery.justonebite.item.application.dto.request.ItemRequest;
+import com.delivery.justonebite.item.application.dto.request.ItemUpdateRequest;
+import com.delivery.justonebite.item.application.dto.response.ItemDetailResponse;
+import com.delivery.justonebite.item.application.dto.response.ItemOwnerDetailResponse;
+import com.delivery.justonebite.item.application.dto.response.ItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
