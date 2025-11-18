@@ -175,7 +175,7 @@ jwt:
      ``` bash
      ./gradlew clean build
      java -jar build/libs/justonebite-0.0.1-SNAPSHOT.jar
-       ```
+     ``` 
 
 
 ##  주요 기능
