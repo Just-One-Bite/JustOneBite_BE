@@ -78,7 +78,7 @@
 
 | 구분 | 기술 |
 |------|------|
-| **Language** | Java 21 |
+| **Language** | Java 17 |
 | **Framework** | Spring Boot 3.5.6 / Spring Data JPA / Spring Security / **Spring Scheduler** |
 | **Database** | PostgreSQL |
 | **Build Tool** | Gradle |
